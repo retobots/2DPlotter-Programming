@@ -54,6 +54,7 @@ public:
 
 class circle : shape
 {
+    void r_draw();
 };
 
 // Định nghĩa hàm
