@@ -52,6 +52,10 @@ public:
     }
 };
 
+class circle : shape
+{
+};
+
 // Định nghĩa hàm
 void rectangle::length_draw()
 {
