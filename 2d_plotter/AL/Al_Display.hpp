@@ -1,5 +1,5 @@
-#ifndef SDL_CONFIG_SERVOSETUP_HPP
-#define SDL_CONFIG_SERVOSETUP_HPP
+#ifndef AL_DISPLAY_HPP
+#define AL_DISPLAY_HPP
 
 /*======================================================== [INCLUDE LIBRARY] ===================================================*/
 

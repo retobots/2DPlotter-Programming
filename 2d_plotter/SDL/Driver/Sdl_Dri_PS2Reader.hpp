@@ -1,5 +1,5 @@
-#ifndef SDL_CONFIG_SERVOSETUP_HPP
-#define SDL_CONFIG_SERVOSETUP_HPP
+#ifndef SDL_PS2READER_HPP
+#define SDL_PS2READER_HPP
 
 /*======================================================== [INCLUDE LIBRARY] ===================================================*/
 

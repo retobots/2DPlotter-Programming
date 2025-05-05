@@ -1,5 +1,5 @@
-#ifndef SDL_CONFIG_SERVOSETUP_HPP
-#define SDL_CONFIG_SERVOSETUP_HPP
+#ifndef SDL_DRI_SERVOCONTROL_HPP
+#define SDL_DRI_SERVOCONTROL_HPP
 
 /*======================================================== [INCLUDE LIBRARY] ===================================================*/
 

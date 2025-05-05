@@ -1,6 +1,5 @@
-#ifndef SDL_CONFIG_SERVOSETUP_HPP
-#define SDL_CONFIG_SERVOSETUP_HPP
-
+#ifndef SDL_SER_MOTIONCALCULATE_HPP
+#define SDL_SER_MOTIONCALCULATE_HPP
 /*======================================================== [INCLUDE LIBRARY] ===================================================*/
 
 /*======================================================= [MACRO DEFINITIONS] ==================================================*/

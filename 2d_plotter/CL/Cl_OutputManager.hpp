@@ -1,5 +1,5 @@
-#ifndef SDL_CONFIG_SERVOSETUP_HPP
-#define SDL_CONFIG_SERVOSETUP_HPP
+#ifndef CL_OUTPUTMANAGER_HPP
+#define CL_OUTPUTMANAGER_HPP
 
 /*======================================================== [INCLUDE LIBRARY] ===================================================*/
 

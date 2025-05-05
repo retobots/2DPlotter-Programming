@@ -1,5 +1,5 @@
-#ifndef SDL_CONFIG_SERVOSETUP_HPP
-#define SDL_CONFIG_SERVOSETUP_HPP
+#ifndef SDL_SER_SERIALPROCESS_HPP
+#define SDL_SER_SERIALPROCESS_HPP
 
 /*======================================================== [INCLUDE LIBRARY] ===================================================*/
 

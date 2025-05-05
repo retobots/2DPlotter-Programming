@@ -1,5 +1,5 @@
-#ifndef SDL_CONFIG_SERVOSETUP_HPP
-#define SDL_CONFIG_SERVOSETUP_HPP
+#ifndef CL_INPUTPROCESS_HPP
+#define CL_INPUTPROCESS_HPP
 
 /*======================================================== [INCLUDE LIBRARY] ===================================================*/
 
