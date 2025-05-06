@@ -1,5 +1,5 @@
-#ifndef AL_MANUALMODE_HPP
-#define AL_MANUALMODE_HPP
+#ifndef SDL_CONFIG_LCDSETUP_HPP
+#define SDL_CONFIG_LCDSETUP_HPP
 
 /*======================================================== [INCLUDE LIBRARY] ===================================================*/
 
