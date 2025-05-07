@@ -1,5 +1,5 @@
-#ifndef SDL_SER_MOTIONCALCULATE_HPP
-#define SDL_SER_MOTIONCALCULATE_HPP
+#ifndef AL_DEVICECONTROL_HPP
+#define AL_DEVICECONTROL_HPP
 
 /*======================================================== [INCLUDE LIBRARY] ===================================================*/
 
