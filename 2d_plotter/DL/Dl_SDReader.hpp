@@ -1,5 +1,5 @@
-#ifndef SDL_CONFIG_MOTORSETUP_HPP
-#define SDL_CONFIG_MOTORSETUP_HPP
+#ifndef DL_SDREADER_HPP
+#define DL_SDREADER_HPP
 
 /*======================================================== [INCLUDE LIBRARY] ===================================================*/
 

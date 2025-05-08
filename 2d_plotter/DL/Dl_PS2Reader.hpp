@@ -1,5 +1,5 @@
-#ifndef SDL_DRI_SERVOCONTROL_HPP
-#define SDL_DRI_SERVOCONTROL_HPP
+#ifndef DL_PS2READER_HPP
+#define DL_PS2READER_HPP
 
 /*======================================================== [INCLUDE LIBRARY] ===================================================*/
 

@@ -1,5 +1,5 @@
-#ifndef SDL_CONFIG_LCDSETUP_HPP
-#define SDL_CONFIG_LCDSETUP_HPP
+#ifndef DL_LCDDISPLAY_HPP
+#define DL_LCDDISPLAY_HPP
 
 /*======================================================== [INCLUDE LIBRARY] ===================================================*/
 

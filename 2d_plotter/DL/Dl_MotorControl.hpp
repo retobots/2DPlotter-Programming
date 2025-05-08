@@ -1,5 +1,5 @@
-#ifndef SDL_DRI_LCDDISPLAY_HPP
-#define SDL_DRI_LCDDISPLAY_HPP
+#ifndef DL_MOTORCONTROL_HPP
+#define DL_MOTORCONTROL_HPP
 
 /*======================================================== [INCLUDE LIBRARY] ===================================================*/
 
