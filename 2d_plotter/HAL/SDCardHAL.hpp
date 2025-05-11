@@ -1,5 +1,5 @@
-#ifndef CL_INPUTPROCESS_HPP
-#define CL_INPUTPROCESS_HPP
+#ifndef SDCARDHAL_HPP
+#define SDCARDHAL_HPP
 
 /*======================================================== [INCLUDE LIBRARY] ===================================================*/
 

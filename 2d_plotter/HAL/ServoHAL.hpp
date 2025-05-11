@@ -1,5 +1,5 @@
-#ifndef CL_OUTPUTMANAGER_HPP
-#define CL_OUTPUTMANAGER_HPP
+#ifndef SERVOHAL_HPP
+#define SERVOHAL_HPP
 
 /*======================================================== [INCLUDE LIBRARY] ===================================================*/
 

@@ -1,5 +1,5 @@
-#ifndef DL_SDREADER_HPP
-#define DL_SDREADER_HPP
+#ifndef JOYSTICKHAL_HPP
+#define JOYSTICKHAL_HPP
 
 /*======================================================== [INCLUDE LIBRARY] ===================================================*/
 

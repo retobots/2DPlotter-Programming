@@ -1,5 +1,5 @@
-#ifndef DL_SERVOCONTROL_HPP
-#define DL_SERVOCONTROL_HPP
+#ifndef LCDHAL_HPP
+#define LCDHAL_HPP
 
 /*======================================================== [INCLUDE LIBRARY] ===================================================*/
 

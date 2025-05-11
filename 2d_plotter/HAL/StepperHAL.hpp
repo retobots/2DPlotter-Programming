@@ -1,5 +1,5 @@
-#ifndef DL_MOTORCONTROL_HPP
-#define DL_MOTORCONTROL_HPP
+#ifndef STEPPERHAL_HPP
+#define STEPPERHAL_HPP
 
 /*======================================================== [INCLUDE LIBRARY] ===================================================*/
 
