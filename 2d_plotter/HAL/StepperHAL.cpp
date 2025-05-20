@@ -35,7 +35,7 @@ void X_Draw()
 void Y_Draw()
 {
     digitalWrite(Y_STEP, HIGH);
-    delay(STEP_DELAY));
+    delay(STEP_DELAY);
     digitalWrite(Y_STEP, LOW);
     delay(STEP_DELAY);
 }
