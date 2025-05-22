@@ -7,35 +7,43 @@
 
 void setupStepper()
 {
+
     // Setup Chân Điều Khiển X
-    pinMode(X_DIR, OUTPUT);
-    pinMode(X_STEP, OUTPUT);
+    AccelStepper stepperX(AccelStepper::DRIVER, X_STEP, X_DIR);
 
-    // Setup chân điều khiển Z
-    pinMode(Y_DIR, OUTPUT);
-    pinMode(Y_STEP, OUTPUT);
+    // Setup chân điều khiển Y
+    AccelStepper stepperY(AccelStepper::DRIVER, Y_STEP, Y_DIR);
 
-    // Setup khởi động
+    // Set Thông Số
     pinMode(ENABLE, OUTPUT);
     digitalWrite(ENABLE, LOW);
+
+    stepperX.setMaxSpeed(MAX_SPEED);        // Tốc độ tối đa (step/giây)
+    stepperX.setAcceleration(ACCELERATION); // Gia tốc (step/giây^2)
 }
 
-/*===================================================== ( Hàm Điều Khiển Trục X ) ==============================================*/
+/*======================================================== ( Hàm Dẫn Hướng) ====================================================*/
 
-void X_Draw()
+void moveXYTo(float x, float y)
 {
-    digitalWrite(X_STEP, HIGH);
-    delay(STEP_DELAY);
-    digitalWrite(X_STEP, LOW);
-    delay(STEP_DELAY);
+    stepperX.moveTo(x);
+    stepperY.moveTo(y);
 }
 
-/*===================================================== ( Hàm Điều Khiển Trục Y ) ==============================================*/
+/*====================================================== ( Hàm Chạy Động Cơ ) ==================================================*/
 
-void Y_Draw()
+void runXY()
 {
-    digitalWrite(Y_STEP, HIGH);
-    delay(STEP_DELAY);
-    digitalWrite(Y_STEP, LOW);
-    delay(STEP_DELAY);
+    stepperX.run();
+    stepperY.run();
+}
+
+/*======================================================= ( Hàm Điều Khiển) ====================================================*/
+
+void runXYBlocking()
+{
+    while (stepperX.isRunning() || stepperY.isRunning())
+    {
+        runXY();
+    }
 }

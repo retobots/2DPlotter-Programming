@@ -8,7 +8,8 @@
 
 void setupServo()
 {
-    myServo.attach(PWM_PIN);
+    myServo.setPeriodHertz(50);
+    myServo.attach(PWM_PIN, 500, 2400);
     penUp();
 }
 
