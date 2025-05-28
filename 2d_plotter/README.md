@@ -7,7 +7,7 @@
 │  │  ├─ AutoModeController.h # Điều phối chế độ Auto: đọc & vẽ G-code
 │  │  └─ ManualModeController.h # Điều phối chế độ Manual: điều khiển tay bằng PS4
 │  ├─ Config
-│  │  ├─ Limits.h # Cấu hình giới hạn toạ độ X/Y, bước, vùng an toàn
+│  │  ├─ Limitations.h # Cấu hình giới hạn toạ độ X/Y, bước, vùng an toàn
 │  │  ├─ Pins.h # Mapping GPIO: step, dir, PS4, LCD, buzzer, v.v.
 │  │  └─ Settings.h # Các hằng số cấu hình hệ thống: tốc độ, delay, độ phân giải
 │  ├─ HAL

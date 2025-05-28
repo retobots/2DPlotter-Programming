@@ -1,12 +1,11 @@
 #include <Arduino.h>
 #include "AppController.h"
 
-void setup()
-{
-
+void setup() {
+  Serial.begin(115200);
+  AppController::getInstance().setup();
 }
 
-void loop()
-{
-    
+void loop() {
+  AppController::getInstance().loop();
 }

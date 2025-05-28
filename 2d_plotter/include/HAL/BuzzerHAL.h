@@ -1,18 +1,14 @@
-// #ifndef BuzzerHAL_H
-// #define BuzzerHAL_H
+#pragma once
+#include <Arduino.h>
+class BuzzerHAL {
+public:
+  static BuzzerHAL& getInstance();
 
-// class BuzzerHAL {
-// public:
-//     BuzzerHAL();               // Constructor
-//     void init();                 // Hàm khởi tạo phần cứng hoặc logic
-//     void update();               // Gọi trong loop (nếu cần)
-    
-//     // Các method công khai khác
-//     void doSomething();
-    
-// private:
-//     // Biến nội bộ, trạng thái...
-//     int internalState;
-// };
+  void setup();
+  void beepShort();
+  void beepLong();
+  void beepCustom(uint8_t count, uint16_t duration);
 
-// #endif
+private:
+  BuzzerHAL();
+};
