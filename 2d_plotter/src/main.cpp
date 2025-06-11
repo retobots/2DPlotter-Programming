@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 
@@ -138,4 +139,16 @@ void sdCardMode(){
 
 void serialMode(){
   // Serial mode
+=======
+#include <Arduino.h>
+#include "AppController.h"
+
+void setup() {
+  Serial.begin(115200);
+  AppController::getInstance().setup();
+}
+
+void loop() {
+  AppController::getInstance().loop();
+>>>>>>> 8b8faf47fbf7a76a16388ce401c0e78e0ac9e931
 }
