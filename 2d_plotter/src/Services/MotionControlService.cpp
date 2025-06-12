@@ -1,8 +1,11 @@
 #include "MotionControlService.h"
-MotionControlService::MotionControlService(){}
-MotionControlService& MotionControlService::getInstance(){
+
+MotionControlService::MotionControlService() {}
+
+MotionControlService& MotionControlService::getInstance() {
 	static MotionControlService instance;
-	return instance; }
+	return instance;
+}
 void MotionControlService::manualMode(){
 	// Code Manual Mode
 }
