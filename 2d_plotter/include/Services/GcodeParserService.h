@@ -2,13 +2,16 @@
 #include <Arduino.h>
 #include <string>
 
-class GcodeParserService {
-public:
-  static GcodeParserService& getInstance();
+#define LINE_BUFFER_LENGTH 512
 
-  void setup();
-  bool parseLine(const std::string& line);
-
+class GcodeParserService
+{
 private:
   GcodeParserService();
+
+public:
+  static GcodeParserService &getInstance();
+
+  void setup();
+  bool parseLine(const std::string &line);
 };
