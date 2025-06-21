@@ -1,11 +1,17 @@
 #include <Arduino.h>
-#include "AppController.h"
+#include "UIMenuService.h"
 
-void setup() {
+UIMenuService *UI;
+
+void setup()
+{
   Serial.begin(115200);
-  AppController::getInstance().setup();
+  Serial.println("Ready for Setting Up!");
+  UI = &UIMenuService::getInstance();
+  UI->setup();
 }
 
-void loop() {
-  AppController::getInstance().loop();
+void loop()
+{
+  UI->run();
 }
