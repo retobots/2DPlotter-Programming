@@ -1,24 +1,83 @@
+/*******************************************************************************
+ * @file    BuzzerHAL.cpp
+ * @brief   Định nghĩa các hàm trong file header
+ * @version 1.0
+ * @date    2025-06-19
+ * @author  Do Duc Nghia
+ ******************************************************************************/
+/*================================================ [ INCLUDE LIBRARY ] ==================================================*/
 #include "HAL/BuzzerHAL.h"
+#include "Pins.h"
 
-BuzzerHAL::BuzzerHAL() {}
+/*================================================= [ DEFINITION ] ==================================================*/
 
-BuzzerHAL& BuzzerHAL::getInstance() {
+BuzzerHAL::BuzzerHAL() { setup(); }
+
+/*<===================================================>*/
+
+BuzzerHAL &BuzzerHAL::getInstance()
+{
+  Serial.println("INSTANCE BUZZER CREATED");
   static BuzzerHAL instance;
   return instance;
 }
 
-void BuzzerHAL::setup() {
-  // Cấu hình chân GPIO làm output
+/*<===================================================>*/
+
+void BuzzerHAL::setup()
+{
+  // Logging
+  Serial.println("Set Up Buzzer!");
+
+  // Setup
+  ledcSetup(BUZZER_CHANNEL, 2000, 8); // tần số 2kHz, độ phân giải 8-bit
+  ledcAttachPin(PIN_BUZZER, BUZZER_CHANNEL);
 }
 
-void BuzzerHAL::beepShort() {
-  // Bật/tắt beep ngắn
+/*<===================================================>*/
+
+void BuzzerHAL::buzzerTone(int freq)
+{
+  ledcAttachPin(PIN_BUZZER, BUZZER_CHANNEL);
+  ledcWriteTone(BUZZER_CHANNEL, freq);
 }
 
-void BuzzerHAL::beepLong() {
-  // Bật/tắt beep dài
+/*<===================================================>*/
+
+void BuzzerHAL::buzzerStop()
+{
+  ledcWriteTone(BUZZER_CHANNEL, 0);
+  ledcDetachPin(PIN_BUZZER);
 }
 
-void BuzzerHAL::beepCustom(uint8_t count, uint16_t duration) {
-  // Bật beep count lần với duration ms
+/*<===================================================>*/
+
+void BuzzerHAL::beepOnce()
+{
+  // Logging
+  Serial.println("Beep!");
+
+  buzzerTone(2000); // Tạo sóng âm 2kHz
+  delay(300);       // Kêu 300ms
+  buzzerStop();     // Tắt buzzer
 }
+
+/*<===================================================>*/
+
+void BuzzerHAL::startingSoundBuzzer()
+{
+  // Logging
+  Serial.println("Buzzer khởi động - Played!");
+
+  int melody[] = {523, 659, 784, 1047}; // C5, E5, G5, C6
+  int duration[] = {200, 200, 300, 400};
+
+  for (int i = 0; i < 4; i++)
+  {
+    buzzerTone(melody[i]);
+    delay(duration[i]);
+  }
+  buzzerStop();
+}
+
+/*<===================================================>*/
