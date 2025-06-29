@@ -1,0 +1,152 @@
+{
+    "version": 1,
+    "author": "SANDEEP SANDEEP",
+    "editor": "wokwi",
+    "parts": [
+        {
+            "type": "wokwi-esp32-devkit-v1",
+            "id": "esp",
+            "top": -72.1,
+            "left": -62.6,
+            "attrs": {}
+        },
+        {
+            "type": "wokwi-lcd2004",
+            "id": "lcd1",
+            "top": -137.6,
+            "left": 82.4,
+            "attrs": {
+                "pins": "i2c"
+            }
+        },
+        {
+            "type": "wokwi-ky-040",
+            "id": "encoder1",
+            "top": 155.3,
+            "left": -48.8,
+            "attrs": {}
+        },
+        {
+            "type": "wokwi-buzzer",
+            "id": "bz1",
+            "top": -93.6,
+            "left": -171,
+            "attrs": {
+                "volume": "0.1"
+            }
+        }
+    ],
+    "connections": [
+        [
+            "esp:TX0",
+            "$serialMonitor:RX",
+            "",
+            []
+        ],
+        [
+            "esp:RX0",
+            "$serialMonitor:TX",
+            "",
+            []
+        ],
+        [
+            "lcd1:VCC",
+            "esp:3V3",
+            "red",
+            [
+                "h-19.2",
+                "v96.1"
+            ]
+        ],
+        [
+            "lcd1:GND",
+            "esp:GND.1",
+            "black",
+            [
+                "h-28.8",
+                "v182.4"
+            ]
+        ],
+        [
+            "lcd1:SCL",
+            "esp:D22",
+            "green",
+            [
+                "h-38.4",
+                "v38.7"
+            ]
+        ],
+        [
+            "lcd1:SDA",
+            "esp:D21",
+            "cyan",
+            [
+                "h-9.6",
+                "v77"
+            ]
+        ],
+        [
+            "encoder1:CLK",
+            "esp:D18",
+            "purple",
+            [
+                "v-153.6",
+                "h-28.5"
+            ]
+        ],
+        [
+            "encoder1:DT",
+            "esp:D19",
+            "green",
+            [
+                "h9.6",
+                "v-172.7",
+                "h-38.4"
+            ]
+        ],
+        [
+            "encoder1:SW",
+            "esp:D5",
+            "yellow",
+            [
+                "h-19.2",
+                "v-163.1",
+                "h-9.6"
+            ]
+        ],
+        [
+            "encoder1:VCC",
+            "esp:3V3",
+            "red",
+            [
+                "h0"
+            ]
+        ],
+        [
+            "encoder1:GND",
+            "esp:GND.1",
+            "black",
+            [
+                "h-38.4",
+                "v-124"
+            ]
+        ],
+        [
+            "bz1:2",
+            "esp:D27",
+            "green",
+            [
+                "v0"
+            ]
+        ],
+        [
+            "bz1:1",
+            "esp:GND.2",
+            "green",
+            [
+                "v0"
+            ]
+        ]
+    ],
+    "dependencies": {}
+}
