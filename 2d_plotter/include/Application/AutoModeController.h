@@ -1,11 +1,12 @@
 #pragma once
 #include <Arduino.h>
-class AutoModeController {
+class AutoModeController
+{
 public:
-  static AutoModeController& getInstance();
+  static AutoModeController &getInstance();
 
   void setup();
-  void run();
+  void readSerial(point &actualPoint);
 
 private:
   AutoModeController();

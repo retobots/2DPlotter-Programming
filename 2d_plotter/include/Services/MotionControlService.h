@@ -1,8 +1,19 @@
 #pragma once
 #include <Arduino.h>
-class MotionControlService {
+
+typedef struct point
+{
+  float x;
+  float y;
+  float z;
+} point;
+
+// extern point actualPoint;
+
+class MotionControlService
+{
 public:
-  static MotionControlService& getInstance();
+  static MotionControlService &getInstance();
 
   void setup();
   void moveTo(float x, float y);
