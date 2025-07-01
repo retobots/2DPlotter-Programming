@@ -1,9 +1,9 @@
 #include <Arduino.h>
 #include "UIMenuService.h"
-#include "GcodeParserService.h"
+#include "AutoModeController.h"
 
 UIMenuService *UI;
-GcodeParserService *GPSer;
+AutoModeController *AC;
 
 point actualPoint;
 
@@ -15,16 +15,13 @@ void setup()
   UI = &UIMenuService::getInstance();
   UI->setup();
 
-  GPSer = &GcodeParserService::getInstance();
-  GPSer->setup();
+  AC = &AutoModeController::getInstance();
 
   actualPoint.x = 0;
   actualPoint.y = 0;
-  actualPoint.z = 0;
 }
 
 void loop()
 {
-  // UI->run();
-  GPSer->readSerial(actualPoint);
+  AC->readSerial(actualPoint);
 }

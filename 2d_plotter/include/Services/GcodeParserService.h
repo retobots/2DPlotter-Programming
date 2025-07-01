@@ -11,13 +11,6 @@ class GcodeParserService
 private:
   GcodeParserService();
 
-  char line[LINE_BUFFER_LENGTH];
-  char c;
-  int lineIndex = 0;
-  bool lineIsComment = false;
-  bool lineSemiColon = false;
-  bool verbose = false;
-
 public:
   static GcodeParserService &getInstance();
 

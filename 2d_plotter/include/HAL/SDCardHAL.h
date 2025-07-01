@@ -3,6 +3,7 @@
 #include <string>
 #include <Arduino.h>
 #include <SD.h>
+#include <SPI.h>
 
 class SDCardHAL
 {

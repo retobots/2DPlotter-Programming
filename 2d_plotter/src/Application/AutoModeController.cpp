@@ -1,9 +1,8 @@
-#include "Application/AutoModeController.h"
+#include "AutoModeController.h"
 
 AutoModeController::AutoModeController()
 {
   GPS.setup();
-  GPS.getInstance();
 }
 
 AutoModeController &AutoModeController::getInstance()
@@ -59,8 +58,6 @@ void AutoModeController::readSerial(point &actualPoint)
           Serial.print(actualPoint.x, 3);
           Serial.print(",");
           Serial.print(actualPoint.y, 3);
-          Serial.print(",");
-          Serial.print(actualPoint.z, 3);
           Serial.println("|FS:0,0>");
           lineIndex = 0;
           return;

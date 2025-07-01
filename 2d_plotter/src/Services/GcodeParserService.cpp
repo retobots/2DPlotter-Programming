@@ -27,8 +27,8 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
   }
 
   int currentIndex = 0;
-  char buffer[128];               // Tăng kích thước buffer để an toàn
-  point newPos = {0.0, 0.0, 0.0}; // Khởi tạo vị trí mới
+  char buffer[128];          // Tăng kích thước buffer để an toàn
+  point newPos = {0.0, 0.0}; // Khởi tạo vị trí mới
 
   while (currentIndex < charNB && line[currentIndex] != '\0')
   {

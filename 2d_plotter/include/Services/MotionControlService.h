@@ -7,7 +7,6 @@ typedef struct point
 {
   float x;
   float y;
-  float z;
 } point;
 
 // extern point actualPoint;
@@ -17,12 +16,12 @@ class MotionControlService
 private:
   MotionControlService();
 
+  // Khai báo stepper
+  StepperHAL &stepper = StepperHAL::getInstance();
+
   // Vị trí hiện tại (mm)
   float Xpos = X_MIN;
   float Ypos = Y_MIN;
-
-  // Khai báo stepper
-  StepperHAL stepper;
 
 public:
   static MotionControlService &getInstance();

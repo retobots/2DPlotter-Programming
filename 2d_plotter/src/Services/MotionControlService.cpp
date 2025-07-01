@@ -1,4 +1,4 @@
-#include "Services/MotionControlService.h"
+#include "MotionControlService.h"
 
 MotionControlService::MotionControlService()
 {
@@ -15,7 +15,6 @@ void MotionControlService::setup()
 {
   // Khởi tạo stepper
   stepper.setup();
-  stepper.getInstance();
 }
 
 void MotionControlService::drawLine(float xPos, float yPos)
@@ -31,18 +30,11 @@ void MotionControlService::drawLine(float xPos, float yPos)
     yPos = Y_MAX;
 
   // Chuyển đổi mm -> step
-  long x1_steps = xPos * StepsPerMillimeterX;
-  long y1_steps = yPos * StepsPerMillimeterY;
+  long x1_steps = xPos * STEPS_PER_MM_X;
+  long y1_steps = yPos * STEPS_PER_MM_Y;
 
-  // Đặt mục tiêu cho stepper
+  // Chạy tới vị trí mới
   stepper.moveTo(x1_steps, y1_steps);
-
-  // Chạy đồng thời cả 2 động cơ đến vị trí mới
-  while (stepperX.distanceToGo() != 0 || stepperY.distanceToGo() != 0)
-  {
-    stepperX.run();
-    stepperY.run();
-  }
 
   // Cập nhật vị trí hiện tại
   Xpos = xPos;

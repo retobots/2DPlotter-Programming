@@ -1,5 +1,7 @@
 #pragma
 
+#define ENABLE 8
+
 // Stepper Motor - Trục X
 #define PIN_X_STEP 2
 #define PIN_X_DIR 3

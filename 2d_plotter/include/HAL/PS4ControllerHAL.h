@@ -1,12 +1,20 @@
 #pragma once
 #include <Arduino.h>
-class PS4ControllerHAL {
+#include "PS4Controller.h"
+
+typedef struct
+{
+  float x;
+  float y;
+} PointData;
+
+class PS4ControllerHAL
+{
 public:
-  static PS4ControllerHAL& getInstance();
+  static PS4ControllerHAL &getInstance();
 
   void setup();
-  int getAnalogX();
-  int getAnalogY();
+  PointData readPS4();
   bool isButtonPressed();
 
 private:

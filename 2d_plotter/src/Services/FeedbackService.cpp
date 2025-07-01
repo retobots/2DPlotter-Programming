@@ -1,20 +1,24 @@
-#include "Services/FeedbackService.h"
+#include "FeedbackService.h"
 
 FeedbackService::FeedbackService() {}
 
-FeedbackService& FeedbackService::getInstance() {
+FeedbackService &FeedbackService::getInstance()
+{
   static FeedbackService instance;
   return instance;
 }
 
-void FeedbackService::setup() {
+void FeedbackService::setup()
+{
   // Khởi tạo LCD và buzzer
 }
 
-void FeedbackService::showStatus(const char* message) {
+void FeedbackService::showStatus(const char *message)
+{
   // Gửi message lên LCD
 }
 
-void FeedbackService::beep(uint8_t type) {
+void FeedbackService::beep(uint8_t type)
+{
   // Phát âm thanh tùy theo loại
 }

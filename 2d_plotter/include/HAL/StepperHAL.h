@@ -6,13 +6,16 @@
 
 class StepperHAL
 {
+private:
+  StepperHAL();
+
+  AccelStepper stepperX;
+  AccelStepper stepperY;
+
 public:
   static StepperHAL &getInstance();
 
   void setup();
   void moveTo(float x, float y);
   void stop();
-
-private:
-  StepperHAL();
 };

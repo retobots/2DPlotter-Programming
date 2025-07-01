@@ -1,6 +1,8 @@
-#include "HAL/StepperHAL.h"
+#include "StepperHAL.h"
 
-StepperHAL::StepperHAL() {}
+StepperHAL::StepperHAL()
+    : stepperX(AccelStepper::DRIVER, PIN_X_STEP, PIN_X_DIR),
+      stepperY(AccelStepper::DRIVER, PIN_Y_STEP, PIN_Y_DIR) {}
 
 StepperHAL &StepperHAL::getInstance()
 {
@@ -10,13 +12,6 @@ StepperHAL &StepperHAL::getInstance()
 
 void StepperHAL::setup()
 {
-  // Setup GPIO step/dir cho trục X/Y
-  // Setup Chân Điều Khiển X
-  AccelStepper stepperX(AccelStepper::DRIVER, PIN_X_STEP, PIN_X_DIR);
-
-  // Setup chân điều khiển Y
-  AccelStepper stepperY(AccelStepper::DRIVER, PIN_Y_STEP, PIN_Y_DIR);
-
   // Set Thông Số
   pinMode(ENABLE, OUTPUT);
   digitalWrite(ENABLE, LOW);
