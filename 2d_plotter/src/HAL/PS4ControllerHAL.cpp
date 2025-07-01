@@ -1,6 +1,9 @@
 #include "PS4ControllerHAL.h"
 
-PS4ControllerHAL::PS4ControllerHAL() {}
+PS4ControllerHAL::PS4ControllerHAL()
+{
+  PS4.begin();
+}
 
 PS4ControllerHAL &PS4ControllerHAL::getInstance()
 {
@@ -10,7 +13,6 @@ PS4ControllerHAL &PS4ControllerHAL::getInstance()
 
 void PS4ControllerHAL::setup()
 {
-  PS4.begin();
 }
 
 PointData PS4ControllerHAL::readPS4()

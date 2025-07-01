@@ -1,6 +1,7 @@
 #pragma once
 #include <Arduino.h>
 #include "GcodeParserService.h"
+#include "MotionControlService.h"
 
 class AutoModeController
 {
@@ -8,6 +9,7 @@ class AutoModeController
 private:
   AutoModeController();
   GcodeParserService &GPS = GcodeParserService::getInstance();
+  MotionControlService &MC = MotionControlService::getInstance();
 
   int lineIndex = 0;
   bool lineIsComment = false;
