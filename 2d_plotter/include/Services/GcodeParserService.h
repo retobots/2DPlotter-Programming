@@ -2,6 +2,7 @@
 #include <Arduino.h>
 #include <string>
 #include "MotionControlService.h"
+#include "ServoHAL.h"
 
 #define LINE_BUFFER_LENGTH 512
 

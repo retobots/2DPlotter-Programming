@@ -1,20 +1,32 @@
-#include "HAL/ServoHAL.h"
+#include "ServoHAL.h"
 
-ServoHAL::ServoHAL() {}
+ServoHAL::ServoHAL()
+{
+}
 
-ServoHAL& ServoHAL::getInstance() {
+ServoHAL &ServoHAL::getInstance()
+{
   static ServoHAL instance;
   return instance;
 }
 
-void ServoHAL::setup() {
+void ServoHAL::setup()
+{
   // Gắn servo vào chân PWM
+  myServo.attach(PIN_SERVO);
+  liftPen();
 }
 
-void ServoHAL::liftPen() {
+void ServoHAL::liftPen()
+{
   // Góc nâng bút
+  myServo.write(PEN_UP_ANGLE);
+  delay(300);
 }
 
-void ServoHAL::dropPen() {
+void ServoHAL::dropPen()
+{
   // Góc hạ bút
+  myServo.write(PEN_DOWN_ANGLE);
+  delay(300);
 }

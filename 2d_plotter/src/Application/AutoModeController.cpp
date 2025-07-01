@@ -2,7 +2,8 @@
 
 AutoModeController::AutoModeController()
 {
-  // Constructor
+  GPS.setup();
+  GPS.getInstance();
 }
 
 AutoModeController &AutoModeController::getInstance()
@@ -161,7 +162,7 @@ void AutoModeController::readSerial(point &actualPoint)
           Serial.print("Received: ");
           Serial.println(line);
         }
-        processIncomingLine(line, lineIndex, actualPoint);
+        GPS.processIncomingLine(line, lineIndex, actualPoint);
         lineIndex = 0;
       }
       else
