@@ -9,8 +9,8 @@ class StepperHAL
 private:
   StepperHAL();
 
-  AccelStepper stepperX;
-  AccelStepper stepperY;
+  AccelStepper *stepperX;
+  AccelStepper *stepperY;
 
 public:
   static StepperHAL &getInstance();

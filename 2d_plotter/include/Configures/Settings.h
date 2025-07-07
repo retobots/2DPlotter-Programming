@@ -28,9 +28,6 @@
 // Độ nhạy joystick
 #define JOYSTICK_DEADZONE 10
 
-// Tốc độ tối đa di chuyển khi điều khiển tay
-#define MAX_MANUAL_SPEED 5.0 // mm/s
-
 // Tốc độ tối đa
 #define MAX_SPEED 1000
 
@@ -39,7 +36,10 @@
 
 /*========== PS4 SETTING ==========*/
 
-// Vùng an toàn (có thể thêm nếu cần)
+// Tốc độ tối đa di chuyển khi điều khiển tay
+#define MAX_MANUAL_SPEED 0.5 // mm/s
+
+// Vùng an toàn
 #define SAFE_ZONE_MARGIN 5.0
 
 // Ngưỡng giới hạn để cảnh báo buzzer

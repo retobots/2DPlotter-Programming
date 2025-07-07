@@ -8,9 +8,9 @@ class ManualModeController
 private:
   ManualModeController();
 
-  PS4ControllerHAL &ps4 = PS4ControllerHAL::getInstance();
+  PS4ControllerHAL &ps4;
 
-  MotionControlService &MC = MotionControlService::getInstance();
+  MotionControlService &MC;
 
   PointData paraPoint;
 

@@ -1,8 +1,7 @@
 #include "MotionControlService.h"
 
-MotionControlService::MotionControlService()
+MotionControlService::MotionControlService() : stepper(StepperHAL::getInstance())
 {
-  setup();
 }
 
 MotionControlService &MotionControlService::getInstance()
@@ -13,8 +12,10 @@ MotionControlService &MotionControlService::getInstance()
 
 void MotionControlService::setup()
 {
+  // stepper = &StepperHAL::getInstance();
   // Khởi tạo stepper
-  stepper.setup();
+  // stepper.setup();
+  // Serial.println("MC Setup Done!");
 }
 
 void MotionControlService::drawLine(float xPos, float yPos)

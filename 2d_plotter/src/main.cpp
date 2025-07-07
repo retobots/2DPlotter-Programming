@@ -1,21 +1,18 @@
 #include <Arduino.h>
-#include "UIMenuService.h"
+#include <MotionControlService.h>
 #include "AutoModeController.h"
+#include "ManualModeController.h"
 
-UIMenuService *UI;
 AutoModeController *AC;
-
 point actualPoint;
 
 void setup()
 {
-  Serial.begin(115200);
-  Serial.println("Ready for Setting Up!");
-
-  UI = &UIMenuService::getInstance();
-  UI->setup();
-
+  Serial.begin(9600);
+  while (!Serial)
+    ;
   AC = &AutoModeController::getInstance();
+  AC->setup();
 
   actualPoint.x = 0;
   actualPoint.y = 0;
@@ -23,5 +20,9 @@ void setup()
 
 void loop()
 {
-  AC->readSerial(actualPoint);
+  AC->readSerial();
+  if (Serial.available() > 0)
+  {
+    Serial.println();
+  }
 }

@@ -10,12 +10,6 @@ GcodeParserService &GcodeParserService::getInstance()
 
 void GcodeParserService::setup()
 {
-  pinMode(2, OUTPUT);
-
-  digitalWrite(2, HIGH); // Bật LED
-  delay(500);
-  digitalWrite(2, LOW); // Tắt LED
-  delay(500);
 }
 
 void GcodeParserService::processIncomingLine(char *line, int charNB, point &actualPos)

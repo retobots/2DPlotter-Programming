@@ -17,19 +17,17 @@ void PS4ControllerHAL::setup()
 
 PointData PS4ControllerHAL::readPS4()
 {
-  PS4.update();
-
-  PointData points;
+  PointData points = {0.00, 0.00};
 
   if (!PS4.isConnected())
-    return;
+    return PointData{};
 
   int rx = PS4.RStickX();
   int ry = PS4.RStickY();
 
   // Vùng chết
-  if (abs(rx) < DEADZONE && abs(ry) < DEADZONE)
-    return;
+  if (abs(rx) < SAFE_ZONE_MARGIN && abs(ry) < SAFE_ZONE_MARGIN)
+    return PointData{};
 
   // Tính vector chuẩn hóa
   float magnitude = sqrt(rx * rx + ry * ry);
@@ -37,11 +35,8 @@ PointData PS4ControllerHAL::readPS4()
   float vy = ry / magnitude;
 
   // Di chuyển một đoạn nhỏ theo hướng
-  x += vx * SPEED;
-  y += vy * SPEED;
-
-  points.x = x;
-  points.y = y;
+  points.x += vx * MAX_MANUAL_SPEED;
+  points.y += vy * MAX_MANUAL_SPEED;
 
   delay(10); // Điều chỉnh mượt tùy tốc độ máy
 
@@ -51,6 +46,5 @@ PointData PS4ControllerHAL::readPS4()
 
 bool PS4ControllerHAL::isButtonPressed()
 {
-  // Trả về true nếu nút joystick được nhấn
   return false;
 }

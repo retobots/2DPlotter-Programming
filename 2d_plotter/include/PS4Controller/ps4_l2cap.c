@@ -7,10 +7,10 @@
 #include "esp_bt.h"
 #include "esp_bt_main.h"
 #include "esp_gap_bt_api.h"
-#include "stack/gap_api.h"
-#include "stack/bt_types.h"
-#include "stack/l2c_api.h"
-#include "osi/allocator.h"
+#include "gap_api.h"
+#include "bt_types.h"
+#include "l2c_api.h"
+#include "allocator.h"
 
 #define PS4_TAG "PS4_L2CAP"
 
@@ -34,18 +34,17 @@ static void ps4_l2cap_congest_cback(uint16_t cid, bool congested);
 /********************************************************************************/
 
 static const tL2CAP_APPL_INFO dyn_info = {
-  ps4_l2cap_connect_ind_cback,
-  ps4_l2cap_connect_cfm_cback,
-  NULL,
-  ps4_l2cap_config_ind_cback,
-  ps4_l2cap_config_cfm_cback,
-  ps4_l2cap_disconnect_ind_cback,
-  ps4_l2cap_disconnect_cfm_cback,
-  NULL,
-  ps4_l2cap_data_ind_cback,
-  ps4_l2cap_congest_cback,
-  NULL
-};
+    ps4_l2cap_connect_ind_cback,
+    ps4_l2cap_connect_cfm_cback,
+    NULL,
+    ps4_l2cap_config_ind_cback,
+    ps4_l2cap_config_cfm_cback,
+    ps4_l2cap_disconnect_ind_cback,
+    ps4_l2cap_disconnect_cfm_cback,
+    NULL,
+    ps4_l2cap_data_ind_cback,
+    ps4_l2cap_congest_cback,
+    NULL};
 
 static tL2CAP_CFG_INFO ps4_cfg_info;
 
@@ -66,7 +65,8 @@ uint16_t l2cap_interrupt_channel = 0;
 ** Returns          void
 **
 *******************************************************************************/
-void ps4_l2cap_init_services() {
+void ps4_l2cap_init_services()
+{
   ps4_l2cap_init_service("PS4-HIDC", BT_PSM_HID_CONTROL, BTM_SEC_SERVICE_FIRST_EMPTY);
   ps4_l2cap_init_service("PS4-HIDI", BT_PSM_HID_INTERRUPT, BTM_SEC_SERVICE_FIRST_EMPTY + 1);
 }
@@ -80,7 +80,8 @@ void ps4_l2cap_init_services() {
 ** Returns          void
 **
 *******************************************************************************/
-void ps4_l2cap_deinit_services() {
+void ps4_l2cap_deinit_services()
+{
   ps4_l2cap_deinit_service("PS4-HIDC", BT_PSM_HID_CONTROL);
   ps4_l2cap_deinit_service("PS4-HIDI", BT_PSM_HID_INTERRUPT);
 }
@@ -94,13 +95,15 @@ void ps4_l2cap_deinit_services() {
 ** Returns          void
 **
 *******************************************************************************/
-void ps4_l2cap_send_hid(hid_cmd_t *hid_cmd, uint8_t len) {
+void ps4_l2cap_send_hid(hid_cmd_t *hid_cmd, uint8_t len)
+{
   uint8_t result;
   BT_HDR *p_buf;
 
   p_buf = (BT_HDR *)osi_malloc(BT_DEFAULT_BUFFER_SIZE);
 
-  if (!p_buf) {
+  if (!p_buf)
+  {
     ESP_LOGE(PS4_TAG, "[%s] allocating buffer for sending the command failed", __func__);
   }
 
@@ -109,7 +112,8 @@ void ps4_l2cap_send_hid(hid_cmd_t *hid_cmd, uint8_t len) {
 
   memcpy((uint8_t *)(p_buf + 1) + p_buf->offset, (uint8_t *)hid_cmd, p_buf->length);
 
-  if (l2cap_control_channel == 0) {
+  if (l2cap_control_channel == 0)
+  {
     ESP_LOGE(PS4_TAG, "[%s] l2cap_control_channel not initialized.", __func__);
   }
   result = L2CA_DataWrite(l2cap_control_channel, p_buf);
@@ -138,16 +142,19 @@ void ps4_l2cap_send_hid(hid_cmd_t *hid_cmd, uint8_t len) {
 ** Returns          void
 **
 *******************************************************************************/
-static void ps4_l2cap_init_service(const char *name, uint16_t psm, uint8_t security_id) {
+static void ps4_l2cap_init_service(const char *name, uint16_t psm, uint8_t security_id)
+{
   // log_i("init services");
   /* Register the PSM for incoming connections */
-  if (!L2CA_Register(psm, (tL2CAP_APPL_INFO *)&dyn_info)) {
+  if (!L2CA_Register(psm, (tL2CAP_APPL_INFO *)&dyn_info))
+  {
     ESP_LOGE(PS4_TAG, "%s Registering service %s failed", __func__, name);
     return;
   }
 
   /* Register with the Security Manager for our specific security level (none) */
-  if (!BTM_SetSecurityLevel(false, name, security_id, 0, psm, 0, 0)) {
+  if (!BTM_SetSecurityLevel(false, name, security_id, 0, psm, 0, 0))
+  {
     ESP_LOGE(PS4_TAG, "%s Registering security service %s failed", __func__, name);
     return;
   }
@@ -164,7 +171,8 @@ static void ps4_l2cap_init_service(const char *name, uint16_t psm, uint8_t secur
 ** Returns          void
 **
 *******************************************************************************/
-static void ps4_l2cap_deinit_service(const char *name, uint16_t psm) {
+static void ps4_l2cap_deinit_service(const char *name, uint16_t psm)
+{
   /* Deregister the PSM from incoming connections */
   L2CA_Deregister(psm);
   ESP_LOGI(PS4_TAG, "[%s] Service %s Deinitialized", __func__, name);
@@ -179,7 +187,8 @@ static void ps4_l2cap_deinit_service(const char *name, uint16_t psm) {
 ** Returns          void
 **
 *******************************************************************************/
-static void ps4_l2cap_connect_ind_cback(BD_ADDR bd_addr, uint16_t l2cap_cid, uint16_t psm, uint8_t l2cap_id) {
+static void ps4_l2cap_connect_ind_cback(BD_ADDR bd_addr, uint16_t l2cap_cid, uint16_t psm, uint8_t l2cap_id)
+{
   ESP_LOGI(PS4_TAG, "[%s] bd_addr: %s\n  l2cap_cid: 0x%02x\n  psm: %d\n  id: %d", __func__, bd_addr, l2cap_cid, psm, l2cap_id);
 
   /* Send connection pending response to the L2CAP layer. */
@@ -191,9 +200,12 @@ static void ps4_l2cap_connect_ind_cback(BD_ADDR bd_addr, uint16_t l2cap_cid, uin
   /* Send a Configuration Request. */
   L2CA_CONFIG_REQ(l2cap_cid, &ps4_cfg_info);
 
-  if (psm == BT_PSM_HID_CONTROL) {
+  if (psm == BT_PSM_HID_CONTROL)
+  {
     l2cap_control_channel = l2cap_cid;
-  } else if (psm == BT_PSM_HID_INTERRUPT) {
+  }
+  else if (psm == BT_PSM_HID_INTERRUPT)
+  {
     l2cap_interrupt_channel = l2cap_cid;
   }
 }
@@ -208,7 +220,8 @@ static void ps4_l2cap_connect_ind_cback(BD_ADDR bd_addr, uint16_t l2cap_cid, uin
 ** Returns          void
 **
 *******************************************************************************/
-static void ps4_l2cap_connect_cfm_cback(uint16_t l2cap_cid, uint16_t result) {
+static void ps4_l2cap_connect_cfm_cback(uint16_t l2cap_cid, uint16_t result)
+{
   ESP_LOGI(PS4_TAG, "[%s] l2cap_cid: 0x%02x\n  result: %d", __func__, l2cap_cid, result);
 }
 
@@ -222,14 +235,16 @@ static void ps4_l2cap_connect_cfm_cback(uint16_t l2cap_cid, uint16_t result) {
 ** Returns          void
 **
 *******************************************************************************/
-void ps4_l2cap_config_cfm_cback(uint16_t l2cap_cid, tL2CAP_CFG_INFO *p_cfg) {
+void ps4_l2cap_config_cfm_cback(uint16_t l2cap_cid, tL2CAP_CFG_INFO *p_cfg)
+{
   ESP_LOGI(PS4_TAG, "[%s] l2cap_cid: 0x%02x\n  p_cfg->result: %d", __func__, l2cap_cid, p_cfg->result);
 
   /* The PS4 controller is connected after    */
   /* receiving the second config confirmation */
   bool prev_is_connected = is_connected;
   is_connected = l2cap_cid == l2cap_interrupt_channel;
-  if (prev_is_connected != is_connected) {
+  if (prev_is_connected != is_connected)
+  {
     ps4ConnectEvent(is_connected);
   }
 }
@@ -244,7 +259,8 @@ void ps4_l2cap_config_cfm_cback(uint16_t l2cap_cid, tL2CAP_CFG_INFO *p_cfg) {
 ** Returns          void
 **
 *******************************************************************************/
-void ps4_l2cap_config_ind_cback(uint16_t l2cap_cid, tL2CAP_CFG_INFO *p_cfg) {
+void ps4_l2cap_config_ind_cback(uint16_t l2cap_cid, tL2CAP_CFG_INFO *p_cfg)
+{
   ESP_LOGI(PS4_TAG, "[%s] l2cap_cid: 0x%02x\n  p_cfg->result: %d\n  p_cfg->mtu_present: %d\n  p_cfg->mtu: %d", __func__, l2cap_cid, p_cfg->result, p_cfg->mtu_present, p_cfg->mtu);
 
   p_cfg->result = L2CAP_CFG_OK;
@@ -262,10 +278,12 @@ void ps4_l2cap_config_ind_cback(uint16_t l2cap_cid, tL2CAP_CFG_INFO *p_cfg) {
 ** Returns          void
 **
 *******************************************************************************/
-void ps4_l2cap_disconnect_ind_cback(uint16_t l2cap_cid, bool ack_needed) {
+void ps4_l2cap_disconnect_ind_cback(uint16_t l2cap_cid, bool ack_needed)
+{
   ESP_LOGI(PS4_TAG, "[%s] l2cap_cid: 0x%02x\n  ack_needed: %d", __func__, l2cap_cid, ack_needed);
   is_connected = false;
-  if (ack_needed) {
+  if (ack_needed)
+  {
     L2CA_DisconnectRsp(l2cap_cid);
   }
   ps4ConnectEvent(is_connected);
@@ -281,7 +299,8 @@ void ps4_l2cap_disconnect_ind_cback(uint16_t l2cap_cid, bool ack_needed) {
 ** Returns          void
 **
 *******************************************************************************/
-static void ps4_l2cap_disconnect_cfm_cback(uint16_t l2cap_cid, uint16_t result) {
+static void ps4_l2cap_disconnect_cfm_cback(uint16_t l2cap_cid, uint16_t result)
+{
   ESP_LOGI(PS4_TAG, "[%s] l2cap_cid: 0x%02x\n  result: %d", __func__, l2cap_cid, result);
 }
 
@@ -295,8 +314,10 @@ static void ps4_l2cap_disconnect_cfm_cback(uint16_t l2cap_cid, uint16_t result) 
 ** Returns          void
 **
 *******************************************************************************/
-static void ps4_l2cap_data_ind_cback(uint16_t l2cap_cid, BT_HDR *p_buf) {
-  if (p_buf->length > 2) {
+static void ps4_l2cap_data_ind_cback(uint16_t l2cap_cid, BT_HDR *p_buf)
+{
+  if (p_buf->length > 2)
+  {
     parsePacket(p_buf->data);
   }
 
@@ -312,6 +333,7 @@ static void ps4_l2cap_data_ind_cback(uint16_t l2cap_cid, BT_HDR *p_buf) {
 ** Returns          void
 **
 *******************************************************************************/
-static void ps4_l2cap_congest_cback(uint16_t l2cap_cid, bool congested) {
+static void ps4_l2cap_congest_cback(uint16_t l2cap_cid, bool congested)
+{
   ESP_LOGI(PS4_TAG, "[%s] l2cap_cid: 0x%02x\n  congested: %d", __func__, l2cap_cid, congested);
 }

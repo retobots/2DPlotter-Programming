@@ -25,22 +25,20 @@
 #ifndef BTM_API_H
 #define BTM_API_H
 
-
-#include "stack/bt_types.h"
+#include "bt_types.h"
 
 /* Security service definitions (BTM_SetSecurityLevel)
 ** Used for Authorization APIs
 */
 
 /* Update these as services are added */
-#define BTM_SEC_SERVICE_FIRST_EMPTY     51
+#define BTM_SEC_SERVICE_FIRST_EMPTY 51
 
 #define BT_DEFAULT_BUFFER_SIZE (4096 + 16)
 
 #ifndef BTM_SEC_MAX_SERVICES
-#define BTM_SEC_MAX_SERVICES            65
+#define BTM_SEC_MAX_SERVICES 65
 #endif
-
 
 /*******************************************************************************
 **
@@ -54,10 +52,10 @@
 ** Returns          TRUE if registered OK, else FALSE
 **
 *******************************************************************************/
-//extern
-bool BTM_SetSecurityLevel (bool is_originator, const char *p_name,
-                              uint8_t service_id, uint16_t sec_level,
-                              uint16_t psm, uint32_t mx_proto_id,
-                              uint32_t mx_chan_id);
+// extern
+bool BTM_SetSecurityLevel(bool is_originator, const char *p_name,
+                          uint8_t service_id, uint16_t sec_level,
+                          uint16_t psm, uint32_t mx_proto_id,
+                          uint32_t mx_chan_id);
 
 #endif /* BTM_API_H */

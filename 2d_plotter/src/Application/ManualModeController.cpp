@@ -1,9 +1,7 @@
 #include "ManualModeController.h"
 
-ManualModeController::ManualModeController()
+ManualModeController::ManualModeController() : ps4(PS4ControllerHAL::getInstance()), MC(MotionControlService::getInstance())
 {
-  MC.setup();
-  ps4.setup();
 }
 
 ManualModeController &ManualModeController::getInstance()
@@ -14,6 +12,8 @@ ManualModeController &ManualModeController::getInstance()
 
 void ManualModeController::setup()
 {
+  MC.setup();
+  ps4.setup();
 }
 
 void ManualModeController::run()

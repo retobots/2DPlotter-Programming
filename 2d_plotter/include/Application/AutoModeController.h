@@ -3,13 +3,16 @@
 #include "GcodeParserService.h"
 #include "MotionControlService.h"
 
+#define LINE_BUFFER_LENGTH 512
+
 class AutoModeController
 {
 
 private:
   AutoModeController();
-  GcodeParserService &GPS = GcodeParserService::getInstance();
-  MotionControlService &MC = MotionControlService::getInstance();
+
+  // GcodeParserService &GPS;
+  // MotionControlService &MC;
 
   int lineIndex = 0;
   bool lineIsComment = false;

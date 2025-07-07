@@ -17,7 +17,7 @@ private:
   MotionControlService();
 
   // Khai báo stepper
-  StepperHAL &stepper = StepperHAL::getInstance();
+  StepperHAL &stepper;
 
   // Vị trí hiện tại (mm)
   float Xpos = X_MIN;

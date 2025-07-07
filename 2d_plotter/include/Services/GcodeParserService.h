@@ -4,8 +4,6 @@
 #include "MotionControlService.h"
 #include "ServoHAL.h"
 
-#define LINE_BUFFER_LENGTH 512
-
 class GcodeParserService
 {
 private:

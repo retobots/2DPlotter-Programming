@@ -2,7 +2,6 @@
 
 AutoModeController::AutoModeController()
 {
-  GPS.setup();
 }
 
 AutoModeController &AutoModeController::getInstance()
@@ -13,7 +12,15 @@ AutoModeController &AutoModeController::getInstance()
 
 void AutoModeController::setup()
 {
-  // Cài đặt SDCard, LCD, parser...
+  GcodeParserService::getInstance().setup();
+  MotionControlService::getInstance().setup();
+
+  pinMode(2, OUTPUT);
+
+  digitalWrite(2, HIGH); // Bật LED
+  delay(500);
+  digitalWrite(2, LOW); // Tắt LED
+  delay(500);
 }
 
 void AutoModeController::readSerial(point &actualPoint)
@@ -22,6 +29,8 @@ void AutoModeController::readSerial(point &actualPoint)
   while (Serial.available() > 0)
   {
     c = Serial.read();
+
+    Serial.println(c);
 
     // Xử lý ký tự thời gian thực của GRBL
     if (c == '!')
@@ -51,6 +60,9 @@ void AutoModeController::readSerial(point &actualPoint)
       {
         line[lineIndex] = '\0'; // Kết thúc chuỗi
 
+        Serial.print("Lệnh nhận được: ");
+        Serial.println(line);
+
         // Xử lý các lệnh GRBL
         if (strcmp(line, "?") == 0)
         {
@@ -58,6 +70,8 @@ void AutoModeController::readSerial(point &actualPoint)
           Serial.print(actualPoint.x, 3);
           Serial.print(",");
           Serial.print(actualPoint.y, 3);
+          Serial.print(",");
+          Serial.print(0.000, 3); // Z = 0 nếu không dùng
           Serial.println("|FS:0,0>");
           lineIndex = 0;
           return;
@@ -159,7 +173,10 @@ void AutoModeController::readSerial(point &actualPoint)
           Serial.print("Received: ");
           Serial.println(line);
         }
-        GPS.processIncomingLine(line, lineIndex, actualPoint);
+        Serial.println("Bắt đầu xử lý Gcode");
+        GcodeParserService::getInstance().processIncomingLine(line, lineIndex, actualPoint);
+        Serial.println("Xử lý xong, gửi OK");
+        Serial.println("ok");
         lineIndex = 0;
       }
       else
