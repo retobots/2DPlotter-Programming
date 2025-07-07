@@ -1,6 +1,7 @@
 #include "AutoModeController.h"
 
-AutoModeController::AutoModeController()
+AutoModeController::AutoModeController() //   GPS(GcodeParserService::getInstance()),
+                                         //   MC(MotionControlService::getInstance()),
 {
 }
 

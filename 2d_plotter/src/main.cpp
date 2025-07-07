@@ -3,16 +3,12 @@
 #include "AutoModeController.h"
 #include "ManualModeController.h"
 
-AutoModeController *AC;
+// AutoModeController *AC;
 point actualPoint;
 
 void setup()
 {
-  Serial.begin(9600);
-  while (!Serial)
-    ;
-  AC = &AutoModeController::getInstance();
-  AC->setup();
+  Serial.begin(112500);
 
   actualPoint.x = 0;
   actualPoint.y = 0;
@@ -20,9 +16,4 @@ void setup()
 
 void loop()
 {
-  AC->readSerial();
-  if (Serial.available() > 0)
-  {
-    Serial.println();
-  }
 }
