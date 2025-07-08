@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include "UIMenuService.h"
 
-UIMenuService *UI;
+// UIMenuService *UI;
 String inputBuffer = "";
 
 void setup()
@@ -11,8 +11,8 @@ void setup()
   while (!Serial)
     ; // Đợi kết nối Serial (đặc biệt cho ESP32)
   Serial.println("UART Receiver Ready!");
-  UI = &UIMenuService::getInstance();
-  UI->setup();
+  // UI = &UIMenuService::getInstance();
+  // UI->setup();
 }
 
 void loop()
