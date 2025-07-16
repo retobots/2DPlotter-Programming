@@ -63,6 +63,16 @@ private:
   BuzzerHAL &Buzzer;
   ButtonHAL &Button;
 
+  void runMainMenu();
+
+  void runAutoMode();
+
+  void runManualMode();
+
+  void runUGSMenu();
+
+  void runSDMenu();
+
 public:
   /**
    * @brief   Khởi tạo đối tượng menu
@@ -84,4 +94,6 @@ public:
    *
    */
   void run();
+
+  void opening();
 };

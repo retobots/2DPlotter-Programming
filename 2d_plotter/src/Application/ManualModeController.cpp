@@ -14,10 +14,13 @@ void ManualModeController::setup()
 {
   MC.setup();
   ps4.setup();
+
+  // Logging
+  Serial.println("[SET UP]: Manual Controller Done!");
 }
 
 void ManualModeController::run()
 {
-  paraPoint = ps4.readPS4();
-  MC.drawLine(paraPoint.x, paraPoint.y);
+  data = ps4.readPS4();
+  MC.drawLine(data.x, data.y);
 }

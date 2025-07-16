@@ -15,13 +15,12 @@ LiquidCrystal_I2C lcd(0x27, 20, 4); // 0x27 là địa chỉ I2C của màn hìn
 
 /*<===================================================>*/
 
-LcdHAL::LcdHAL() { setup(); }
+LcdHAL::LcdHAL() {}
 
 /*<===================================================>*/
 
 LcdHAL &LcdHAL::getInstance()
 {
-  Serial.println("INSTANCE LCD CREATED");
   static LcdHAL instance;
   return instance;
 }
@@ -35,6 +34,9 @@ void LcdHAL::setup()
   lcd.backlight(); // Bật đèn nền
 
   delay(500);
+
+  // Logging
+  Serial.println("[SET UP]: LCD Done!");
 }
 
 /*<===================================================>*/
@@ -87,54 +89,28 @@ void LcdHAL::welcomeScreen()
 
 void LcdHAL::modeScreen(uint8_t update)
 {
-  String line1 = "AUTO MODE   <";
-  String line2 = "MANUAL MODE  ";
-
-  if (update == 0)
+  String options[2] = {"AUTO MODE", "MANUAL MODE"};
+  for (int i = 0; i < 2; i++)
   {
-    line1 = "AUTO MODE   <";
-    line2 = "MANUAL MODE  ";
+    String suffix = (i == update) ? " <" : "";
+    lcdDisplay(options[i] + suffix, 0, i + 1);
   }
-  else if (update == 1)
-  {
-    line1 = "AUTO MODE    ";
-    line2 = "MANUAL MODE <";
-  }
-
-  lcdDisplay(line1, 0, 1);
-  lcdDisplay(line2, 0, 2);
 }
 
 /*<===================================================>*/
 
 void LcdHAL::automodeScreen(uint8_t update)
 {
-  String line1 = "UGS SERIAL <";
-  String line2 = "SD CARD     ";
-  String line3 = "Back";
+  String options[3] = {
+      "UGS SERIAL",
+      "SD CARD",
+      "Back"};
 
-  if (update == 0)
+  for (int i = 0; i < 3; i++)
   {
-    line1 = "UGS SERIAL <";
-    line2 = "SD CARD     ";
-    line3 = "Back";
+    String prefix = (i == update) ? "> " : "  ";
+    lcdDisplay(prefix + options[i], 0, i + 1);
   }
-  else if (update == 1)
-  {
-    line1 = "UGS SERIAL ";
-    line2 = "SD CARD    <";
-    line3 = "Back";
-  }
-  else if (update == 2)
-  {
-    line1 = "UGS SERIAL ";
-    line2 = "SD CARD";
-    line3 = "> Back";
-  }
-
-  lcdDisplay(line1, 0, 1);
-  lcdDisplay(line2, 0, 2);
-  lcdDisplay(line3, (19 - line3.length()), 3);
 }
 
 /*<===================================================>*/
@@ -236,36 +212,19 @@ void LcdHAL::serialModeScreen(String file, int percenum, uint8_t workingStateMod
   String title = "UGS PLATFORM";
   String percentage = "  % : " + String(percenum) + "%";
   String filename = "File: " + file;
-  String cancel = "> CANCEL";
-  String workingState = "PAUSE";
-  String back = "Back";
 
-  if (workingStateMode == 1)
-  {
-    cancel = ">CANCEL";
-    workingState = " PAUSE";
-    back = " Back";
-  }
-
-  else if (workingStateMode == 0)
-  {
-    cancel = " CANCEL";
-    workingState = ">PAUSE";
-    back = " Back";
-  }
-  else if (workingStateMode == 2)
-  {
-    cancel = " CANCEL";
-    workingState = " PAUSE";
-    back = ">Back";
-  }
+  String options[3] = {"PAUSE", "CANCEL", "Back"};
+  int positions[3] = {0, 7, 15};
 
   lcdDisplay(title, getMiddleXCursor(title), 0);
   lcdDisplay(filename, 0, 1);
   lcdDisplay(percentage, 0, 2);
-  lcdDisplay(workingState, 0, 3);
-  lcdDisplay(cancel, 7, 3);
-  lcdDisplay(back, 15, 3);
+
+  for (int i = 0; i < 3; i++)
+  {
+    String prefix = (i == workingStateMode) ? ">" : " ";
+    lcdDisplay(prefix + options[i], positions[i], 3);
+  }
 }
 
 /*<===================================================>*/

@@ -3,14 +3,6 @@
 #include "Settings.h"
 #include "StepperHAL.h"
 
-typedef struct point
-{
-  float x;
-  float y;
-} point;
-
-// extern point actualPoint;
-
 class MotionControlService
 {
 private:
@@ -19,9 +11,8 @@ private:
   // Khai báo stepper
   StepperHAL &stepper;
 
-  // Vị trí hiện tại (mm)
-  float Xpos = X_MIN;
-  float Ypos = Y_MIN;
+  // Data lưu dữ liệu
+  point Data;
 
 public:
   static MotionControlService &getInstance();
@@ -29,4 +20,6 @@ public:
   void setup();
   void drawLine(float xPos, float yPos);
   void stop();
+
+  void updateData(point &newData);
 };

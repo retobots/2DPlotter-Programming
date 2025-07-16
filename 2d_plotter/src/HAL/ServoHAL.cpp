@@ -12,9 +12,13 @@ ServoHAL &ServoHAL::getInstance()
 
 void ServoHAL::setup()
 {
+
   // Gắn servo vào chân PWM
   myServo.attach(PIN_SERVO);
   liftPen();
+
+  // Logging
+  Serial.println("[SET UP]: Servo Done!");
 }
 
 void ServoHAL::liftPen()

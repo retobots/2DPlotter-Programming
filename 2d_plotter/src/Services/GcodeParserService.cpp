@@ -10,6 +10,8 @@ GcodeParserService &GcodeParserService::getInstance()
 
 void GcodeParserService::setup()
 {
+  // Logging
+  Serial.println("[SET UP]: Gcode Parser Done!");
 }
 
 void GcodeParserService::processIncomingLine(char *line, int charNB, point &actualPos)

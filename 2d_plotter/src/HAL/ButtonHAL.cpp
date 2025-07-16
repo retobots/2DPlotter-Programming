@@ -13,14 +13,12 @@
 
 ButtonHAL::ButtonHAL()
 {
-    setup();
 }
 
 /*<===================================================>*/
 
 ButtonHAL &ButtonHAL::getInstance()
 {
-    Serial.println("INSTANCE BUTTON CREATED");
     static ButtonHAL instance;
     return instance;
 }
@@ -30,11 +28,12 @@ ButtonHAL &ButtonHAL::getInstance()
 void ButtonHAL::setup()
 {
     // Cấu hình chân GPIO làm output
-    // Logging
-    Serial.println("Set Up Button!");
 
     // Setup
     pinMode(PIN_MENU_BUTTON, INPUT);
+
+    // Logging
+    Serial.println("[SET UP]: Button Done!");
 }
 
 /*<===================================================>*/

@@ -17,14 +17,12 @@
 
 RotaryEncoderHAL::RotaryEncoderHAL()
 {
-  setup();
 }
 
 /*<===================================================>*/
 
 RotaryEncoderHAL &RotaryEncoderHAL::getInstance()
 {
-  Serial.println("INSTANCE ROTARY CREATED");
   static RotaryEncoderHAL instance;
   return instance;
 }
@@ -38,6 +36,9 @@ void RotaryEncoderHAL::setup()
   pinMode(PIN_DT, INPUT);
   pinMode(PIN_SW, INPUT_PULLUP);
   lastCLK = digitalRead(PIN_CLK);
+
+  // Logging
+  Serial.println("[SET UP]: Rotary Encode Done!");
 }
 
 /*<===================================================>*/

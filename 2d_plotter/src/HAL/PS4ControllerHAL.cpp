@@ -13,21 +13,23 @@ PS4ControllerHAL &PS4ControllerHAL::getInstance()
 
 void PS4ControllerHAL::setup()
 {
+  // Logging
+  Serial.println("[SET UP]: PS4 Controller Done!");
 }
 
-PointData PS4ControllerHAL::readPS4()
+point PS4ControllerHAL::readPS4()
 {
-  PointData points = {0.00, 0.00};
+  point points = {0.00, 0.00};
 
   if (!PS4.isConnected())
-    return PointData{};
+    return point{};
 
   int rx = PS4.RStickX();
   int ry = PS4.RStickY();
 
   // Vùng chết
   if (abs(rx) < SAFE_ZONE_MARGIN && abs(ry) < SAFE_ZONE_MARGIN)
-    return PointData{};
+    return point{};
 
   // Tính vector chuẩn hóa
   float magnitude = sqrt(rx * rx + ry * ry);

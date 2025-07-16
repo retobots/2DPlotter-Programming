@@ -1,5 +1,11 @@
 #pragma once
 
+typedef struct point
+{
+    float x;
+    float y;
+} point;
+
 /*========== SERVO SETTING ==========*/
 
 // Góc servo nhấc/hạ bút

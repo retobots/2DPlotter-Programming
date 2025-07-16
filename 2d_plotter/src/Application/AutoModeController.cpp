@@ -1,7 +1,6 @@
 #include "AutoModeController.h"
 
-AutoModeController::AutoModeController() //   GPS(GcodeParserService::getInstance()),
-                                         //   MC(MotionControlService::getInstance()),
+AutoModeController::AutoModeController() : GPS(GcodeParserService::getInstance()), MC(MotionControlService::getInstance())
 {
 }
 
@@ -13,15 +12,15 @@ AutoModeController &AutoModeController::getInstance()
 
 void AutoModeController::setup()
 {
-  GcodeParserService::getInstance().setup();
-  MotionControlService::getInstance().setup();
+  GPS.setup();
+  MC.setup();
 
-  pinMode(2, OUTPUT);
+  // Set data
+  data.x = X_MIN;
+  data.y = Y_MIN;
 
-  digitalWrite(2, HIGH); // Bật LED
-  delay(500);
-  digitalWrite(2, LOW); // Tắt LED
-  delay(500);
+  // Logging
+  Serial.println("[SET UP]: AutoMode Controller Done!");
 }
 
 void AutoModeController::readSerial(point &actualPoint)
@@ -174,9 +173,7 @@ void AutoModeController::readSerial(point &actualPoint)
           Serial.print("Received: ");
           Serial.println(line);
         }
-        Serial.println("Bắt đầu xử lý Gcode");
-        GcodeParserService::getInstance().processIncomingLine(line, lineIndex, actualPoint);
-        Serial.println("Xử lý xong, gửi OK");
+        GPS.processIncomingLine(line, lineIndex, actualPoint);
         Serial.println("ok");
         lineIndex = 0;
       }
@@ -233,4 +230,9 @@ void AutoModeController::readSerial(point &actualPoint)
       }
     }
   }
+}
+
+void AutoModeController::run()
+{
+  readSerial(data);
 }

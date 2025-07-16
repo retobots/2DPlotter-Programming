@@ -12,11 +12,12 @@ private:
 
   MotionControlService &MC;
 
-  PointData paraPoint;
+  point data;
 
 public:
   static ManualModeController &getInstance();
 
   void setup();
+
   void run();
 };

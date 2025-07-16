@@ -1,8 +1,10 @@
 #include <Arduino.h>
 #include "UIMenuService.h"
+#include "AutoModeController.h"
 
-// UIMenuService *UI;
-String inputBuffer = "";
+// Khởi tạo đối tượng quản lý
+AutoModeController *AC;
+UIMenuService *UI;
 
 void setup()
 {
@@ -11,29 +13,14 @@ void setup()
   while (!Serial)
     ; // Đợi kết nối Serial (đặc biệt cho ESP32)
   Serial.println("UART Receiver Ready!");
-  // UI = &UIMenuService::getInstance();
-  // UI->setup();
+
+  // Setup
+  Serial.println("================ [ SETTING - UP ] ===============");
+  AC->setup();
+  UI->setup();
 }
 
 void loop()
 {
-  // UI->run();
-  // Kiểm tra có dữ liệu đến không
-  while (Serial.available() > 0)
-  {
-    char c = Serial.read(); // Đọc 1 ký tự
-
-    // Ghi ký tự vào buffer
-    if (c != '\n')
-    {
-      inputBuffer += c;
-    }
-    else
-    {
-      // Kết thúc chuỗi
-      Serial.print("Received: ");
-      Serial.println(inputBuffer);
-      inputBuffer = ""; // Xoá buffer để chuẩn bị nhận chuỗi mới
-    }
-  }
+  AC->run();
 }

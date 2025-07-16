@@ -12,10 +12,12 @@ MotionControlService &MotionControlService::getInstance()
 
 void MotionControlService::setup()
 {
-  // stepper = &StepperHAL::getInstance();
   // Khởi tạo stepper
   // stepper.setup();
   // Serial.println("MC Setup Done!");
+
+  // Logging
+  Serial.println("[SET UP]: Motion Control Done!");
 }
 
 void MotionControlService::drawLine(float xPos, float yPos)
@@ -38,12 +40,17 @@ void MotionControlService::drawLine(float xPos, float yPos)
   stepper.moveTo(x1_steps, y1_steps);
 
   // Cập nhật vị trí hiện tại
-  Xpos = xPos;
-  Ypos = yPos;
+  Data.x = xPos;
+  Data.y = yPos;
 }
 
 void MotionControlService::stop()
 {
   // Dừng mọi chuyển động
   stepper.stop();
+}
+
+void MotionControlService::updateData(point &newData)
+{
+  newData = Data;
 }

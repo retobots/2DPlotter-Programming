@@ -11,13 +11,12 @@
 
 /*================================================= [ DEFINITION ] ==================================================*/
 
-BuzzerHAL::BuzzerHAL() { setup(); }
+BuzzerHAL::BuzzerHAL() {}
 
 /*<===================================================>*/
 
 BuzzerHAL &BuzzerHAL::getInstance()
 {
-  Serial.println("INSTANCE BUZZER CREATED");
   static BuzzerHAL instance;
   return instance;
 }
@@ -26,12 +25,12 @@ BuzzerHAL &BuzzerHAL::getInstance()
 
 void BuzzerHAL::setup()
 {
-  // Logging
-  Serial.println("Set Up Buzzer!");
-
   // Setup
   ledcSetup(BUZZER_CHANNEL, 2000, 8); // tần số 2kHz, độ phân giải 8-bit
   ledcAttachPin(PIN_BUZZER, BUZZER_CHANNEL);
+
+  // Logging
+  Serial.println("[SET UP]: Buzzer Done!");
 }
 
 /*<===================================================>*/

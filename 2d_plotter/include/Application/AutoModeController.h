@@ -11,8 +11,8 @@ class AutoModeController
 private:
   AutoModeController();
 
-  // GcodeParserService &GPS;
-  // MotionControlService &MC;
+  GcodeParserService &GPS;
+  MotionControlService &MC;
 
   int lineIndex = 0;
   bool lineIsComment = false;
@@ -21,9 +21,15 @@ private:
   char line[LINE_BUFFER_LENGTH];
   char c;
 
+  void readSerial(point &actualPoint);
+
+  // Coordinate
+  point data;
+
 public:
   static AutoModeController &getInstance();
 
   void setup();
-  void readSerial(point &actualPoint);
+
+  void run();
 };

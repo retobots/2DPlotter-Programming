@@ -14,33 +14,25 @@ StepperHAL &StepperHAL::getInstance()
 
 void StepperHAL::setup()
 {
-  Serial.println("StepperHAL::setup() - start");
-
   pinMode(ENABLE, OUTPUT);
-  Serial.println("pinMode OK");
 
   digitalWrite(ENABLE, LOW);
-  Serial.println("digitalWrite OK");
 
   if (stepperX == nullptr || stepperY == nullptr)
   {
-    Serial.println("Stepper pointer NULL!");
     return;
   }
 
   stepperX->setMaxSpeed(MAX_SPEED);
-  Serial.println("setMaxSpeed X OK");
 
   stepperX->setAcceleration(ACCELERATION);
-  Serial.println("setAccel X OK");
 
   stepperY->setMaxSpeed(MAX_SPEED);
-  Serial.println("setMaxSpeed Y OK");
 
   stepperY->setAcceleration(ACCELERATION);
-  Serial.println("setAccel Y OK");
 
-  Serial.println("StepperHAL::setup() - done");
+  // Logging
+  Serial.println("[SET UP]: Stepper Motor Done!");
 }
 
 void StepperHAL::moveTo(float x, float y)

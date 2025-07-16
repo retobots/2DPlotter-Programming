@@ -47,6 +47,11 @@ UIMenuService &UIMenuService::getInstance()
 
 void UIMenuService::setup()
 {
+  // Set phần cứng liên quan
+  LCD.setup();
+  RE.setup();
+  Buzzer.setup();
+  Button.setup();
 
   Serial.println("Setting Up...");
   Buzzer.startingSoundBuzzer();
@@ -55,6 +60,9 @@ void UIMenuService::setup()
 
   LCD.clear();
   LCD.modeScreen(modeFlag);
+
+  // Logging
+  Serial.println("[SET UP]: UI Menu Done!");
 }
 
 /*<===================================================>*/
@@ -72,182 +80,210 @@ void UIMenuService::setup()
 
 /*<===================================================>*/
 
-void UIMenuService::run()
+void UIMenuService::runSDMenu()
 {
+  uint8_t ar_idx = 0;
+  int startIndex = 0;
+  int fileCount = MAX_FILES + 1;
+  int state = State::SD_MENU;
 
-  switch (currentState)
+  LCD.clear();
+  Serial.printf("currentState: %d\n", state);
+  LCD.sdModeScreen(fileList, 0, ar_idx, startIndex, fileCount, state);
+
+  while (1)
   {
-  case MAIN_MENU:
-    LCD.clear();
-    LCD.modeScreen(modeFlag);
-    while (1)
+    if (state == State::AUTO_MODE)
     {
-      RE.readEncoder();
-      if (RE.scrollUp() || RE.scrollDown())
-      {
-        Buzzer.beepOnce();
-        modeFlag = 1 - modeFlag;
-        LCD.clear();
-        LCD.modeScreen(modeFlag);
-      }
+      currentState = AUTO_MODE;
+      break;
+    }
 
-      if (RE.isRotaryPressed())
+    RE.readEncoder();
+
+    if (RE.scrollUp())
+    {
+      Buzzer.beepOnce();
+      LCD.clear();
+      LCD.sdModeScreen(fileList, -1, ar_idx, startIndex, fileCount, state);
+    }
+    else if (RE.scrollDown())
+    {
+      Buzzer.beepOnce();
+      LCD.clear();
+      LCD.sdModeScreen(fileList, 1, ar_idx, startIndex, fileCount, state);
+    }
+    else if (RE.isRotaryPressed())
+    {
+      Buzzer.beepOnce();
+      LCD.sdModeScreen(fileList, 2, ar_idx, startIndex, fileCount, state);
+    }
+  }
+}
+
+/*<===================================================>*/
+
+void UIMenuService::runMainMenu()
+{
+  LCD.clear();
+  LCD.modeScreen(modeFlag);
+
+  while (1)
+  {
+    RE.readEncoder();
+
+    if (RE.scrollUp() || RE.scrollDown())
+    {
+      Buzzer.beepOnce();
+      modeFlag ^= 1; // Toggle nhanh
+      LCD.clear();
+      LCD.modeScreen(modeFlag);
+    }
+
+    if (RE.isRotaryPressed())
+    {
+      Buzzer.beepOnce();
+      currentState = (modeFlag == AUTOMODE) ? AUTO_MODE : MANUAL_MODE;
+      break;
+    }
+  }
+}
+
+/*<===================================================>*/
+
+void UIMenuService::runAutoMode()
+{
+  LCD.clear();
+  LCD.automodeScreen(autoModeFlag);
+
+  while (1)
+  {
+    RE.readEncoder();
+
+    if (RE.scrollUp() || RE.scrollDown())
+    {
+      Buzzer.beepOnce();
+      bool isUp = RE.scrollUp();
+      autoModeFlag = (isUp) ? (autoModeFlag + 2) % 3 : (autoModeFlag + 1) % 3;
+      LCD.clear();
+      LCD.automodeScreen(autoModeFlag);
+    }
+
+    if (RE.isRotaryPressed())
+    {
+      Buzzer.beepOnce();
+      switch (autoModeFlag)
       {
-        Buzzer.beepOnce();
-        currentState = (modeFlag == AUTOMODE) ? AUTO_MODE : MANUAL_MODE;
+      case UGS:
+        currentState = UGS_MENU;
         break;
-      }
-    }
-    break;
-
-  case AUTO_MODE:
-    // Xử lý giao diện chế độ tự động ở đây
-    // Ví dụ: Chọn UGS hay SD
-    LCD.clear();
-    LCD.automodeScreen(autoModeFlag);
-    while (1)
-    {
-      RE.readEncoder();
-      // if (cancelSignal() == true)
-      //   break;
-      if (RE.scrollDown())
-      {
-        Buzzer.beepOnce();
-        autoModeFlag = (autoModeFlag + 1) % 3;
-        LCD.clear();
-        LCD.automodeScreen(autoModeFlag);
-      }
-      else if (RE.scrollUp())
-      {
-        Buzzer.beepOnce();
-        autoModeFlag = (autoModeFlag + 2) % 3;
-        LCD.clear();
-        LCD.automodeScreen(autoModeFlag);
-      }
-      if (RE.isRotaryPressed())
-      {
-        Buzzer.beepOnce();
-        if (autoModeFlag == UGS)
-        {
-          currentState = UGS_MENU;
-        }
-        else if (autoModeFlag == SD)
-        {
-          currentState = SD_MENU;
-        }
-        else
-        {
-          currentState = MAIN_MENU;
-        }
+      case SD:
+        currentState = SD_MENU;
         break;
+      default:
+        currentState = MAIN_MENU;
       }
+      break;
     }
-    break;
+  }
+}
 
-  case MANUAL_MODE:
-    LCD.clear();
-    while (1)
+/*<===================================================>*/
+
+void UIMenuService::runManualMode()
+{
+  LCD.clear();
+  while (1)
+  {
+    RE.readEncoder();
+    LCD.lcdDisplay("Manual Mode", LCD.getMiddleXCursor("Manual Mode"), 1);
+    // TODO: thêm logic nếu có cancel/exit
+  }
+}
+
+/*<===================================================>*/
+
+void UIMenuService::runUGSMenu()
+{
+  LCD.clear();
+  LCD.serialModeScreen("retobots logo", 10, workingFlag);
+
+  while (1)
+  {
+    RE.readEncoder();
+
+    if (RE.scrollUp() || RE.scrollDown())
     {
-      RE.readEncoder();
-      // if (cancelSignal() == true)
-      //   break;
-
-      LCD.lcdDisplay("Manual Mode", LCD.getMiddleXCursor("Manual Mode"), 1);
+      Buzzer.beepOnce();
+      bool isUp = RE.scrollUp();
+      workingFlag = (isUp) ? (workingFlag + 1) % 3 : (workingFlag + 2) % 3;
+      LCD.clear();
+      LCD.serialModeScreen("retobots logo", 10, workingFlag);
     }
-    break;
 
-  case UGS_MENU:
-    LCD.clear();
-    LCD.serialModeScreen("retobots logo", 10, workingFlag);
-    while (1)
+    if (RE.isRotaryPressed())
     {
-      RE.readEncoder();
-      // if (cancelSignal() == true)
-      //   break;
-
-      if (RE.scrollUp())
+      Buzzer.beepOnce();
+      if (workingFlag == WORKING_STATE)
       {
-        Buzzer.beepOnce();
-        workingFlag = (workingFlag + 1) % 3;
-        LCD.clear();
-        LCD.serialModeScreen("retobots logo", 10, workingFlag);
-      }
-      else if (RE.scrollDown())
-      {
-        Buzzer.beepOnce();
-        workingFlag = (workingFlag + 2) % 3;
-        LCD.clear();
-        LCD.serialModeScreen("retobots logo", 10, workingFlag);
-      }
-
-      if (RE.isRotaryPressed())
-      {
-        Buzzer.beepOnce();
-        if ((workingFlag == WORKING_STATE) && (workingStateFlag == PAUSE))
+        if (workingStateFlag == PAUSE)
         {
-          Serial.println("Tạm dừng");
+          Serial.println("Pause");
           workingStateFlag = CONTINUE;
         }
-        else if ((workingFlag == WORKING_STATE) && (workingStateFlag == CONTINUE))
-        {
-          Serial.println("Tiếp tục");
-          workingStateFlag = PAUSE;
-        }
-        else if (workingFlag == CANCEL)
-        {
-          Serial.println("Cancel");
-        }
         else
         {
-          currentState = AUTO_MODE;
-          break;
+          Serial.println("Continue");
+          workingStateFlag = PAUSE;
         }
       }
-    }
-    break;
-
-  case SD_MENU:
-    // loadFileListFromSD();
-    uint8_t ar_idx = 0;
-    int startIndex = 0;
-    int fileCount = MAX_FILES + 1;
-    LCD.clear();
-    int state = State::SD_MENU;
-    Serial.print("currentState: ");
-    Serial.println(state);
-    LCD.sdModeScreen(fileList, 0, ar_idx, startIndex, fileCount, state);
-    while (1)
-    {
-      if (state == State::AUTO_MODE)
+      else if (workingFlag == CANCEL)
+      {
+        Serial.println("Cancel");
+      }
+      else
       {
         currentState = AUTO_MODE;
         break;
       }
-      else
-      {
-        RE.readEncoder();
-
-        if (RE.scrollUp())
-        {
-          Buzzer.beepOnce();
-          LCD.clear();
-          LCD.sdModeScreen(fileList, -1, ar_idx, startIndex, fileCount, state);
-        }
-        else if (RE.scrollDown())
-        {
-          Buzzer.beepOnce();
-          LCD.clear();
-          LCD.sdModeScreen(fileList, 1, ar_idx, startIndex, fileCount, state);
-        }
-        else if (RE.isRotaryPressed())
-        {
-          Buzzer.beepOnce();
-          LCD.sdModeScreen(fileList, 2, ar_idx, startIndex, fileCount, state);
-        }
-      }
     }
+  }
+}
+
+/*<===================================================>*/
+
+void UIMenuService::run()
+{
+  switch (currentState)
+  {
+  case MAIN_MENU:
+    runMainMenu();
+    break;
+  case AUTO_MODE:
+    runAutoMode();
+    break;
+  case MANUAL_MODE:
+    runManualMode();
+    break;
+  case UGS_MENU:
+    runUGSMenu();
+    break;
+  case SD_MENU:
+    runSDMenu();
     break;
   }
 }
 
 /*<===================================================>*/
+
+void UIMenuService::opening()
+{
+  Buzzer.startingSoundBuzzer();
+  LCD.welcomeScreen();
+  delay(2000);
+
+  LCD.clear();
+  LCD.modeScreen(modeFlag);
+
+  Serial.println("Opening Done!");
+}
