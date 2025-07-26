@@ -41,12 +41,6 @@ void UIMenuService::setup()
   IoHwAb_Button::getInstance().setup();
 
   Serial.println("Setting Up...");
-  IoHwAb_Buzzer::getInstance().startingSoundBuzzer();
-  IoHwAb_LCD::getInstance().welcomeScreen();
-  delay(2000);
-
-  IoHwAb_LCD::getInstance().clear();
-  IoHwAb_LCD::getInstance().modeScreen(modeFlag);
 
   // Logging
   Serial.println("[SET UP]: UI Menu Done!");
@@ -67,209 +61,190 @@ void UIMenuService::setup()
 
 /*<===================================================>*/
 
-void UIMenuService::runSDMenu()
+void UIMenuService::welcomeScreen()
 {
-  uint8_t ar_idx = 0;
-  int startIndex = 0;
-  int state = State::SD_MENU;
+  String wel1 = "2DPLOTER";
+  String wel2 = "RETOBOTS";
+  String wel3 = "WELCOME ANH KHAI";
 
+  // Màn hình 1
+  IoHwAb_LCD::getInstance().lcdDisplay(wel1, IoHwAb_LCD::getInstance().getMiddleXCursor(wel1), 1);
+  IoHwAb_LCD::getInstance().lcdDisplay(wel2, IoHwAb_LCD::getInstance().getMiddleXCursor(wel2), 2);
+
+  // Màn hình 2
+  delay(2000);
   IoHwAb_LCD::getInstance().clear();
-  Serial.printf("currentState: %d\n", state);
-  IoHwAb_LCD::getInstance().sdModeScreen(fileList, 0, ar_idx, startIndex, fileList.size(), state);
+  IoHwAb_LCD::getInstance().lcdDisplay(wel3, IoHwAb_LCD::getInstance().getMiddleXCursor(wel3), 1);
+}
 
-  while (1)
+/*<===================================================>*/
+
+void UIMenuService::modeScreen(uint8_t update)
+{
+  String options[2] = {"AUTO MODE", "MANUAL MODE"};
+  for (int i = 0; i < 2; i++)
   {
-    if (state == State::AUTO_MODE)
-    {
-      currentState = AUTO_MODE;
-      break;
-    }
-
-    IoHwAb_Encoder::getInstance().readEncoder();
-
-    if (IoHwAb_Encoder::getInstance().scrollUp())
-    {
-      IoHwAb_Buzzer::getInstance().beepOnce();
-      IoHwAb_LCD::getInstance().clear();
-      IoHwAb_LCD::getInstance().sdModeScreen(fileList, -1, ar_idx, startIndex, fileList.size(), state);
-    }
-    else if (IoHwAb_Encoder::getInstance().scrollDown())
-    {
-      IoHwAb_Buzzer::getInstance().beepOnce();
-      IoHwAb_LCD::getInstance().clear();
-      IoHwAb_LCD::getInstance().sdModeScreen(fileList, 1, ar_idx, startIndex, fileList.size(), state);
-    }
-    else if (IoHwAb_Encoder::getInstance().isRotaryPressed())
-    {
-      IoHwAb_Buzzer::getInstance().beepOnce();
-      IoHwAb_LCD::getInstance().sdModeScreen(fileList, 2, ar_idx, startIndex, fileList.size(), state);
-    }
+    String suffix = (i == update) ? " <" : "";
+    IoHwAb_LCD::getInstance().lcdDisplay(options[i] + suffix, 0, i + 1);
   }
 }
 
 /*<===================================================>*/
 
-void UIMenuService::runMainMenu()
+void UIMenuService::automodeScreen(uint8_t update)
 {
-  IoHwAb_LCD::getInstance().clear();
-  IoHwAb_LCD::getInstance().modeScreen(modeFlag);
+  String options[3] = {
+      "UGS SERIAL",
+      "SD CARD",
+      "Back"};
 
-  while (1)
+  for (int i = 0; i < 3; i++)
   {
-    IoHwAb_Encoder::getInstance().readEncoder();
-
-    if (IoHwAb_Encoder::getInstance().scrollUp() || IoHwAb_Encoder::getInstance().scrollDown())
-    {
-      IoHwAb_Buzzer::getInstance().beepOnce();
-      modeFlag ^= 1; // Toggle nhanh
-      IoHwAb_LCD::getInstance().clear();
-      IoHwAb_LCD::getInstance().modeScreen(modeFlag);
-    }
-
-    if (IoHwAb_Encoder::getInstance().isRotaryPressed())
-    {
-      IoHwAb_Buzzer::getInstance().beepOnce();
-      currentState = (modeFlag == AUTOMODE) ? AUTO_MODE : MANUAL_MODE;
-      break;
-    }
+    String prefix = (i == update) ? "> " : "  ";
+    IoHwAb_LCD::getInstance().lcdDisplay(prefix + options[i], 0, i + 1);
   }
 }
 
 /*<===================================================>*/
 
-void UIMenuService::runAutoMode()
+void UIMenuService::sdModeScreen(vector<String> files, int8_t signal, uint8_t &ar_idx, int &startIndex, int fileCount, int &state)
 {
-  IoHwAb_LCD::getInstance().clear();
-  IoHwAb_LCD::getInstance().automodeScreen(autoModeFlag);
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("CHOOSE FILE:");
 
-  while (1)
-  {
-    IoHwAb_Encoder::getInstance().readEncoder();
+  files[0] = "Back";
+  String arrow = ">> ";
+  int selectedFile = startIndex + ar_idx;
 
-    if (IoHwAb_Encoder::getInstance().scrollUp() || IoHwAb_Encoder::getInstance().scrollDown())
+  /*=======DEBUG======*/
+  Serial.println("--------------------------------------");
+  Serial.printf("Selected file: %d\nStart Index: %d\nArrow Index: %d\nState: %d\n",
+                selectedFile, startIndex, ar_idx, state);
+  Serial.println("-------**************--------");
+
+  /*--- Xử lý dịch chỉ số ---*/
+  if (signal == 1)
+  { // Scroll xuống
+    if (ar_idx < 2)
     {
-      IoHwAb_Buzzer::getInstance().beepOnce();
-      bool isUp = IoHwAb_Encoder::getInstance().scrollUp();
-      autoModeFlag = (isUp) ? (autoModeFlag + 2) % 3 : (autoModeFlag + 1) % 3;
-      IoHwAb_LCD::getInstance().clear();
-      IoHwAb_LCD::getInstance().automodeScreen(autoModeFlag);
+      ar_idx++;
     }
-
-    if (IoHwAb_Encoder::getInstance().isRotaryPressed())
+    else
     {
-      IoHwAb_Buzzer::getInstance().beepOnce();
-      switch (autoModeFlag)
+      if (selectedFile == fileCount - 1)
       {
-      case UGS:
-        currentState = UGS_MENU;
-        break;
-      case SD:
-        currentState = SD_MENU;
-        break;
-      default:
-        currentState = MAIN_MENU;
-      }
-      break;
-    }
-  }
-}
-
-/*<===================================================>*/
-
-void UIMenuService::runManualMode()
-{
-  IoHwAb_LCD::getInstance().clear();
-  while (1)
-  {
-    IoHwAb_Encoder::getInstance().readEncoder();
-    IoHwAb_LCD::getInstance().lcdDisplay("Manual Mode", IoHwAb_LCD::getInstance().getMiddleXCursor("Manual Mode"), 1);
-    // TODO: thêm logic nếu có cancel/exit
-  }
-}
-
-/*<===================================================>*/
-
-void UIMenuService::runUGSMenu()
-{
-  IoHwAb_LCD::getInstance().clear();
-  IoHwAb_LCD::getInstance().serialModeScreen(workingFlag);
-
-  while (1)
-  {
-    IoHwAb_Encoder::getInstance().readEncoder();
-
-    if (IoHwAb_Encoder::getInstance().scrollUp() || IoHwAb_Encoder::getInstance().scrollDown())
-    {
-      IoHwAb_Buzzer::getInstance().beepOnce();
-      bool isUp = IoHwAb_Encoder::getInstance().scrollUp();
-      workingFlag = (isUp) ? (workingFlag + 1) % 3 : (workingFlag + 2) % 3;
-      IoHwAb_LCD::getInstance().clear();
-      IoHwAb_LCD::getInstance().serialModeScreen(workingFlag);
-    }
-
-    if (IoHwAb_Encoder::getInstance().isRotaryPressed())
-    {
-      IoHwAb_Buzzer::getInstance().beepOnce();
-      if (workingFlag == WORKING_STATE)
-      {
-        if (workingStateFlag == PAUSE)
-        {
-          Serial.println("Pause");
-          workingStateFlag = CONTINUE;
-        }
-        else
-        {
-          Serial.println("Continue");
-          workingStateFlag = PAUSE;
-        }
-      }
-      else if (workingFlag == CANCEL)
-      {
-        Serial.println("Cancel");
+        startIndex = (selectedFile + 1) % fileCount;
+        ar_idx = 0;
       }
       else
       {
-        currentState = AUTO_MODE;
-        break;
+        startIndex = (startIndex + 1) % fileCount;
       }
     }
   }
+  else if (signal == -1)
+  { // Scroll lên
+    if (ar_idx > 0)
+    {
+      ar_idx--;
+    }
+    else
+    {
+      if (startIndex == 0)
+      {
+        startIndex = (fileCount + startIndex - 3) % fileCount;
+        ar_idx = 2;
+      }
+      else
+      {
+        startIndex = (startIndex + fileCount - 1) % fileCount;
+      }
+    }
+  }
+  else if (signal == 2)
+  { // Nhấn chọn
+    if (selectedFile == 0)
+    {
+      Serial.println("Back");
+      state = 1;
+      return;
+    }
+    else
+    {
+      IoHwAb_LCD::getInstance().clear();
+      IoHwAb_LCD::getInstance().lcdDisplay(files[selectedFile] + " chose", IoHwAb_LCD::getInstance().getMiddleXCursor(files[selectedFile] + " chose"), 1);
+      delay(1500);
+      IoHwAb_LCD::getInstance().clear();
+      IoHwAb_LCD::getInstance().lcdDisplay("Read file", IoHwAb_LCD::getInstance().getMiddleXCursor("Read file"), 1);
+      return;
+    }
+  }
+
+  // --- Hiển thị 3 dòng với mũi tên ---
+  for (int i = 0; i < 3; i++)
+  {
+    int index = (startIndex + i) % fileCount;
+    String prefix = (i == ar_idx) ? arrow : "   ";
+    IoHwAb_LCD::getInstance().lcdDisplay(prefix + files[index], 0, i + 1);
+  }
+
+  /*========DEBUG=========*/
+  selectedFile = startIndex + ar_idx;
+  Serial.println("--------------------------------------");
+  Serial.printf("Selected file: %d\nStart Index: %d\nArrow Index: %d\nState: %d\n",
+                selectedFile, startIndex, ar_idx, state);
+  Serial.println("-------**************--------");
 }
 
 /*<===================================================>*/
 
-void UIMenuService::run()
+void UIMenuService::serialModeScreen(uint8_t workingStateMode)
 {
-  switch (currentState)
+  String title = "RCSA PLATFORM";
+  // String percentage = "  % : " + String(percenum) + "%";
+  // String filename = "File: " + file;
+
+  String options[3] = {"PAUSE", "CANCEL", "Back"};
+  int positions[3] = {0, 7, 15};
+
+  IoHwAb_LCD::getInstance().lcdDisplay(title, IoHwAb_LCD::getInstance().getMiddleXCursor(title), 0);
+  // IoHwAb_LCD::getInstance().lcdDisplay(filename, 0, 1);
+  // IoHwAb_LCD::getInstance().lcdDisplay(percentage, 0, 2);
+
+  for (int i = 0; i < 3; i++)
   {
-  case MAIN_MENU:
-    runMainMenu();
-    break;
-  case AUTO_MODE:
-    runAutoMode();
-    break;
-  case MANUAL_MODE:
-    runManualMode();
-    break;
-  case UGS_MENU:
-    runUGSMenu();
-    break;
-  case SD_MENU:
-    runSDMenu();
-    break;
+    String prefix = (i == workingStateMode) ? ">" : " ";
+    IoHwAb_LCD::getInstance().lcdDisplay(prefix + options[i], positions[i], 3);
   }
 }
 
 /*<===================================================>*/
 
-void UIMenuService::opening()
+void UIMenuService::loadingScreen()
 {
-  IoHwAb_Buzzer::getInstance().startingSoundBuzzer();
-  IoHwAb_LCD::getInstance().welcomeScreen();
-  delay(2000);
+  String loading = "--LOADING.--";
+  IoHwAb_LCD::getInstance().lcdDisplay(loading, IoHwAb_LCD::getInstance().getMiddleXCursor(loading), 1);
+}
 
-  IoHwAb_LCD::getInstance().clear();
-  IoHwAb_LCD::getInstance().modeScreen(modeFlag);
+/*<===================================================>*/
 
-  Serial.println("Opening Done!");
+void UIMenuService::statusScreen(String filename, int percenum, String time, uint8_t workingStateMode)
+{
+  String title = "File: " + filename;
+  String percentage = "  % : " + String(percenum) + "%";
+  String timeDisplay = "Time: " + time;
+
+  String options[3] = {"PAUSE", "CANCEL", "Back"};
+  int positions[3] = {0, 7, 15};
+
+  IoHwAb_LCD::getInstance().lcdDisplay(title, 0, 0);
+  IoHwAb_LCD::getInstance().lcdDisplay(percentage, 0, 1);
+  IoHwAb_LCD::getInstance().lcdDisplay(timeDisplay, 0, 2);
+
+  for (int i = 0; i < 3; i++)
+  {
+    String prefix = (i == workingStateMode) ? ">" : " ";
+    IoHwAb_LCD::getInstance().lcdDisplay(prefix + options[i], positions[i], 3);
+  }
 }

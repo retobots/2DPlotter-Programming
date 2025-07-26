@@ -19,82 +19,29 @@
 #include <string>
 using namespace std;
 
-/*================================================ [ CONFIGURATION ] ==================================================*/
-
-#define AUTOMODE 0
-#define MANUALMODE 1
-
-#define UGS 0
-#define SD 1
-
-#define WORKING_STATE 0
-#define CANCEL 1
-
-#define PAUSE 0
-#define CONTINUE 1
-
-/**
- * @brief enum chứa các mode của menu
- *
- */
-enum State
-{
-  MAIN_MENU,
-  AUTO_MODE,
-  MANUAL_MODE,
-  UGS_MENU,
-  SD_MENU
-};
-
-/**
- * @brief class UIMenu giúp quản lý các phương thức
- *
- */
 class UIMenuService
 {
 private:
   UIMenuService();
 
-  uint8_t modeFlag = AUTOMODE;
-  uint8_t workingFlag = WORKING_STATE;
-  uint8_t workingStateFlag = PAUSE;
-  uint8_t autoModeFlag = UGS;
-  State currentState = MAIN_MENU;
-
-  void runMainMenu();
-
-  void runAutoMode();
-
-  void runManualMode();
-
-  void runUGSMenu();
-
-  void runSDMenu();
-
-  // File List
-  vector<String> fileList;
-
 public:
-  /**
-   * @brief   Khởi tạo đối tượng menu
-   *
-   * @return  UIMenuService&
-   */
   static UIMenuService &getInstance();
 
-  /**
-   * @brief Hàm setup UIMenu và các đối tượng khác
-   *
-   */
   void setup();
 
-  // bool cancelSignal();
-
-  /**
-   * @brief Hàm chạy chương trình điều phối logic Menu
-   *
-   */
   void run();
 
-  void opening();
+  void welcomeScreen();
+
+  void modeScreen(uint8_t update);
+
+  void automodeScreen(uint8_t update);
+
+  void sdModeScreen(vector<String> files, int8_t signal, uint8_t &ar_idx, int &startIndex, int fileCount, int &state);
+
+  void serialModeScreen(uint8_t workingStateMode);
+
+  void loadingScreen();
+
+  void statusScreen(String filename, int percenum, String time, uint8_t workingStateMode);
 };
