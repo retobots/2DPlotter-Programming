@@ -35,18 +35,18 @@ UIMenuService &UIMenuService::getInstance()
 void UIMenuService::setup()
 {
   // Set phần cứng liên quan
-  LcdHAL::getInstance().setup();
-  RotaryEncoderHAL::getInstance().setup();
-  BuzzerHAL::getInstance().setup();
-  ButtonHAL::getInstance().setup();
+  IoHwAb_LCD::getInstance().setup();
+  IoHwAb_Encoder::getInstance().setup();
+  IoHwAb_Buzzer::getInstance().setup();
+  IoHwAb_Button::getInstance().setup();
 
   Serial.println("Setting Up...");
-  BuzzerHAL::getInstance().startingSoundBuzzer();
-  LcdHAL::getInstance().welcomeScreen();
+  IoHwAb_Buzzer::getInstance().startingSoundBuzzer();
+  IoHwAb_LCD::getInstance().welcomeScreen();
   delay(2000);
 
-  LcdHAL::getInstance().clear();
-  LcdHAL::getInstance().modeScreen(modeFlag);
+  IoHwAb_LCD::getInstance().clear();
+  IoHwAb_LCD::getInstance().modeScreen(modeFlag);
 
   // Logging
   Serial.println("[SET UP]: UI Menu Done!");
@@ -71,12 +71,11 @@ void UIMenuService::runSDMenu()
 {
   uint8_t ar_idx = 0;
   int startIndex = 0;
-  int fileCount = MAX_FILES + 1;
   int state = State::SD_MENU;
 
-  LcdHAL::getInstance().clear();
+  IoHwAb_LCD::getInstance().clear();
   Serial.printf("currentState: %d\n", state);
-  LcdHAL::getInstance().sdModeScreen(fileList, 0, ar_idx, startIndex, fileCount, state);
+  IoHwAb_LCD::getInstance().sdModeScreen(fileList, 0, ar_idx, startIndex, fileList.size(), state);
 
   while (1)
   {
@@ -86,24 +85,24 @@ void UIMenuService::runSDMenu()
       break;
     }
 
-    RotaryEncoderHAL::getInstance().readEncoder();
+    IoHwAb_Encoder::getInstance().readEncoder();
 
-    if (RotaryEncoderHAL::getInstance().scrollUp())
+    if (IoHwAb_Encoder::getInstance().scrollUp())
     {
-      BuzzerHAL::getInstance().beepOnce();
-      LcdHAL::getInstance().clear();
-      LcdHAL::getInstance().sdModeScreen(fileList, -1, ar_idx, startIndex, fileCount, state);
+      IoHwAb_Buzzer::getInstance().beepOnce();
+      IoHwAb_LCD::getInstance().clear();
+      IoHwAb_LCD::getInstance().sdModeScreen(fileList, -1, ar_idx, startIndex, fileList.size(), state);
     }
-    else if (RotaryEncoderHAL::getInstance().scrollDown())
+    else if (IoHwAb_Encoder::getInstance().scrollDown())
     {
-      BuzzerHAL::getInstance().beepOnce();
-      LcdHAL::getInstance().clear();
-      LcdHAL::getInstance().sdModeScreen(fileList, 1, ar_idx, startIndex, fileCount, state);
+      IoHwAb_Buzzer::getInstance().beepOnce();
+      IoHwAb_LCD::getInstance().clear();
+      IoHwAb_LCD::getInstance().sdModeScreen(fileList, 1, ar_idx, startIndex, fileList.size(), state);
     }
-    else if (RotaryEncoderHAL::getInstance().isRotaryPressed())
+    else if (IoHwAb_Encoder::getInstance().isRotaryPressed())
     {
-      BuzzerHAL::getInstance().beepOnce();
-      LcdHAL::getInstance().sdModeScreen(fileList, 2, ar_idx, startIndex, fileCount, state);
+      IoHwAb_Buzzer::getInstance().beepOnce();
+      IoHwAb_LCD::getInstance().sdModeScreen(fileList, 2, ar_idx, startIndex, fileList.size(), state);
     }
   }
 }
@@ -112,24 +111,24 @@ void UIMenuService::runSDMenu()
 
 void UIMenuService::runMainMenu()
 {
-  LcdHAL::getInstance().clear();
-  LcdHAL::getInstance().modeScreen(modeFlag);
+  IoHwAb_LCD::getInstance().clear();
+  IoHwAb_LCD::getInstance().modeScreen(modeFlag);
 
   while (1)
   {
-    RotaryEncoderHAL::getInstance().readEncoder();
+    IoHwAb_Encoder::getInstance().readEncoder();
 
-    if (RotaryEncoderHAL::getInstance().scrollUp() || RotaryEncoderHAL::getInstance().scrollDown())
+    if (IoHwAb_Encoder::getInstance().scrollUp() || IoHwAb_Encoder::getInstance().scrollDown())
     {
-      BuzzerHAL::getInstance().beepOnce();
+      IoHwAb_Buzzer::getInstance().beepOnce();
       modeFlag ^= 1; // Toggle nhanh
-      LcdHAL::getInstance().clear();
-      LcdHAL::getInstance().modeScreen(modeFlag);
+      IoHwAb_LCD::getInstance().clear();
+      IoHwAb_LCD::getInstance().modeScreen(modeFlag);
     }
 
-    if (RotaryEncoderHAL::getInstance().isRotaryPressed())
+    if (IoHwAb_Encoder::getInstance().isRotaryPressed())
     {
-      BuzzerHAL::getInstance().beepOnce();
+      IoHwAb_Buzzer::getInstance().beepOnce();
       currentState = (modeFlag == AUTOMODE) ? AUTO_MODE : MANUAL_MODE;
       break;
     }
@@ -140,25 +139,25 @@ void UIMenuService::runMainMenu()
 
 void UIMenuService::runAutoMode()
 {
-  LcdHAL::getInstance().clear();
-  LcdHAL::getInstance().automodeScreen(autoModeFlag);
+  IoHwAb_LCD::getInstance().clear();
+  IoHwAb_LCD::getInstance().automodeScreen(autoModeFlag);
 
   while (1)
   {
-    RotaryEncoderHAL::getInstance().readEncoder();
+    IoHwAb_Encoder::getInstance().readEncoder();
 
-    if (RotaryEncoderHAL::getInstance().scrollUp() || RotaryEncoderHAL::getInstance().scrollDown())
+    if (IoHwAb_Encoder::getInstance().scrollUp() || IoHwAb_Encoder::getInstance().scrollDown())
     {
-      BuzzerHAL::getInstance().beepOnce();
-      bool isUp = RotaryEncoderHAL::getInstance().scrollUp();
+      IoHwAb_Buzzer::getInstance().beepOnce();
+      bool isUp = IoHwAb_Encoder::getInstance().scrollUp();
       autoModeFlag = (isUp) ? (autoModeFlag + 2) % 3 : (autoModeFlag + 1) % 3;
-      LcdHAL::getInstance().clear();
-      LcdHAL::getInstance().automodeScreen(autoModeFlag);
+      IoHwAb_LCD::getInstance().clear();
+      IoHwAb_LCD::getInstance().automodeScreen(autoModeFlag);
     }
 
-    if (RotaryEncoderHAL::getInstance().isRotaryPressed())
+    if (IoHwAb_Encoder::getInstance().isRotaryPressed())
     {
-      BuzzerHAL::getInstance().beepOnce();
+      IoHwAb_Buzzer::getInstance().beepOnce();
       switch (autoModeFlag)
       {
       case UGS:
@@ -179,11 +178,11 @@ void UIMenuService::runAutoMode()
 
 void UIMenuService::runManualMode()
 {
-  LcdHAL::getInstance().clear();
+  IoHwAb_LCD::getInstance().clear();
   while (1)
   {
-    RotaryEncoderHAL::getInstance().readEncoder();
-    LcdHAL::getInstance().lcdDisplay("Manual Mode", LcdHAL::getInstance().getMiddleXCursor("Manual Mode"), 1);
+    IoHwAb_Encoder::getInstance().readEncoder();
+    IoHwAb_LCD::getInstance().lcdDisplay("Manual Mode", IoHwAb_LCD::getInstance().getMiddleXCursor("Manual Mode"), 1);
     // TODO: thêm logic nếu có cancel/exit
   }
 }
@@ -192,25 +191,25 @@ void UIMenuService::runManualMode()
 
 void UIMenuService::runUGSMenu()
 {
-  LcdHAL::getInstance().clear();
-  LcdHAL::getInstance().serialModeScreen("retobots logo", 10, workingFlag);
+  IoHwAb_LCD::getInstance().clear();
+  IoHwAb_LCD::getInstance().serialModeScreen(workingFlag);
 
   while (1)
   {
-    RotaryEncoderHAL::getInstance().readEncoder();
+    IoHwAb_Encoder::getInstance().readEncoder();
 
-    if (RotaryEncoderHAL::getInstance().scrollUp() || RotaryEncoderHAL::getInstance().scrollDown())
+    if (IoHwAb_Encoder::getInstance().scrollUp() || IoHwAb_Encoder::getInstance().scrollDown())
     {
-      BuzzerHAL::getInstance().beepOnce();
-      bool isUp = RotaryEncoderHAL::getInstance().scrollUp();
+      IoHwAb_Buzzer::getInstance().beepOnce();
+      bool isUp = IoHwAb_Encoder::getInstance().scrollUp();
       workingFlag = (isUp) ? (workingFlag + 1) % 3 : (workingFlag + 2) % 3;
-      LcdHAL::getInstance().clear();
-      LcdHAL::getInstance().serialModeScreen("retobots logo", 10, workingFlag);
+      IoHwAb_LCD::getInstance().clear();
+      IoHwAb_LCD::getInstance().serialModeScreen(workingFlag);
     }
 
-    if (RotaryEncoderHAL::getInstance().isRotaryPressed())
+    if (IoHwAb_Encoder::getInstance().isRotaryPressed())
     {
-      BuzzerHAL::getInstance().beepOnce();
+      IoHwAb_Buzzer::getInstance().beepOnce();
       if (workingFlag == WORKING_STATE)
       {
         if (workingStateFlag == PAUSE)
@@ -265,12 +264,12 @@ void UIMenuService::run()
 
 void UIMenuService::opening()
 {
-  BuzzerHAL::getInstance().startingSoundBuzzer();
-  LcdHAL::getInstance().welcomeScreen();
+  IoHwAb_Buzzer::getInstance().startingSoundBuzzer();
+  IoHwAb_LCD::getInstance().welcomeScreen();
   delay(2000);
 
-  LcdHAL::getInstance().clear();
-  LcdHAL::getInstance().modeScreen(modeFlag);
+  IoHwAb_LCD::getInstance().clear();
+  IoHwAb_LCD::getInstance().modeScreen(modeFlag);
 
   Serial.println("Opening Done!");
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * @file    LcdHAL.cpp
+ * @file    IoHwAb_LCD.cpp
  * @brief   Setup thông số cho LCD. Định nghĩa các hàm hiển thị các màn hình menu
  * @version 1.0
  * @date    2025-06-19
@@ -7,7 +7,7 @@
  ******************************************************************************/
 
 /*================================================ [ INCLUDE LIBRARY ] ==================================================*/
-#include "LcdHAL.h"
+#include "IoHwAb_LCD.h"
 
 /*================================================= [ DEFINITION ] ==================================================*/
 
@@ -15,19 +15,19 @@ LiquidCrystal_I2C lcd(0x27, 20, 4); // 0x27 là địa chỉ I2C của màn hìn
 
 /*<===================================================>*/
 
-LcdHAL::LcdHAL() {}
+IoHwAb_LCD::IoHwAb_LCD() {}
 
 /*<===================================================>*/
 
-LcdHAL &LcdHAL::getInstance()
+IoHwAb_LCD &IoHwAb_LCD::getInstance()
 {
-  static LcdHAL instance;
+  static IoHwAb_LCD instance;
   return instance;
 }
 
 /*<===================================================>*/
 
-void LcdHAL::setup()
+void IoHwAb_LCD::setup()
 {
   // Khởi tạo LCD (I2C hoặc SPI)
   lcd.init();      // Khởi tạo LCD
@@ -41,7 +41,7 @@ void LcdHAL::setup()
 
 /*<===================================================>*/
 
-void LcdHAL::clear()
+void IoHwAb_LCD::clear()
 {
   // Xoá màn hình
   lcd.clear();
@@ -49,7 +49,7 @@ void LcdHAL::clear()
 
 /*<===================================================>*/
 
-int LcdHAL::getMiddleXCursor(const String &text)
+int IoHwAb_LCD::getMiddleXCursor(const String &text)
 {
   int strLen = text.length(); // Độ dài chuỗi
   int lcdWidth = 20;          // LCD 20 cột
@@ -61,7 +61,7 @@ int LcdHAL::getMiddleXCursor(const String &text)
 
 /*<===================================================>*/
 
-void LcdHAL::lcdDisplay(const String &text, uint8_t x, uint8_t y)
+void IoHwAb_LCD::lcdDisplay(const String &text, uint8_t x, uint8_t y)
 {
   lcd.setCursor(x, y);
   lcd.print(text);
@@ -69,7 +69,7 @@ void LcdHAL::lcdDisplay(const String &text, uint8_t x, uint8_t y)
 
 /*<===================================================>*/
 
-void LcdHAL::welcomeScreen()
+void IoHwAb_LCD::welcomeScreen()
 {
   String wel1 = "2DPLOTER";
   String wel2 = "RETOBOTS";
@@ -81,13 +81,13 @@ void LcdHAL::welcomeScreen()
 
   // Màn hình 2
   delay(2000);
-  LcdHAL::clear();
+  IoHwAb_LCD::clear();
   lcdDisplay(wel3, getMiddleXCursor(wel3), 1);
 }
 
 /*<===================================================>*/
 
-void LcdHAL::modeScreen(uint8_t update)
+void IoHwAb_LCD::modeScreen(uint8_t update)
 {
   String options[2] = {"AUTO MODE", "MANUAL MODE"};
   for (int i = 0; i < 2; i++)
@@ -99,7 +99,7 @@ void LcdHAL::modeScreen(uint8_t update)
 
 /*<===================================================>*/
 
-void LcdHAL::automodeScreen(uint8_t update)
+void IoHwAb_LCD::automodeScreen(uint8_t update)
 {
   String options[3] = {
       "UGS SERIAL",
@@ -115,7 +115,7 @@ void LcdHAL::automodeScreen(uint8_t update)
 
 /*<===================================================>*/
 
-void LcdHAL::sdModeScreen(vector<String> files, int8_t signal, uint8_t &ar_idx, int &startIndex, int fileCount, int &state)
+void IoHwAb_LCD::sdModeScreen(vector<String> files, int8_t signal, uint8_t &ar_idx, int &startIndex, int fileCount, int &state)
 {
   lcd.clear();
   lcd.setCursor(0, 0);
@@ -207,18 +207,18 @@ void LcdHAL::sdModeScreen(vector<String> files, int8_t signal, uint8_t &ar_idx, 
 
 /*<===================================================>*/
 
-void LcdHAL::serialModeScreen(String file, int percenum, uint8_t workingStateMode)
+void IoHwAb_LCD::serialModeScreen(uint8_t workingStateMode)
 {
-  String title = "UGS PLATFORM";
-  String percentage = "  % : " + String(percenum) + "%";
-  String filename = "File: " + file;
+  String title = "RCSA PLATFORM";
+  // String percentage = "  % : " + String(percenum) + "%";
+  // String filename = "File: " + file;
 
   String options[3] = {"PAUSE", "CANCEL", "Back"};
   int positions[3] = {0, 7, 15};
 
   lcdDisplay(title, getMiddleXCursor(title), 0);
-  lcdDisplay(filename, 0, 1);
-  lcdDisplay(percentage, 0, 2);
+  // lcdDisplay(filename, 0, 1);
+  // lcdDisplay(percentage, 0, 2);
 
   for (int i = 0; i < 3; i++)
   {
@@ -229,7 +229,7 @@ void LcdHAL::serialModeScreen(String file, int percenum, uint8_t workingStateMod
 
 /*<===================================================>*/
 
-void LcdHAL::loadingScreen()
+void IoHwAb_LCD::loadingScreen()
 {
   String loading = "--LOADING.--";
   lcdDisplay(loading, getMiddleXCursor(loading), 1);

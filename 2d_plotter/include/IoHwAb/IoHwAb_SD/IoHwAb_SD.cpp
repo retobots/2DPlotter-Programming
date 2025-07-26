@@ -1,23 +1,23 @@
-#include "SDCardHAL.h"
+#include "IoHwAb_SD.h"
 using namespace std;
 
-SDCardHAL::SDCardHAL()
+IoHwAb_SD::IoHwAb_SD()
 {
   // Constructor logic if needed
 }
 
-SDCardHAL &SDCardHAL::getInstance()
+IoHwAb_SD &IoHwAb_SD::getInstance()
 {
-  static SDCardHAL instance;
+  static IoHwAb_SD instance;
   return instance;
 }
 
-void SDCardHAL::setup()
+void IoHwAb_SD::setup()
 {
   SD.begin(PIN_SD_CS);
 }
 
-void SDCardHAL::loadFileListFromSD()
+void IoHwAb_SD::loadFileListFromSD()
 {
   fileList.clear();
   // Add "Back" as the first element
@@ -38,7 +38,7 @@ void SDCardHAL::loadFileListFromSD()
   }
 }
 
-void SDCardHAL::readSelectedFile(String &filename)
+void IoHwAb_SD::readSelectedFile(String &filename)
 {
   fileContents.clear();
   File f = SD.open(filename.c_str());

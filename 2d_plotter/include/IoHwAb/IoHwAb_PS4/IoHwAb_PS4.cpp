@@ -1,23 +1,23 @@
-#include "PS4ControllerHAL.h"
+#include "IoHwAb_PS4.h"
 
-PS4ControllerHAL::PS4ControllerHAL()
+IoHwAb_PS4::IoHwAb_PS4()
 {
   PS4.begin();
 }
 
-PS4ControllerHAL &PS4ControllerHAL::getInstance()
+IoHwAb_PS4 &IoHwAb_PS4::getInstance()
 {
-  static PS4ControllerHAL instance;
+  static IoHwAb_PS4 instance;
   return instance;
 }
 
-void PS4ControllerHAL::setup()
+void IoHwAb_PS4::setup()
 {
   // Logging
   Serial.println("[SET UP]: PS4 Controller Done!");
 }
 
-point PS4ControllerHAL::readPS4()
+point IoHwAb_PS4::readPS4()
 {
   point points = {0.00, 0.00};
 
@@ -46,7 +46,7 @@ point PS4ControllerHAL::readPS4()
   return points;
 }
 
-bool PS4ControllerHAL::isButtonPressed()
+bool IoHwAb_PS4::isButtonPressed()
 {
   return false;
 }

@@ -1,15 +1,12 @@
 #pragma once
 #include <Arduino.h>
 #include "Settings.h"
-#include "StepperHAL.h"
+#include "IoHwAb_Stepper.h"
 
 class MotionControlService
 {
 private:
   MotionControlService();
-
-  // Khai báo stepper
-  StepperHAL &stepper;
 
   // Data lưu dữ liệu
   point Data;

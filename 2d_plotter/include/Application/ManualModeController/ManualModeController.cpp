@@ -1,6 +1,6 @@
 #include "ManualModeController.h"
 
-ManualModeController::ManualModeController() : ps4(PS4ControllerHAL::getInstance()), MC(MotionControlService::getInstance())
+ManualModeController::ManualModeController()
 {
 }
 
@@ -12,8 +12,8 @@ ManualModeController &ManualModeController::getInstance()
 
 void ManualModeController::setup()
 {
-  MC.setup();
-  ps4.setup();
+  MotionControlService::getInstance().setup();
+  IoHwAb_PS4::getInstance().setup();
 
   // Logging
   Serial.println("[SET UP]: Manual Controller Done!");
@@ -21,6 +21,6 @@ void ManualModeController::setup()
 
 void ManualModeController::run()
 {
-  data = ps4.readPS4();
-  MC.drawLine(data.x, data.y);
+  data = IoHwAb_PS4::getInstance().readPS4();
+  MotionControlService::getInstance().drawLine(data.x, data.y);
 }

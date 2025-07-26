@@ -1,29 +1,29 @@
 /*******************************************************************************
- * @file    BuzzerHAL.cpp
+ * @file    IoHwAb_Buzzer.cpp
  * @brief   Định nghĩa các hàm trong file header
  * @version 1.0
  * @date    2025-06-19
  * @author  Do Duc Nghia
  ******************************************************************************/
 /*================================================ [ INCLUDE LIBRARY ] ==================================================*/
-#include "BuzzerHAL.h"
+#include "IoHwAb_Buzzer.h"
 #include "Pins.h"
 
 /*================================================= [ DEFINITION ] ==================================================*/
 
-BuzzerHAL::BuzzerHAL() {}
+IoHwAb_Buzzer::IoHwAb_Buzzer() {}
 
 /*<===================================================>*/
 
-BuzzerHAL &BuzzerHAL::getInstance()
+IoHwAb_Buzzer &IoHwAb_Buzzer::getInstance()
 {
-  static BuzzerHAL instance;
+  static IoHwAb_Buzzer instance;
   return instance;
 }
 
 /*<===================================================>*/
 
-void BuzzerHAL::setup()
+void IoHwAb_Buzzer::setup()
 {
   // Setup
   ledcSetup(BUZZER_CHANNEL, 2000, 8); // tần số 2kHz, độ phân giải 8-bit
@@ -35,7 +35,7 @@ void BuzzerHAL::setup()
 
 /*<===================================================>*/
 
-void BuzzerHAL::buzzerTone(int freq)
+void IoHwAb_Buzzer::buzzerTone(int freq)
 {
   ledcAttachPin(PIN_BUZZER, BUZZER_CHANNEL);
   ledcWriteTone(BUZZER_CHANNEL, freq);
@@ -43,7 +43,7 @@ void BuzzerHAL::buzzerTone(int freq)
 
 /*<===================================================>*/
 
-void BuzzerHAL::buzzerStop()
+void IoHwAb_Buzzer::buzzerStop()
 {
   ledcWriteTone(BUZZER_CHANNEL, 0);
   ledcDetachPin(PIN_BUZZER);
@@ -51,7 +51,7 @@ void BuzzerHAL::buzzerStop()
 
 /*<===================================================>*/
 
-void BuzzerHAL::beepOnce()
+void IoHwAb_Buzzer::beepOnce()
 {
   // Logging
   Serial.println("Beep!");
@@ -63,7 +63,7 @@ void BuzzerHAL::beepOnce()
 
 /*<===================================================>*/
 
-void BuzzerHAL::startingSoundBuzzer()
+void IoHwAb_Buzzer::startingSoundBuzzer()
 {
   // Logging
   Serial.println("Buzzer khởi động - Played!");

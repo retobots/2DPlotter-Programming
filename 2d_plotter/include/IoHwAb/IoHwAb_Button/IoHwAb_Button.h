@@ -1,7 +1,7 @@
 #pragma once
 
 /**
- * @file    ButtonHAL.h
+ * @file    IoHwAb_Button.h
  * @author  Do Duc Nghia
  * @brief   File này chứa hàm đọc nút nhấn, setup cho nút nhấn
  * @version 1.0
@@ -16,26 +16,26 @@
 /*================================================= [ DECLARATION ] ==================================================*/
 
 /****************************************************************************************
- * @class   ButtonHAL
+ * @class   IoHwAb_Button
  * @brief   Class này khai báo, setup nút nhấn và đọc tín hiệu nút nhấn
  ****************************************************************************************
  */
-class ButtonHAL
+class IoHwAb_Button
 {
 private:
     /**
      * @brief Constructor khởi tạo các thông số cho nút nhấn khi tạo đối tượng
      *
      */
-    ButtonHAL();
+    IoHwAb_Button();
 
 public:
     /**
      * @brief   Tạo đối tượng nút nhấn
      *
-     * @return  ButtonHAL&
+     * @return  IoHwAb_Button&
      */
-    static ButtonHAL &getInstance();
+    static IoHwAb_Button &getInstance();
 
     /**
      * @brief setup nút nhấn

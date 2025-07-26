@@ -8,7 +8,7 @@
 #include "Pins.h"
 using namespace std;
 
-class SDCardHAL
+class IoHwAb_SD
 {
 private:
   // Vector to store file names
@@ -18,13 +18,13 @@ private:
   vector<String> fileContents;
 
   // Constructor
-  SDCardHAL();
+  IoHwAb_SD();
 
   // Destructor
-  ~SDCardHAL();
+  ~IoHwAb_SD();
 
 public:
-  static SDCardHAL &getInstance();
+  static IoHwAb_SD &getInstance();
 
   void setup();
 

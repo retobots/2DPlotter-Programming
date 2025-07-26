@@ -1,5 +1,5 @@
 /*******************************************************************************
- * @file    RotaryEncoderHAL.cpp
+ * @file    IoHwAb_Encoder.cpp
  * @brief   Định nghĩa các hàm trong file header
  * @version 1.0
  * @date    2025-06-19
@@ -8,28 +8,28 @@
 
 /*================================================ [ INCLUDE LIBRARY ] ==================================================*/
 
-#include "RotaryEncoderHAL.h"
+#include "IoHwAb_Encoder.h"
 #include "Pins.h"
 
 /*================================================= [ DEFINITION ] ==================================================*/
 
 /*<===================================================>*/
 
-RotaryEncoderHAL::RotaryEncoderHAL()
+IoHwAb_Encoder::IoHwAb_Encoder()
 {
 }
 
 /*<===================================================>*/
 
-RotaryEncoderHAL &RotaryEncoderHAL::getInstance()
+IoHwAb_Encoder &IoHwAb_Encoder::getInstance()
 {
-  static RotaryEncoderHAL instance;
+  static IoHwAb_Encoder instance;
   return instance;
 }
 
 /*<===================================================>*/
 
-void RotaryEncoderHAL::setup()
+void IoHwAb_Encoder::setup()
 {
   // Cấu hình encoder
   pinMode(PIN_CLK, INPUT);
@@ -43,7 +43,7 @@ void RotaryEncoderHAL::setup()
 
 /*<===================================================>*/
 
-void RotaryEncoderHAL::readEncoder()
+void IoHwAb_Encoder::readEncoder()
 {
   int currentCLK = digitalRead(PIN_CLK);
 
@@ -66,7 +66,7 @@ void RotaryEncoderHAL::readEncoder()
 
 /*<===================================================>*/
 
-bool RotaryEncoderHAL::scrollUp()
+bool IoHwAb_Encoder::scrollUp()
 {
   if (upFlag)
   {
@@ -78,7 +78,7 @@ bool RotaryEncoderHAL::scrollUp()
 
 /*<===================================================>*/
 
-bool RotaryEncoderHAL::scrollDown()
+bool IoHwAb_Encoder::scrollDown()
 {
   if (downFlag)
   {
@@ -90,7 +90,7 @@ bool RotaryEncoderHAL::scrollDown()
 
 /*<===================================================>*/
 
-bool RotaryEncoderHAL::isRotaryPressed()
+bool IoHwAb_Encoder::isRotaryPressed()
 {
   return digitalRead(PIN_SW) == LOW;
 }

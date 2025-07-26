@@ -1,7 +1,7 @@
 #pragma once
 
 /**
- * @file    BuzzerHAL.h
+ * @file    IoHwAb_Buzzer.h
  * @author  Do Duc Nghia
  * @brief   File này chứa các khai báo, thông số, hàm điều khiển buzzer
  * @version 1.0
@@ -18,12 +18,12 @@
 /*================================================= [ DECLARATION ] ==================================================*/
 
 /****************************************************************************************
- * @class   BuzzerHAL
+ * @class   IoHwAb_Buzzer
  * @brief   Class chứa các chức năng điều khiển buzzer phát âm thanh
  * @details Cấu trúc này chứa thông số đối tượng Buzzer, hàm phát âm thanh, setup thông số
  ****************************************************************************************
  */
-class BuzzerHAL
+class IoHwAb_Buzzer
 {
 
 private:
@@ -31,15 +31,15 @@ private:
    * @brief Constructor khởi tạo thông số cho buzzer khi khởi tạo đối tượng
    *
    */
-  BuzzerHAL();
+  IoHwAb_Buzzer();
 
 public:
   /**
    * @brief Tạo đối tượng buzzer
    *
-   * @return BuzzerHAL&
+   * @return IoHwAb_Buzzer&
    */
-  static BuzzerHAL &getInstance();
+  static IoHwAb_Buzzer &getInstance();
 
   /**
    * @brief setup cho buzzer

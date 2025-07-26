@@ -2,13 +2,14 @@
 
 #include <string>
 #include <Arduino.h>
-class RTCHAL {
+class IoHwAb_RTC
+{
 public:
-  static RTCHAL& getInstance();
+  static IoHwAb_RTC &getInstance();
 
   void setup();
   std::string getCurrentTime();
 
 private:
-  RTCHAL();
+  IoHwAb_RTC();
 };

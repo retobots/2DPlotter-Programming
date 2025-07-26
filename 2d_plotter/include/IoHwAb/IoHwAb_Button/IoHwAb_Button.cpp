@@ -1,31 +1,31 @@
 /*******************************************************************************
- * @file    ButtonHAL.cpp
+ * @file    IoHwAb_Button.cpp
  * @brief   Định nghĩa các hàm trong file header
  * @version 1.0
  * @date    2025-06-19
  * @author  Do Duc Nghia
  ******************************************************************************/
 /*================================================ [ INCLUDE LIBRARY ] ==================================================*/
-#include "ButtonHAL.h"
+#include "IoHwAb_Button.h"
 #include "Pins.h"
 
 /*================================================= [ DEFINITION ] ==================================================*/
 
-ButtonHAL::ButtonHAL()
+IoHwAb_Button::IoHwAb_Button()
 {
 }
 
 /*<===================================================>*/
 
-ButtonHAL &ButtonHAL::getInstance()
+IoHwAb_Button &IoHwAb_Button::getInstance()
 {
-    static ButtonHAL instance;
+    static IoHwAb_Button instance;
     return instance;
 }
 
 /*<===================================================>*/
 
-void ButtonHAL::setup()
+void IoHwAb_Button::setup()
 {
     // Cấu hình chân GPIO làm output
 
@@ -38,7 +38,7 @@ void ButtonHAL::setup()
 
 /*<===================================================>*/
 
-bool ButtonHAL::isButtonPressed()
+bool IoHwAb_Button::isButtonPressed()
 {
     if (digitalRead(PIN_MENU_BUTTON) == HIGH)
     {
@@ -49,7 +49,7 @@ bool ButtonHAL::isButtonPressed()
 
 /*<===================================================>*/
 
-bool ButtonHAL::isButtonHeld3s(bool (*isButtonPressed)())
+bool IoHwAb_Button::isButtonHeld3s(bool (*isButtonPressed)())
 {
     // Logging
     Serial.println("Check nếu nút được giữ 3 giây!");

@@ -1,18 +1,18 @@
-#include "StepperHAL.h"
+#include "IoHwAb_Stepper.h"
 
-StepperHAL::StepperHAL()
+IoHwAb_Stepper::IoHwAb_Stepper()
 {
   stepperX = new AccelStepper(AccelStepper::DRIVER, PIN_X_STEP, PIN_X_DIR);
   stepperY = new AccelStepper(AccelStepper::DRIVER, PIN_Y_STEP, PIN_Y_DIR);
 }
 
-StepperHAL &StepperHAL::getInstance()
+IoHwAb_Stepper &IoHwAb_Stepper::getInstance()
 {
-  static StepperHAL instance;
+  static IoHwAb_Stepper instance;
   return instance;
 }
 
-void StepperHAL::setup()
+void IoHwAb_Stepper::setup()
 {
   pinMode(ENABLE, OUTPUT);
 
@@ -35,7 +35,7 @@ void StepperHAL::setup()
   Serial.println("[SET UP]: Stepper Motor Done!");
 }
 
-void StepperHAL::moveTo(float x, float y)
+void IoHwAb_Stepper::moveTo(float x, float y)
 {
   // Tính toán bước và điều khiển motor
   stepperX->moveTo(x);
@@ -48,7 +48,7 @@ void StepperHAL::moveTo(float x, float y)
   }
 }
 
-void StepperHAL::stop()
+void IoHwAb_Stepper::stop()
 {
   // Ngắt tín hiệu step
 

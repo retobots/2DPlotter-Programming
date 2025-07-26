@@ -1,7 +1,7 @@
 #pragma once
 
 /**
- * @file    RotaryEncoderHAL.h
+ * @file    IoHwAb_Encoder.h
  * @author  Do Duc Nghia
  * @brief   File này chứa các hàm đọc tín hiệu rotary encoder, setup thông số encoder
  * @version 1.0
@@ -15,12 +15,12 @@
 /*================================================= [ DECLARATION ] ==================================================*/
 
 /****************************************************************************************
- * @class   RotaryEncoderHAL
+ * @class   IoHwAb_Encoder
  * @brief   Class chứa các hàm đọc tín hiệu của rotary encoder, setup cho rotary encoder
  ****************************************************************************************
  */
 
-class RotaryEncoderHAL
+class IoHwAb_Encoder
 {
 
 private:
@@ -28,7 +28,7 @@ private:
    * @brief Constructo khởi tạo các thông số ban đầu khi khởi tạo đối tượng
    *
    */
-  RotaryEncoderHAL();
+  IoHwAb_Encoder();
 
   /*======================== [ Các biến flag ] ===========================*/
   int lastCLK = HIGH;
@@ -39,9 +39,9 @@ public:
   /**
    * @brief   khởi tạo đối tượng
    *
-   * @return  RotaryEncoderHAL&
+   * @return  IoHwAb_Encoder&
    */
-  static RotaryEncoderHAL &getInstance();
+  static IoHwAb_Encoder &getInstance();
 
   /**
    * @brief setup thông số

@@ -4,14 +4,14 @@
 #include "Pins.h"
 #include "Settings.h"
 
-class ServoHAL
+class IoHwAb_Servo
 {
 private:
-  ServoHAL();
+  IoHwAb_Servo();
   Servo myServo;
 
 public:
-  static ServoHAL &getInstance();
+  static IoHwAb_Servo &getInstance();
 
   void setup();
   void liftPen();

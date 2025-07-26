@@ -1,16 +1,16 @@
-#include "ServoHAL.h"
+#include "IoHwAb_Servo.h"
 
-ServoHAL::ServoHAL()
+IoHwAb_Servo::IoHwAb_Servo()
 {
 }
 
-ServoHAL &ServoHAL::getInstance()
+IoHwAb_Servo &IoHwAb_Servo::getInstance()
 {
-  static ServoHAL instance;
+  static IoHwAb_Servo instance;
   return instance;
 }
 
-void ServoHAL::setup()
+void IoHwAb_Servo::setup()
 {
 
   // Gắn servo vào chân PWM
@@ -21,14 +21,14 @@ void ServoHAL::setup()
   Serial.println("[SET UP]: Servo Done!");
 }
 
-void ServoHAL::liftPen()
+void IoHwAb_Servo::liftPen()
 {
   // Góc nâng bút
   myServo.write(PEN_UP_ANGLE);
   delay(300);
 }
 
-void ServoHAL::dropPen()
+void IoHwAb_Servo::dropPen()
 {
   // Góc hạ bút
   myServo.write(PEN_DOWN_ANGLE);

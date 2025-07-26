@@ -1,7 +1,7 @@
 #pragma once
 
 /*******************************************************************************
- * @file    LcdHAL.h
+ * @file    IoHwAb_LCD.h
  * @brief   Setup thông số cho LCD. Khai báo các hàm hiển thị các màn hình menu
  * @version 1.0
  * @date    2025-06-19
@@ -14,7 +14,7 @@
 #include <Arduino.h>
 #include "LiquidCrystal_I2C.h"
 #include "Pins.h"
-#include "SDCardHAL.h"
+#include "IoHwAb_SD.h"
 #include <vector>
 using namespace std;
 
@@ -26,25 +26,25 @@ extern LiquidCrystal_I2C lcd;
 /*================================================= [ DECLARATION ] ==================================================*/
 
 /****************************************************************************************
- * @class   LcdHAL
+ * @class   IoHwAb_LCD
  * @brief   Class chứa các chức năng hiển thị của màn hình lcd
  * @details Cấu trúc này chứa thông số đối tượng lcd, hàm hiển thị màn hình chính, status
  ****************************************************************************************
  */
 
-class LcdHAL
+class IoHwAb_LCD
 {
 private:
-  LcdHAL();
+  IoHwAb_LCD();
 
 public:
   /**
    * @brief   Khởi tạo đối tượng
    * @details Hàm này sẽ giúp khởi tạo đối tượng từ class, đối tượng sẽ chứa các thông số,
    *          phương thức đã được định nghĩa và khai báo sẵn phục vụ cho quá trình lập trình
-   * @return  LcdHAL
+   * @return  IoHwAb_LCD
    */
-  static LcdHAL &getInstance();
+  static IoHwAb_LCD &getInstance();
 
   /**
    * @brief   Setup LCD
@@ -108,7 +108,7 @@ public:
    * @param percenum          phần trăm công việc
    * @param workingStateMode  biến cập nhật màn hình
    */
-  void serialModeScreen(String file, int percenum, uint8_t workingStateMode);
+  void serialModeScreen(uint8_t workingStateMode);
 
   /**
    * @brief Màn hình loading

@@ -3,15 +3,15 @@
 #include "PS4Controller/PS4Controller.h"
 #include "Settings.h"
 
-class PS4ControllerHAL
+class IoHwAb_PS4
 {
 public:
-  static PS4ControllerHAL &getInstance();
+  static IoHwAb_PS4 &getInstance();
 
   void setup();
   point readPS4();
   bool isButtonPressed();
 
 private:
-  PS4ControllerHAL();
+  IoHwAb_PS4();
 };

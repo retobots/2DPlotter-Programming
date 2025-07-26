@@ -1,6 +1,6 @@
 #include "MotionControlService.h"
 
-MotionControlService::MotionControlService() : stepper(StepperHAL::getInstance())
+MotionControlService::MotionControlService()
 {
 }
 
@@ -13,7 +13,7 @@ MotionControlService &MotionControlService::getInstance()
 void MotionControlService::setup()
 {
   // Khởi tạo stepper
-  // stepper.setup();
+  // IoHwAb_Stepper::getInstance().setup();
   // Serial.println("MC Setup Done!");
 
   // Logging
@@ -37,7 +37,7 @@ void MotionControlService::drawLine(float xPos, float yPos)
   long y1_steps = yPos * STEPS_PER_MM_Y;
 
   // Chạy tới vị trí mới
-  stepper.moveTo(x1_steps, y1_steps);
+  IoHwAb_Stepper::getInstance().moveTo(x1_steps, y1_steps);
 
   // Cập nhật vị trí hiện tại
   Data.x = xPos;
@@ -47,7 +47,7 @@ void MotionControlService::drawLine(float xPos, float yPos)
 void MotionControlService::stop()
 {
   // Dừng mọi chuyển động
-  stepper.stop();
+  IoHwAb_Stepper::getInstance().stop();
 }
 
 void MotionControlService::updateData(point &newData)
