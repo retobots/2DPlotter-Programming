@@ -6,31 +6,29 @@
 #include <SPI.h>
 #include <map>
 #include "Pins.h"
+using namespace std;
 
 class SDCardHAL
 {
 private:
-  SDCardHAL();
-
   // Vector to store file names
-  vector<string> fileList;
+  vector<String> fileList;
 
   // Vector to store file contents
-  vector<string> fileContents;
+  vector<String> fileContents;
 
   // Constructor
-  SDCardHAL() = default;
+  SDCardHAL();
+
   // Destructor
-  ~SDCardHAL() = default;
+  ~SDCardHAL();
 
 public:
   static SDCardHAL &getInstance();
 
   void setup();
 
-  string readLine();
-
   void loadFileListFromSD();
 
-  void readSelectedFile(String filename);
+  void readSelectedFile(String &filename);
 };

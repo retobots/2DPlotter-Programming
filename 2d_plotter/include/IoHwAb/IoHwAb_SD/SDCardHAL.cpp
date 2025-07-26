@@ -1,8 +1,9 @@
-#include "HAL/SDCardHAL.h"
+#include "SDCardHAL.h"
 using namespace std;
 
 SDCardHAL::SDCardHAL()
 {
+  // Constructor logic if needed
 }
 
 SDCardHAL &SDCardHAL::getInstance()
@@ -16,17 +17,11 @@ void SDCardHAL::setup()
   SD.begin(PIN_SD_CS);
 }
 
-string SDCardHAL::readLine()
-{
-  // Đọc 1 dòng G-code
-  return "";
-}
-
 void SDCardHAL::loadFileListFromSD()
 {
-  fileNames.clear();
+  fileList.clear();
   // Add "Back" as the first element
-  fileNames.push_back("Back");
+  fileList.push_back("Back");
 
   File root = SD.open("/");
   while (true)
@@ -36,14 +31,14 @@ void SDCardHAL::loadFileListFromSD()
       break;
     if (!entry.isDirectory())
     {
-      std::string fname = entry.name();
-      fileNames.push_back(fname);
+      String fname = entry.name();
+      fileList.push_back(fname);
     }
     entry.close();
   }
 }
 
-void SDCardHAL::readSelectedFile(const std::string &filename)
+void SDCardHAL::readSelectedFile(String &filename)
 {
   fileContents.clear();
   File f = SD.open(filename.c_str());
@@ -53,13 +48,13 @@ void SDCardHAL::readSelectedFile(const std::string &filename)
     return;
   }
 
-  std::string line;
+  String line;
   while (f.available())
   {
     char c = f.read();
     if (c == '\n' || c == '\r')
     {
-      if (!line.empty())
+      if (!line.isEmpty())
       {
         fileContents.push_back(line);
         line.clear();
@@ -70,7 +65,7 @@ void SDCardHAL::readSelectedFile(const std::string &filename)
       line += c;
     }
   }
-  if (!line.empty())
+  if (!line.isEmpty())
   {
     fileContents.push_back(line);
   }
