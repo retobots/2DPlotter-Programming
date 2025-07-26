@@ -15,22 +15,9 @@
 #define MAX_FILES 6
 #define NUM_DISPLAY_LINES 3
 
-String fileList[MAX_FILES + 1] = {
-    "",
-    "log1.txt",
-    "config.csv",
-    "data_A.bin",
-    "log2.txt",
-    "hello.csv",
-    "report.md"};
-
 /*================================================= [ DEFINITION ] ==================================================*/
 
 UIMenuService::UIMenuService()
-    : LCD(LcdHAL::getInstance()),
-      RE(RotaryEncoderHAL::getInstance()),
-      Buzzer(BuzzerHAL::getInstance()),
-      Button(ButtonHAL::getInstance())
 {
   Serial.println("[DEBUG] UIMenuService constructor");
 }
@@ -48,18 +35,18 @@ UIMenuService &UIMenuService::getInstance()
 void UIMenuService::setup()
 {
   // Set phần cứng liên quan
-  LCD.setup();
-  RE.setup();
-  Buzzer.setup();
-  Button.setup();
+  LcdHAL::getInstance().setup();
+  RotaryEncoderHAL::getInstance().setup();
+  BuzzerHAL::getInstance().setup();
+  ButtonHAL::getInstance().setup();
 
   Serial.println("Setting Up...");
-  Buzzer.startingSoundBuzzer();
-  LCD.welcomeScreen();
+  BuzzerHAL::getInstance().startingSoundBuzzer();
+  LcdHAL::getInstance().welcomeScreen();
   delay(2000);
 
-  LCD.clear();
-  LCD.modeScreen(modeFlag);
+  LcdHAL::getInstance().clear();
+  LcdHAL::getInstance().modeScreen(modeFlag);
 
   // Logging
   Serial.println("[SET UP]: UI Menu Done!");
@@ -87,9 +74,9 @@ void UIMenuService::runSDMenu()
   int fileCount = MAX_FILES + 1;
   int state = State::SD_MENU;
 
-  LCD.clear();
+  LcdHAL::getInstance().clear();
   Serial.printf("currentState: %d\n", state);
-  LCD.sdModeScreen(fileList, 0, ar_idx, startIndex, fileCount, state);
+  LcdHAL::getInstance().sdModeScreen(fileList, 0, ar_idx, startIndex, fileCount, state);
 
   while (1)
   {
@@ -99,24 +86,24 @@ void UIMenuService::runSDMenu()
       break;
     }
 
-    RE.readEncoder();
+    RotaryEncoderHAL::getInstance().readEncoder();
 
-    if (RE.scrollUp())
+    if (RotaryEncoderHAL::getInstance().scrollUp())
     {
-      Buzzer.beepOnce();
-      LCD.clear();
-      LCD.sdModeScreen(fileList, -1, ar_idx, startIndex, fileCount, state);
+      BuzzerHAL::getInstance().beepOnce();
+      LcdHAL::getInstance().clear();
+      LcdHAL::getInstance().sdModeScreen(fileList, -1, ar_idx, startIndex, fileCount, state);
     }
-    else if (RE.scrollDown())
+    else if (RotaryEncoderHAL::getInstance().scrollDown())
     {
-      Buzzer.beepOnce();
-      LCD.clear();
-      LCD.sdModeScreen(fileList, 1, ar_idx, startIndex, fileCount, state);
+      BuzzerHAL::getInstance().beepOnce();
+      LcdHAL::getInstance().clear();
+      LcdHAL::getInstance().sdModeScreen(fileList, 1, ar_idx, startIndex, fileCount, state);
     }
-    else if (RE.isRotaryPressed())
+    else if (RotaryEncoderHAL::getInstance().isRotaryPressed())
     {
-      Buzzer.beepOnce();
-      LCD.sdModeScreen(fileList, 2, ar_idx, startIndex, fileCount, state);
+      BuzzerHAL::getInstance().beepOnce();
+      LcdHAL::getInstance().sdModeScreen(fileList, 2, ar_idx, startIndex, fileCount, state);
     }
   }
 }
@@ -125,24 +112,24 @@ void UIMenuService::runSDMenu()
 
 void UIMenuService::runMainMenu()
 {
-  LCD.clear();
-  LCD.modeScreen(modeFlag);
+  LcdHAL::getInstance().clear();
+  LcdHAL::getInstance().modeScreen(modeFlag);
 
   while (1)
   {
-    RE.readEncoder();
+    RotaryEncoderHAL::getInstance().readEncoder();
 
-    if (RE.scrollUp() || RE.scrollDown())
+    if (RotaryEncoderHAL::getInstance().scrollUp() || RotaryEncoderHAL::getInstance().scrollDown())
     {
-      Buzzer.beepOnce();
+      BuzzerHAL::getInstance().beepOnce();
       modeFlag ^= 1; // Toggle nhanh
-      LCD.clear();
-      LCD.modeScreen(modeFlag);
+      LcdHAL::getInstance().clear();
+      LcdHAL::getInstance().modeScreen(modeFlag);
     }
 
-    if (RE.isRotaryPressed())
+    if (RotaryEncoderHAL::getInstance().isRotaryPressed())
     {
-      Buzzer.beepOnce();
+      BuzzerHAL::getInstance().beepOnce();
       currentState = (modeFlag == AUTOMODE) ? AUTO_MODE : MANUAL_MODE;
       break;
     }
@@ -153,25 +140,25 @@ void UIMenuService::runMainMenu()
 
 void UIMenuService::runAutoMode()
 {
-  LCD.clear();
-  LCD.automodeScreen(autoModeFlag);
+  LcdHAL::getInstance().clear();
+  LcdHAL::getInstance().automodeScreen(autoModeFlag);
 
   while (1)
   {
-    RE.readEncoder();
+    RotaryEncoderHAL::getInstance().readEncoder();
 
-    if (RE.scrollUp() || RE.scrollDown())
+    if (RotaryEncoderHAL::getInstance().scrollUp() || RotaryEncoderHAL::getInstance().scrollDown())
     {
-      Buzzer.beepOnce();
-      bool isUp = RE.scrollUp();
+      BuzzerHAL::getInstance().beepOnce();
+      bool isUp = RotaryEncoderHAL::getInstance().scrollUp();
       autoModeFlag = (isUp) ? (autoModeFlag + 2) % 3 : (autoModeFlag + 1) % 3;
-      LCD.clear();
-      LCD.automodeScreen(autoModeFlag);
+      LcdHAL::getInstance().clear();
+      LcdHAL::getInstance().automodeScreen(autoModeFlag);
     }
 
-    if (RE.isRotaryPressed())
+    if (RotaryEncoderHAL::getInstance().isRotaryPressed())
     {
-      Buzzer.beepOnce();
+      BuzzerHAL::getInstance().beepOnce();
       switch (autoModeFlag)
       {
       case UGS:
@@ -192,11 +179,11 @@ void UIMenuService::runAutoMode()
 
 void UIMenuService::runManualMode()
 {
-  LCD.clear();
+  LcdHAL::getInstance().clear();
   while (1)
   {
-    RE.readEncoder();
-    LCD.lcdDisplay("Manual Mode", LCD.getMiddleXCursor("Manual Mode"), 1);
+    RotaryEncoderHAL::getInstance().readEncoder();
+    LcdHAL::getInstance().lcdDisplay("Manual Mode", LcdHAL::getInstance().getMiddleXCursor("Manual Mode"), 1);
     // TODO: thêm logic nếu có cancel/exit
   }
 }
@@ -205,25 +192,25 @@ void UIMenuService::runManualMode()
 
 void UIMenuService::runUGSMenu()
 {
-  LCD.clear();
-  LCD.serialModeScreen("retobots logo", 10, workingFlag);
+  LcdHAL::getInstance().clear();
+  LcdHAL::getInstance().serialModeScreen("retobots logo", 10, workingFlag);
 
   while (1)
   {
-    RE.readEncoder();
+    RotaryEncoderHAL::getInstance().readEncoder();
 
-    if (RE.scrollUp() || RE.scrollDown())
+    if (RotaryEncoderHAL::getInstance().scrollUp() || RotaryEncoderHAL::getInstance().scrollDown())
     {
-      Buzzer.beepOnce();
-      bool isUp = RE.scrollUp();
+      BuzzerHAL::getInstance().beepOnce();
+      bool isUp = RotaryEncoderHAL::getInstance().scrollUp();
       workingFlag = (isUp) ? (workingFlag + 1) % 3 : (workingFlag + 2) % 3;
-      LCD.clear();
-      LCD.serialModeScreen("retobots logo", 10, workingFlag);
+      LcdHAL::getInstance().clear();
+      LcdHAL::getInstance().serialModeScreen("retobots logo", 10, workingFlag);
     }
 
-    if (RE.isRotaryPressed())
+    if (RotaryEncoderHAL::getInstance().isRotaryPressed())
     {
-      Buzzer.beepOnce();
+      BuzzerHAL::getInstance().beepOnce();
       if (workingFlag == WORKING_STATE)
       {
         if (workingStateFlag == PAUSE)
@@ -278,12 +265,12 @@ void UIMenuService::run()
 
 void UIMenuService::opening()
 {
-  Buzzer.startingSoundBuzzer();
-  LCD.welcomeScreen();
+  BuzzerHAL::getInstance().startingSoundBuzzer();
+  LcdHAL::getInstance().welcomeScreen();
   delay(2000);
 
-  LCD.clear();
-  LCD.modeScreen(modeFlag);
+  LcdHAL::getInstance().clear();
+  LcdHAL::getInstance().modeScreen(modeFlag);
 
   Serial.println("Opening Done!");
 }

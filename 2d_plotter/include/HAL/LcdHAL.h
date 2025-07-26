@@ -15,6 +15,8 @@
 #include "LiquidCrystal_I2C.h"
 #include "Pins.h"
 #include "SDCardHAL.h"
+#include <vector>
+using namespace std;
 
 /*================================================ [ CONFIGURATION ] ==================================================*/
 
@@ -97,7 +99,7 @@ public:
    * @param fileCount   Số lượng file
    * @param state       Mode hiện tại
    */
-  void sdModeScreen(String files[], int8_t signal, uint8_t &ar_idx, int &startIndex, int fileCount, int &state);
+  void sdModeScreen(vector<String> files, int8_t signal, uint8_t &ar_idx, int &startIndex, int fileCount, int &state);
 
   /**
    * @brief Hàm hiển thị màn hình thông số, status khi chọn serial Mode

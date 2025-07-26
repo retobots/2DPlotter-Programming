@@ -15,6 +15,9 @@
 #include "LcdHAL.h"
 #include "RotaryEncoderHAL.h"
 #include "ButtonHAL.h"
+#include <vector>
+#include <string>
+using namespace std;
 
 /*================================================ [ CONFIGURATION ] ==================================================*/
 
@@ -58,11 +61,6 @@ private:
   uint8_t autoModeFlag = UGS;
   State currentState = MAIN_MENU;
 
-  LcdHAL &LCD;
-  RotaryEncoderHAL &RE;
-  BuzzerHAL &Buzzer;
-  ButtonHAL &Button;
-
   void runMainMenu();
 
   void runAutoMode();
@@ -72,6 +70,9 @@ private:
   void runUGSMenu();
 
   void runSDMenu();
+
+  // File List
+  vector<String> fileList;
 
 public:
   /**

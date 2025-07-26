@@ -1,6 +1,6 @@
 #include "AutoModeController.h"
 
-AutoModeController::AutoModeController() : GPS(GcodeParserService::getInstance()), MC(MotionControlService::getInstance())
+AutoModeController::AutoModeController()
 {
 }
 
@@ -12,8 +12,8 @@ AutoModeController &AutoModeController::getInstance()
 
 void AutoModeController::setup()
 {
-  GPS.setup();
-  MC.setup();
+  GcodeParserService::getInstance().setup();
+  MotionControlService::getInstance().setup();
 
   // Set data
   data.x = X_MIN;
@@ -173,7 +173,7 @@ void AutoModeController::readSerial(point &actualPoint)
           Serial.print("Received: ");
           Serial.println(line);
         }
-        GPS.processIncomingLine(line, lineIndex, actualPoint);
+        GcodeParserService::getInstance().processIncomingLine(line, lineIndex, actualPoint);
         Serial.println("ok");
         lineIndex = 0;
       }
@@ -232,7 +232,104 @@ void AutoModeController::readSerial(point &actualPoint)
   }
 }
 
-void AutoModeController::run()
+void AutoModeController::readFile(File &file, point &actualPoint)
 {
-  readSerial(data);
+  char c;
+  int currentLine = 0;
+  int totaleLines = FeedbackService::getInstance().calculateTotalLines(file);
+  while (file.available())
+  {
+    c = file.read();
+
+    // Kết thúc dòng
+    if ((c == '\n') || (c == '\r'))
+    {
+      if (lineIndex > 0)
+      {
+        line[lineIndex] = '\0'; // Kết thúc chuỗi
+
+        // In ra dòng lệnh đang xử lý (tuỳ chọn)
+        Serial.print("G-code: ");
+        Serial.println(line);
+
+        // Xử lý dòng lệnh G-code thực tế
+        GcodeParserService::getInstance().processIncomingLine(line, lineIndex, actualPoint);
+        currentLine++;
+        FeedbackService::getInstance().calculatePercentage(currentLine, totaleLines);
+        Serial.println("ok");
+
+        // Reset buffer
+        lineIndex = 0;
+      }
+      else
+      {
+        // Dòng trống hoặc chỉ comment → bỏ qua
+        lineIsComment = false;
+        lineSemiColon = false;
+      }
+    }
+    else
+    {
+      // Xử lý các ký tự đang đọc
+      if (lineIsComment || lineSemiColon)
+      {
+        if (c == ')')
+          lineIsComment = false;
+      }
+      else
+      {
+        if (c <= ' ')
+        {
+          // Bỏ qua whitespace
+        }
+        else if (c == '/')
+        {
+          // Bỏ qua block delete
+        }
+        else if (c == '(')
+        {
+          lineIsComment = true;
+        }
+        else if (c == ';')
+        {
+          lineSemiColon = true;
+        }
+        else if (lineIndex >= LINE_BUFFER_LENGTH - 1)
+        {
+          Serial.println("ERROR - lineBuffer overflow");
+          lineIndex = 0;
+          lineIsComment = false;
+          lineSemiColon = false;
+        }
+        else if (c >= 'a' && c <= 'z')
+        {
+          line[lineIndex++] = c - 'a' + 'A'; // Viết hoa
+        }
+        else
+        {
+          line[lineIndex++] = c;
+        }
+      }
+    }
+  }
+}
+
+void AutoModeController::getGcodeFile(const String &filename)
+{
+  gcodeFile = SD.open(filename.c_str());
+  if (!gcodeFile)
+  {
+    Serial.println("Cannot open G-code file!");
+    return;
+  }
+  Serial.print("Opened G-code file: ");
+  Serial.println(filename);
+}
+
+void AutoModeController::run(int choice)
+{
+  if (choice == 1)
+    readSerial(data);
+  else if (choice == 2)
+    readFile(gcodeFile, data);
 }

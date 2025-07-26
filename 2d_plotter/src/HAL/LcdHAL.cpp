@@ -115,7 +115,7 @@ void LcdHAL::automodeScreen(uint8_t update)
 
 /*<===================================================>*/
 
-void LcdHAL::sdModeScreen(String files[], int8_t signal, uint8_t &ar_idx, int &startIndex, int fileCount, int &state)
+void LcdHAL::sdModeScreen(vector<String> files, int8_t signal, uint8_t &ar_idx, int &startIndex, int fileCount, int &state)
 {
   lcd.clear();
   lcd.setCursor(0, 0);

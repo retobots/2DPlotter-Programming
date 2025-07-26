@@ -4,23 +4,31 @@
 #include <Arduino.h>
 #include <SD.h>
 #include <SPI.h>
+#include <map>
+#include "Pins.h"
 
 class SDCardHAL
 {
 private:
   SDCardHAL();
-  // String fileList[MAX_FILES];
-  // int fileCount = 0;
+
+  // Vector to store file names
+  vector<string> fileList;
+
+  // Vector to store file contents
+  vector<string> fileContents;
+
+  // Constructor
+  SDCardHAL() = default;
+  // Destructor
+  ~SDCardHAL() = default;
 
 public:
   static SDCardHAL &getInstance();
 
   void setup();
-  std::vector<std::string> listFiles();
-  std::string readLine();
 
-  bool openFile(const std::string &filename);
-  void closeFile();
+  string readLine();
 
   void loadFileListFromSD();
 

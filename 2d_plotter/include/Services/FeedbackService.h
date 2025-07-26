@@ -1,13 +1,19 @@
 #pragma once
 #include <Arduino.h>
-class FeedbackService {
+#include <SD.h>
+class FeedbackService
+{
 public:
-  static FeedbackService& getInstance();
+  static FeedbackService &getInstance();
 
   void setup();
-  void showStatus(const char* message);
-  void beep(uint8_t type);  // 1: Start, 2: End, 3: Error, etc.
+  int calculateTotalLines(File &file);
+  int calculatePercentage(int currentLine, int totalLines);
+  int getPercentage();
 
 private:
   FeedbackService();
+
+  int totalLines = 0; // Total lines in the file
+  int percentage = 0; // Percentage of completion
 };

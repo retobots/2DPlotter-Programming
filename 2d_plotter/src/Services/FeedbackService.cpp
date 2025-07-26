@@ -13,12 +13,40 @@ void FeedbackService::setup()
   // Khởi tạo LCD và buzzer
 }
 
-void FeedbackService::showStatus(const char *message)
+int FeedbackService::calculateTotalLines(File &file)
 {
-  // Gửi message lên LCD
+  // Đọc file và tính tổng số dòng
+  if (!file)
+  {
+    Serial.println("Cannot open file!");
+    return 0; // Trả về 0 nếu không mở được file
+  }
+
+  int lineCount = 0;
+  while (file.available())
+  {
+    String line = file.readStringUntil('\n');
+    lineCount++;
+  }
+  file.close();
+  Serial.print("Total lines in file: ");
+  Serial.println(lineCount);
+  totalLines = lineCount; // Lưu tổng số dòng
+  return totalLines;
 }
 
-void FeedbackService::beep(uint8_t type)
+int FeedbackService::calculatePercentage(int currentLine, int totalLines)
 {
-  // Phát âm thanh tùy theo loại
+  if (totalLines == 0)
+  {
+    return 0;
+  }
+  percentage = (currentLine * 100) / totalLines;
+
+  return percentage;
+}
+
+int FeedbackService::getPercentage()
+{
+  return percentage;
 }
