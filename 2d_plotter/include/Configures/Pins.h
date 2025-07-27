@@ -1,5 +1,7 @@
 #pragma
 
+#include <Arduino.h>
+
 #define ENABLE 8
 
 // Stepper Motor - Trục X
@@ -34,3 +36,5 @@
 #define PIN_SD_CS 13
 
 // RTC (I2C dùng chung SDA/SCL)
+#define RTC_SDA_PIN 21
+#define RTC_SCL_PIN 22

@@ -1,6 +1,6 @@
 #pragma once
 #include <Arduino.h>
-#include "PS4Controller/PS4Controller.h"
+#include "PS4Controller.h"
 #include "Settings.h"
 
 class IoHwAb_PS4

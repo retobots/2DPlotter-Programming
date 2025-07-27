@@ -37,7 +37,7 @@ public:
 
   void automodeScreen(uint8_t update);
 
-  void sdModeScreen(vector<String> files, int8_t signal, uint8_t &ar_idx, int &startIndex, int fileCount, int &state);
+  void sdModeScreen(vector<String> files, int8_t signal, uint8_t &ar_idx, int &startIndex, int fileCount, int &state, String &filename);
 
   void serialModeScreen(uint8_t workingStateMode);
 

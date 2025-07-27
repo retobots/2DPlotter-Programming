@@ -28,7 +28,7 @@ void AppController::runSDMenu()
 
   IoHwAb_LCD::getInstance().clear();
   Serial.printf("currentState: %d\n", state);
-  UIMenuService::getInstance().sdModeScreen(fileList, 0, ar_idx, startIndex, fileList.size(), state);
+  UIMenuService::getInstance().sdModeScreen(fileList, 0, ar_idx, startIndex, fileList.size(), state, selectedFile);
 
   while (1)
   {
@@ -38,24 +38,28 @@ void AppController::runSDMenu()
       break;
     }
 
+    if (state == 5)
+    {
+    }
+
     IoHwAb_Encoder::getInstance().readEncoder();
 
     if (IoHwAb_Encoder::getInstance().scrollUp())
     {
       IoHwAb_Buzzer::getInstance().beepOnce();
       IoHwAb_LCD::getInstance().clear();
-      UIMenuService::getInstance().sdModeScreen(fileList, -1, ar_idx, startIndex, fileList.size(), state);
+      UIMenuService::getInstance().sdModeScreen(fileList, -1, ar_idx, startIndex, fileList.size(), state, selectedFile);
     }
     else if (IoHwAb_Encoder::getInstance().scrollDown())
     {
       IoHwAb_Buzzer::getInstance().beepOnce();
       IoHwAb_LCD::getInstance().clear();
-      UIMenuService::getInstance().sdModeScreen(fileList, 1, ar_idx, startIndex, fileList.size(), state);
+      UIMenuService::getInstance().sdModeScreen(fileList, 1, ar_idx, startIndex, fileList.size(), state, selectedFile);
     }
     else if (IoHwAb_Encoder::getInstance().isRotaryPressed())
     {
       IoHwAb_Buzzer::getInstance().beepOnce();
-      UIMenuService::getInstance().sdModeScreen(fileList, 2, ar_idx, startIndex, fileList.size(), state);
+      UIMenuService::getInstance().sdModeScreen(fileList, 2, ar_idx, startIndex, fileList.size(), state, selectedFile);
     }
   }
 }
@@ -225,4 +229,57 @@ void AppController::opening()
   UIMenuService::getInstance().modeScreen(modeFlag);
 
   Serial.println("Opening Done!");
+}
+
+/*<===================================================>*/
+
+void AppController::runSDMode()
+{
+  IoHwAb_LCD::getInstance().clear();
+  UIMenuService::getInstance().serialModeScreen(workingFlag);
+
+  while (1)
+  {
+    IoHwAb_Encoder::getInstance().readEncoder();
+
+    if (IoHwAb_Encoder::getInstance().scrollUp() || IoHwAb_Encoder::getInstance().scrollDown())
+    {
+      IoHwAb_Buzzer::getInstance().beepOnce();
+      bool isUp = IoHwAb_Encoder::getInstance().scrollUp();
+      workingFlag = (isUp) ? (workingFlag + 1) % 3 : (workingFlag + 2) % 3;
+      IoHwAb_LCD::getInstance().clear();
+      AutoModeController::getInstance().runSD(workingFlag);
+    }
+
+    if (IoHwAb_Encoder::getInstance().isRotaryPressed())
+    {
+      IoHwAb_Buzzer::getInstance().beepOnce();
+      if (workingFlag == WORKING_STATE)
+      {
+        if (workingStateFlag == PAUSE)
+        {
+          Serial.println("Pause");
+          AutoModeController::getInstance().pauseSD();
+          workingStateFlag = CONTINUE;
+        }
+        else
+        {
+          Serial.println("Continue");
+          AutoModeController::getInstance().continueSD();
+          workingStateFlag = PAUSE;
+        }
+      }
+      else if (workingFlag == CANCEL)
+      {
+        Serial.println("Cancel");
+        AutoModeController::getInstance().cancelSD();
+        AutoModeController::getInstance().resetSD();
+      }
+      else
+      {
+        currentState = State::SD_MENU;
+        break;
+      }
+    }
+  }
 }

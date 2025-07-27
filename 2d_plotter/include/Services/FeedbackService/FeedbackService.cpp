@@ -50,3 +50,13 @@ int FeedbackService::getPercentage()
 {
   return percentage;
 }
+
+int &FeedbackService::getTotalLines()
+{
+  return totalLines;
+}
+
+int &FeedbackService::getCurrentLine()
+{
+  return currentLine;
+}

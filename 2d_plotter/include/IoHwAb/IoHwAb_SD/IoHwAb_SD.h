@@ -31,4 +31,6 @@ public:
   void loadFileListFromSD();
 
   void readSelectedFile(String &filename);
+
+  File &getFile(const String &filename);
 };

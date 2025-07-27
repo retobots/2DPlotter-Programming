@@ -10,10 +10,13 @@ public:
   int calculateTotalLines(File &file);
   int calculatePercentage(int currentLine, int totalLines);
   int getPercentage();
+  int &getTotalLines();
+  int &getCurrentLine();
 
 private:
   FeedbackService();
 
-  int totalLines = 0; // Total lines in the file
-  int percentage = 0; // Percentage of completion
+  int totalLines = 0;  // Total lines in the file
+  int currentLine = 0; // Current line being processed
+  int percentage = 0;  // Percentage of completion
 };

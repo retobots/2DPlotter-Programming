@@ -107,7 +107,7 @@ void UIMenuService::automodeScreen(uint8_t update)
 
 /*<===================================================>*/
 
-void UIMenuService::sdModeScreen(vector<String> files, int8_t signal, uint8_t &ar_idx, int &startIndex, int fileCount, int &state)
+void UIMenuService::sdModeScreen(vector<String> files, int8_t signal, uint8_t &ar_idx, int &startIndex, int fileCount, int &state, String &filename)
 {
   lcd.clear();
   lcd.setCursor(0, 0);
@@ -176,7 +176,9 @@ void UIMenuService::sdModeScreen(vector<String> files, int8_t signal, uint8_t &a
       IoHwAb_LCD::getInstance().lcdDisplay(files[selectedFile] + " chose", IoHwAb_LCD::getInstance().getMiddleXCursor(files[selectedFile] + " chose"), 1);
       delay(1500);
       IoHwAb_LCD::getInstance().clear();
-      IoHwAb_LCD::getInstance().lcdDisplay("Read file", IoHwAb_LCD::getInstance().getMiddleXCursor("Read file"), 1);
+      filename = files[selectedFile];
+      state = 5; // Set state to indicate file selection
+      // IoHwAb_LCD::getInstance().lcdDisplay("Read file", IoHwAb_LCD::getInstance().getMiddleXCursor("Read file"), 1);
       return;
     }
   }

@@ -3,6 +3,8 @@
 #include "GcodeParserService.h"
 #include "MotionControlService.h"
 #include "FeedbackService.h"
+#include "UIMenuService.h"
+#include "IoHwAb_RTC.h"
 #include <SD.h>
 
 #define LINE_BUFFER_LENGTH 512
@@ -20,15 +22,15 @@ private:
   char line[LINE_BUFFER_LENGTH];
   char c;
 
+  point data;
+  File gcodeFile;
+  bool active = false;
+  bool paused = false;
+  bool cancelled = false;
+
   void readSerial(point &actualPoint);
 
-  void readFile(File &file, point &actualPoint);
-
-  // Coordinate
-  point data;
-
-  // File to read G-code commands from
-  File gcodeFile;
+  void readFile(File &file, point &actualPoint, int workingFlag);
 
 public:
   static AutoModeController &getInstance();
@@ -37,5 +39,17 @@ public:
 
   void getGcodeFile(const String &filename);
 
-  void run(int choice);
+  void pauseSD();
+
+  void continueSD();
+
+  void cancelSD();
+
+  void runSD(int workingFlag);
+
+  void resetSD();
+
+  void resetSerial();
+
+  void runSerial();
 };

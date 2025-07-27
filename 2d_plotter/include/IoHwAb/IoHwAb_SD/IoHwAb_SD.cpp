@@ -71,3 +71,14 @@ void IoHwAb_SD::readSelectedFile(String &filename)
   }
   f.close();
 }
+
+File &IoHwAb_SD::getFile(const String &filename)
+{
+  static File file;
+  file = SD.open(filename.c_str());
+  if (!file)
+  {
+    Serial.println("Cannot open file!");
+  }
+  return file;
+}

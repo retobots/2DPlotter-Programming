@@ -1,6 +1,8 @@
 #pragma once
 #include <Arduino.h>
 #include "UIMenuService.h"
+#include "FeedbackService.h"
+#include "AutoModeController.h"
 using namespace std;
 
 #define AUTOMODE 0
@@ -21,7 +23,9 @@ enum State
   AUTO_MODE,
   MANUAL_MODE,
   UGS_MENU,
-  SD_MENU
+  SD_MENU,
+  SD_STATUS,
+  SERIAL_MODE
 };
 class AppController
 {
@@ -39,7 +43,11 @@ private:
   uint8_t autoModeFlag = UGS;
   State currentState = State::MAIN_MENU;
 
+  // Vector to hold file names
   vector<String> fileList;
+
+  // Variable to save the selected file name
+  String selectedFile;
 
   void runMainMenu();
 
@@ -54,4 +62,6 @@ private:
   void run();
 
   void opening();
+
+  void runSDMode();
 };

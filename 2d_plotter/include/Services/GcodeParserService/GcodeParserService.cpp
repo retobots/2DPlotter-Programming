@@ -31,11 +31,11 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
     switch (line[currentIndex++])
     {
     case 'U':
-      // penUp();
+      // IoHwAb_Servo::getInstance().liftPen();
       Serial.println("Pen Up");
       break;
     case 'D':
-      // penDown();
+      // IoHwAb_Servo::getInstance().dropPen();
       Serial.println("Pen Down");
       break;
     case 'G':
@@ -90,7 +90,7 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
           }
         }
 
-        // drawLine(newPos.x, newPos.y);
+        // MotionControlService::getInstance().drawLine(newPos.x, newPos.y);
         actualPos.x = newPos.x;
         actualPos.y = newPos.y;
         Serial.println("Draw Line");
@@ -133,12 +133,12 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
         }
         if (Spos == 30)
         {
-          // penDown();
+          // IoHwAb_Servo::getInstance().dropPen();
           Serial.println("Pen Down");
         }
         else if (Spos == 50)
         {
-          // penUp();
+          // IoHwAb_Servo::getInstance().liftPen();
           Serial.println("Pen Up");
         }
         else

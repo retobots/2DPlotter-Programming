@@ -232,83 +232,96 @@ void AutoModeController::readSerial(point &actualPoint)
   }
 }
 
-void AutoModeController::readFile(File &file, point &actualPoint)
+void AutoModeController::readFile(File &file, point &actualPoint, int workingFlag)
 {
-  char c;
-  int currentLine = 0;
-  int totaleLines = FeedbackService::getInstance().calculateTotalLines(file);
-  while (file.available())
+  if (!active || !file.available())
   {
-    c = file.read();
-
-    // Kết thúc dòng
-    if ((c == '\n') || (c == '\r'))
+    active = false;
+    if (cancelled)
     {
-      if (lineIndex > 0)
-      {
-        line[lineIndex] = '\0'; // Kết thúc chuỗi
+      UIMenuService::getInstance().statusScreen("", 0, "", workingFlag);
+      IoHwAb_RTC::getInstance().changeStatus();
+    }
+    if (!file.available())
+      IoHwAb_RTC::getInstance().changeStatus();
 
-        // In ra dòng lệnh đang xử lý (tuỳ chọn)
-        Serial.print("G-code: ");
-        Serial.println(line);
+    return;
+  }
 
-        // Xử lý dòng lệnh G-code thực tế
-        GcodeParserService::getInstance().processIncomingLine(line, lineIndex, actualPoint);
-        currentLine++;
-        FeedbackService::getInstance().calculatePercentage(currentLine, totaleLines);
-        Serial.println("ok");
+  FeedbackService::getInstance().calculateTotalLines(file);
+  int currentLine = FeedbackService::getInstance().getCurrentLine();
+  IoHwAb_RTC::getInstance().startTimer();
 
-        // Reset buffer
-        lineIndex = 0;
-      }
-      else
-      {
-        // Dòng trống hoặc chỉ comment → bỏ qua
-        lineIsComment = false;
-        lineSemiColon = false;
-      }
+  char c = file.read();
+
+  // Kết thúc dòng
+  if ((c == '\n') || (c == '\r'))
+  {
+    if (lineIndex > 0)
+    {
+      line[lineIndex] = '\0'; // Kết thúc chuỗi
+
+      // In ra dòng lệnh đang xử lý (tuỳ chọn)
+      Serial.print("G-code: ");
+      Serial.println(line);
+
+      // Xử lý dòng lệnh G-code thực tế
+      GcodeParserService::getInstance().processIncomingLine(line, lineIndex, actualPoint);
+      currentLine++;
+      FeedbackService::getInstance().calculatePercentage(currentLine, FeedbackService::getInstance().getTotalLines());
+      UIMenuService::getInstance().statusScreen(file.name(), FeedbackService::getInstance().getPercentage(), IoHwAb_RTC::getInstance().getElapsedTime(), workingFlag);
+      Serial.println("ok");
+
+      // Reset buffer
+      lineIndex = 0;
     }
     else
     {
-      // Xử lý các ký tự đang đọc
-      if (lineIsComment || lineSemiColon)
+      // Dòng trống hoặc chỉ comment → bỏ qua
+      lineIsComment = false;
+      lineSemiColon = false;
+    }
+  }
+  else
+  {
+    // Xử lý các ký tự đang đọc
+    if (lineIsComment || lineSemiColon)
+    {
+      if (c == ')')
+        lineIsComment = false;
+    }
+    else
+    {
+      if (c <= ' ')
       {
-        if (c == ')')
-          lineIsComment = false;
+        // Bỏ qua whitespace
+      }
+      else if (c == '/')
+      {
+        // Bỏ qua block delete
+      }
+      else if (c == '(')
+      {
+        lineIsComment = true;
+      }
+      else if (c == ';')
+      {
+        lineSemiColon = true;
+      }
+      else if (lineIndex >= LINE_BUFFER_LENGTH - 1)
+      {
+        Serial.println("ERROR - lineBuffer overflow");
+        lineIndex = 0;
+        lineIsComment = false;
+        lineSemiColon = false;
+      }
+      else if (c >= 'a' && c <= 'z')
+      {
+        line[lineIndex++] = c - 'a' + 'A'; // Viết hoa
       }
       else
       {
-        if (c <= ' ')
-        {
-          // Bỏ qua whitespace
-        }
-        else if (c == '/')
-        {
-          // Bỏ qua block delete
-        }
-        else if (c == '(')
-        {
-          lineIsComment = true;
-        }
-        else if (c == ';')
-        {
-          lineSemiColon = true;
-        }
-        else if (lineIndex >= LINE_BUFFER_LENGTH - 1)
-        {
-          Serial.println("ERROR - lineBuffer overflow");
-          lineIndex = 0;
-          lineIsComment = false;
-          lineSemiColon = false;
-        }
-        else if (c >= 'a' && c <= 'z')
-        {
-          line[lineIndex++] = c - 'a' + 'A'; // Viết hoa
-        }
-        else
-        {
-          line[lineIndex++] = c;
-        }
+        line[lineIndex++] = c;
       }
     }
   }
@@ -326,10 +339,68 @@ void AutoModeController::getGcodeFile(const String &filename)
   Serial.println(filename);
 }
 
-void AutoModeController::run(int choice)
+void AutoModeController::runSD(int workingFlag)
 {
-  if (choice == 1)
-    readSerial(data);
-  else if (choice == 2)
-    readFile(gcodeFile, data);
+  readFile(gcodeFile, data, workingFlag);
+}
+
+void AutoModeController::cancelSD()
+{
+  if (gcodeFile)
+  {
+    gcodeFile.close();
+    active = false;
+    cancelled = true;
+    Serial.println("Canceled reading G-code file.");
+  }
+}
+
+void AutoModeController::pauseSD()
+{
+  active = false;
+  paused = true;
+}
+
+void AutoModeController::resetSD()
+{
+  int lineIndex = 0;
+  bool lineIsComment = false;
+  bool lineSemiColon = false;
+  bool verbose = false;
+  memset(line, 0, sizeof(line)); // Xoá bộ đệm dòng
+  Serial.println("SD reset done.");
+}
+
+void AutoModeController::resetSerial()
+{
+  lineIndex = 0;
+  lineIsComment = false;
+  lineSemiColon = false;
+  verbose = false;
+  memset(line, 0, sizeof(line)); // Xoá bộ đệm dòng
+  Serial.println("Serial reset done.");
+}
+
+void AutoModeController::runSerial()
+{
+  readSerial(data);
+}
+
+void AutoModeController::continueSD()
+{
+  if (!gcodeFile)
+  {
+    Serial.println("No G-code file opened.");
+    return;
+  }
+
+  if (active)
+  {
+    Serial.println("Already reading G-code file.");
+    return;
+  }
+
+  active = true;
+  paused = false;
+  Serial.println("Continuing reading G-code file...");
 }
