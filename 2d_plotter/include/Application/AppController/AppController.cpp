@@ -140,6 +140,7 @@ void AppController::runManualMode()
   {
     IoHwAb_Encoder::getInstance().readEncoder();
     IoHwAb_LCD::getInstance().lcdDisplay("Manual Mode", IoHwAb_LCD::getInstance().getMiddleXCursor("Manual Mode"), 1);
+    ManualModeController::getInstance().run();
     // TODO: thêm logic nếu có cancel/exit
   }
 }

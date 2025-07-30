@@ -3,6 +3,7 @@
 #include "UIMenuService.h"
 #include "FeedbackService.h"
 #include "AutoModeController.h"
+#include "ManualModeController.h"
 using namespace std;
 
 #define AUTOMODE 0
