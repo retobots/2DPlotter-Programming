@@ -12,10 +12,10 @@ AutoModeController &AutoModeController::getInstance()
 
 void AutoModeController::setup()
 {
-  GcodeParserService::getInstance().setup();
-  MotionControlService::getInstance().setup();
   IoHwAb_RTC::getInstance().setup();
   IoHwAb_SD::getInstance().setup();
+  GcodeParserService::getInstance().setup();
+  MotionControlService::getInstance().setup();
 
   // Set data
   data.x = X_MIN;

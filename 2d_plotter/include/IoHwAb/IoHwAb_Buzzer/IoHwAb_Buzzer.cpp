@@ -25,6 +25,7 @@ IoHwAb_Buzzer &IoHwAb_Buzzer::getInstance()
 
 void IoHwAb_Buzzer::setup()
 {
+  Serial.println("[SET UP]: Buzzer Starting Setup!");
   // Setup
   ledcSetup(BUZZER_CHANNEL, 2000, 8); // tần số 2kHz, độ phân giải 8-bit
   ledcAttachPin(PIN_BUZZER, BUZZER_CHANNEL);

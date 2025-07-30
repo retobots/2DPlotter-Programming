@@ -14,6 +14,8 @@ IoHwAb_SD &IoHwAb_SD::getInstance()
 
 void IoHwAb_SD::setup()
 {
+  Serial.println("[SET UP]: SD Card Starting Setup!");
+
   SD.begin(PIN_SD_CS);
 
   Serial.println("[SET UP]: SD Card Done!");

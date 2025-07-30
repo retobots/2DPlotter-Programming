@@ -40,8 +40,6 @@ void UIMenuService::setup()
   IoHwAb_Buzzer::getInstance().setup();
   IoHwAb_Button::getInstance().setup();
 
-  Serial.println("Setting Up...");
-
   // Logging
   Serial.println("[SET UP]: UI Menu Done!");
 }

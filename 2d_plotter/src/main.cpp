@@ -1,17 +1,16 @@
 #include <Arduino.h>
 #include "AppController.h"
 
-AppController &appController = AppController::getInstance();
-
 void setup()
 {
-    Serial.begin(9600);
-    // Khởi tạo các thành phần khác nếu cần
-    appController.setup();
+    Serial2.begin(112500); // Khởi tạo Serial với tốc độ 112500 bps
+    Serial.begin(115200);  // Khởi tạo Serial với tốc độ 115200 bps
+    // Khởi tạo app controller
+    AppController::getInstance().setup();
 }
 
 void loop()
 {
     // Chạy ứng dụng chính
-    appController.run();
+    AppController::getInstance().run();
 }

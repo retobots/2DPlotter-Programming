@@ -13,8 +13,7 @@ MotionControlService &MotionControlService::getInstance()
 void MotionControlService::setup()
 {
   // Khởi tạo stepper
-  // IoHwAb_Stepper::getInstance().setup();
-  Serial.println("[SET UP]: MC Setup Done!");
+  IoHwAb_Stepper::getInstance().setup();
 
   // Logging
   Serial.println("[SET UP]: Motion Control Done!");

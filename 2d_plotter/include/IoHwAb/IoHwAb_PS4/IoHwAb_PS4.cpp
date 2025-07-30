@@ -13,6 +13,7 @@ IoHwAb_PS4 &IoHwAb_PS4::getInstance()
 
 void IoHwAb_PS4::setup()
 {
+  Serial.println("[SET UP]: PS4 Controller Starting Setup!");
   // Logging
   Serial.println("[SET UP]: PS4 Controller Done!");
 }

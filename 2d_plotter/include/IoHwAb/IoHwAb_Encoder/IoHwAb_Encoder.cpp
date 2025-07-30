@@ -31,6 +31,7 @@ IoHwAb_Encoder &IoHwAb_Encoder::getInstance()
 
 void IoHwAb_Encoder::setup()
 {
+  Serial.println("[SET UP]: Rotary Encoder Starting Setup!");
   // Cấu hình encoder
   pinMode(PIN_CLK, INPUT);
   pinMode(PIN_DT, INPUT);

@@ -12,6 +12,7 @@ IoHwAb_Servo &IoHwAb_Servo::getInstance()
 
 void IoHwAb_Servo::setup()
 {
+  Serial.println("[SET UP]: Servo Starting Setup!");
 
   // Gắn servo vào chân PWM
   myServo.attach(PIN_SERVO);

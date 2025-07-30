@@ -1,6 +1,4 @@
 #include "AppController.h"
-#include "AutoModeController.h"
-#include "ManualModeController.h"
 
 AppController::AppController()
 {
@@ -15,8 +13,14 @@ AppController &AppController::getInstance()
 
 void AppController::setup()
 {
+  UIMenuService::getInstance().setup();
   AutoModeController::getInstance().setup();
   ManualModeController::getInstance().setup();
+
+  Serial.println("[SET UP]: AppController Done!");
+
+  Serial.println("[OPENING]: Welcome Screen");
+  opening();
 }
 
 /*<===================================================>*/
@@ -234,7 +238,7 @@ void AppController::opening()
   IoHwAb_LCD::getInstance().clear();
   UIMenuService::getInstance().modeScreen(modeFlag);
 
-  Serial.println("Opening Done!");
+  Serial.println("[OPENING]: Opening Done!");
 }
 
 /*<===================================================>*/

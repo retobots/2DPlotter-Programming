@@ -27,6 +27,7 @@ IoHwAb_Button &IoHwAb_Button::getInstance()
 
 void IoHwAb_Button::setup()
 {
+    Serial.println("[SET UP]: Button Starting Setup!");
     // Cấu hình chân GPIO làm output
 
     // Setup

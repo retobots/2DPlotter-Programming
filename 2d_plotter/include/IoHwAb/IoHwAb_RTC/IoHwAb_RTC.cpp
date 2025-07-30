@@ -12,6 +12,8 @@ IoHwAb_RTC &IoHwAb_RTC::getInstance()
 
 void IoHwAb_RTC::setup()
 {
+  Serial.println("[SET UP]: RTC Starting Setup!");
+
   Wire.begin(RTC_SDA_PIN, RTC_SCL_PIN);
 
   if (!rtc.begin())

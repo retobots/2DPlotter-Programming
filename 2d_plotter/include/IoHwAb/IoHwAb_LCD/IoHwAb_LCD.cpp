@@ -29,6 +29,8 @@ IoHwAb_LCD &IoHwAb_LCD::getInstance()
 
 void IoHwAb_LCD::setup()
 {
+  Serial.println("[SET UP]: LCD Starting Setup!");
+
   // Khởi tạo LCD (I2C hoặc SPI)
   lcd.init();      // Khởi tạo LCD
   lcd.backlight(); // Bật đèn nền

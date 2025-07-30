@@ -1,8 +1,8 @@
-#pragma
+#pragma once
 
 #include <Arduino.h>
 
-#define ENABLE 7
+#define ENABLE 5
 
 // Stepper Motor - Trục X
 #define PIN_X_STEP 10
@@ -25,8 +25,8 @@
 // PS4 Controller - Bluetooth, không cần pin cụ thể
 
 // Rotary Encoder (nếu dùng)
-#define PIN_CLK 7
-#define PIN_DT 6
+#define PIN_CLK 6
+#define PIN_DT 7
 #define PIN_SW 9
 
 // Nút chọn menu riêng (tuỳ chọn)
