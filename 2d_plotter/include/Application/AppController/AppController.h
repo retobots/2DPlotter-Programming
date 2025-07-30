@@ -4,6 +4,8 @@
 #include "FeedbackService.h"
 #include "AutoModeController.h"
 #include "ManualModeController.h"
+#include "IoHwAb_RTC.h"
+#include "IoHwAb_SD.h"
 using namespace std;
 
 #define AUTOMODE 0
@@ -35,6 +37,8 @@ public:
 
   void setup();
 
+  void run();
+
 private:
   AppController();
 
@@ -59,8 +63,6 @@ private:
   void runUGSMenu();
 
   void runSDMenu();
-
-  void run();
 
   void opening();
 

@@ -1,6 +1,6 @@
 #include "IoHwAb_RTC.h"
 
-IoHwAb_RTC::IoHwAb_RTC() : rtc(RTC_SDA_PIN, RTC_SCL_PIN)
+IoHwAb_RTC::IoHwAb_RTC()
 {
 }
 
@@ -12,25 +12,36 @@ IoHwAb_RTC &IoHwAb_RTC::getInstance()
 
 void IoHwAb_RTC::setup()
 {
-  // Khởi động DS1307
-  rtc.begin();
-  rtc.setDate(27, 7, 2025);
-  rtc.setTime(10, 30, 0);
-  rtc.setDOW(SUNDAY);
+  Wire.begin(RTC_SDA_PIN, RTC_SCL_PIN);
+
+  if (!rtc.begin())
+  {
+    Serial.println("[ERROR]: RTC not found!");
+    while (1)
+      ; // Dừng chương trình nếu lỗi
+  }
+
+  if (rtc.lostPower())
+  {
+    Serial.println("[RTC]: Lost power, setting default time");
+    rtc.adjust(DateTime(2025, 7, 27, 10, 30, 0)); // Năm, Tháng, Ngày, Giờ, Phút, Giây
+  }
+
+  Serial.println("[SET UP]: RTC Done!");
 }
 
 String IoHwAb_RTC::getElapsedTime()
 {
-  Time now = rtc.getTime();
+  if (!isStart)
+    return "00:00:00";
 
-  // Tính số giây đã trôi qua kể từ startTimer()
-  long elapsed = rtc.getUnixTime(now) - rtc.getUnixTime(startTime);
+  DateTime now = rtc.now();
+  TimeSpan elapsed = now - startTime;
 
-  int hours = elapsed / 3600;
-  int minutes = (elapsed % 3600) / 60;
-  int seconds = elapsed % 60;
+  int hours = elapsed.hours() + elapsed.days() * 24; // Tổng giờ kể cả qua ngày
+  int minutes = elapsed.minutes();
+  int seconds = elapsed.seconds();
 
-  // Định dạng chuỗi: HH:MM:SS (có thể > 24h)
   char buffer[16];
   sprintf(buffer, "%d:%02d:%02d", hours, minutes, seconds);
   return String(buffer);
@@ -40,12 +51,12 @@ void IoHwAb_RTC::startTimer()
 {
   if (!isStart)
   {
-    startTime = rtc.getTime();
-    isStart = true; // Đánh dấu đã bắt đầu
+    startTime = rtc.now();
+    isStart = true;
   }
 }
 
 void IoHwAb_RTC::changeStatus()
 {
-  isStart = !isStart; // Đảo trạng thái
+  isStart = !isStart;
 }

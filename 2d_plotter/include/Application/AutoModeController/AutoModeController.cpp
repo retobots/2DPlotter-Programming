@@ -14,6 +14,8 @@ void AutoModeController::setup()
 {
   GcodeParserService::getInstance().setup();
   MotionControlService::getInstance().setup();
+  IoHwAb_RTC::getInstance().setup();
+  IoHwAb_SD::getInstance().setup();
 
   // Set data
   data.x = X_MIN;
@@ -329,12 +331,7 @@ void AutoModeController::readFile(File &file, point &actualPoint, int workingFla
 
 void AutoModeController::getGcodeFile(const String &filename)
 {
-  gcodeFile = SD.open(filename.c_str());
-  if (!gcodeFile)
-  {
-    Serial.println("Cannot open G-code file!");
-    return;
-  }
+  gcodeFile = IoHwAb_SD::getInstance().getFile(filename);
   Serial.print("Opened G-code file: ");
   Serial.println(filename);
 }

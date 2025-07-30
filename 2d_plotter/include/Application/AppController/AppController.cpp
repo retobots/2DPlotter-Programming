@@ -15,7 +15,8 @@ AppController &AppController::getInstance()
 
 void AppController::setup()
 {
-  // Khởi tạo các thành phần cần thiết, hiển thị menu
+  AutoModeController::getInstance().setup();
+  ManualModeController::getInstance().setup();
 }
 
 /*<===================================================>*/
@@ -25,6 +26,7 @@ void AppController::runSDMenu()
   uint8_t ar_idx = 0;
   int startIndex = 0;
   int state = State::SD_MENU;
+  fileList = IoHwAb_SD::getInstance().loadFileListFromSD();
 
   IoHwAb_LCD::getInstance().clear();
   Serial.printf("currentState: %d\n", state);
@@ -38,8 +40,11 @@ void AppController::runSDMenu()
       break;
     }
 
-    if (state == 5)
+    if (state == State::SD_STATUS)
     {
+      currentState = State::SD_STATUS;
+      runSDMode();
+      break;
     }
 
     IoHwAb_Encoder::getInstance().readEncoder();
@@ -140,7 +145,7 @@ void AppController::runManualMode()
   {
     IoHwAb_Encoder::getInstance().readEncoder();
     IoHwAb_LCD::getInstance().lcdDisplay("Manual Mode", IoHwAb_LCD::getInstance().getMiddleXCursor("Manual Mode"), 1);
-    ManualModeController::getInstance().run();
+    // ManualModeController::getInstance().run();
     // TODO: thêm logic nếu có cancel/exit
   }
 }
@@ -237,7 +242,9 @@ void AppController::opening()
 void AppController::runSDMode()
 {
   IoHwAb_LCD::getInstance().clear();
-  UIMenuService::getInstance().serialModeScreen(workingFlag);
+  UIMenuService::getInstance().statusScreen(selectedFile, 0,
+                                            "00:00:00",
+                                            workingStateFlag);
 
   while (1)
   {
@@ -260,21 +267,21 @@ void AppController::runSDMode()
         if (workingStateFlag == PAUSE)
         {
           Serial.println("Pause");
-          AutoModeController::getInstance().pauseSD();
+          // AutoModeController::getInstance().pauseSD();
           workingStateFlag = CONTINUE;
         }
         else
         {
           Serial.println("Continue");
-          AutoModeController::getInstance().continueSD();
+          // AutoModeController::getInstance().continueSD();
           workingStateFlag = PAUSE;
         }
       }
       else if (workingFlag == CANCEL)
       {
         Serial.println("Cancel");
-        AutoModeController::getInstance().cancelSD();
-        AutoModeController::getInstance().resetSD();
+        // AutoModeController::getInstance().cancelSD();
+        // AutoModeController::getInstance().resetSD();
       }
       else
       {

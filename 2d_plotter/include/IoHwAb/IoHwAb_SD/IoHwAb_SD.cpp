@@ -15,9 +15,11 @@ IoHwAb_SD &IoHwAb_SD::getInstance()
 void IoHwAb_SD::setup()
 {
   SD.begin(PIN_SD_CS);
+
+  Serial.println("[SET UP]: SD Card Done!");
 }
 
-void IoHwAb_SD::loadFileListFromSD()
+vector<String> &IoHwAb_SD::loadFileListFromSD()
 {
   fileList.clear();
   // Add "Back" as the first element
@@ -36,6 +38,7 @@ void IoHwAb_SD::loadFileListFromSD()
     }
     entry.close();
   }
+  return fileList;
 }
 
 void IoHwAb_SD::readSelectedFile(String &filename)

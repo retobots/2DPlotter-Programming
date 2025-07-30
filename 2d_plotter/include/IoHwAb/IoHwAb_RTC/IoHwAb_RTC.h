@@ -2,7 +2,7 @@
 
 #include <string>
 #include <Arduino.h>
-#include <DS3231.h>
+#include <RTClib.h>
 #include <Wire.h>
 #include "Pins.h"
 
@@ -11,8 +11,8 @@ class IoHwAb_RTC
 private:
   IoHwAb_RTC();
 
-  DS3231 rtc;
-  Time startTime;
+  RTC_DS3231 rtc;
+  DateTime startTime;
   bool isStart = false;
 
 public:

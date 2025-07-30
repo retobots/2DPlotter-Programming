@@ -10,7 +10,7 @@ FeedbackService &FeedbackService::getInstance()
 
 void FeedbackService::setup()
 {
-  // Khởi tạo LCD và buzzer
+  Serial.println("[SET UP]: Feedback Service Done!");
 }
 
 int FeedbackService::calculateTotalLines(File &file)

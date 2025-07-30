@@ -21,14 +21,14 @@ private:
   IoHwAb_SD();
 
   // Destructor
-  ~IoHwAb_SD();
+  ~IoHwAb_SD() = default;
 
 public:
   static IoHwAb_SD &getInstance();
 
   void setup();
 
-  void loadFileListFromSD();
+  vector<String> &loadFileListFromSD();
 
   void readSelectedFile(String &filename);
 

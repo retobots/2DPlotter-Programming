@@ -5,6 +5,7 @@
 #include "FeedbackService.h"
 #include "UIMenuService.h"
 #include "IoHwAb_RTC.h"
+#include "IoHwAb_SD.h"
 #include <SD.h>
 
 #define LINE_BUFFER_LENGTH 512

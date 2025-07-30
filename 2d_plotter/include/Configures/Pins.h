@@ -30,7 +30,7 @@
 #define PIN_SW 9
 
 // Nút chọn menu riêng (tuỳ chọn)
-#define PIN_MENU_BUTTON
+#define PIN_MENU_BUTTON 15
 
 // SD Card (SPI)
 #define PIN_SD_CS 23
