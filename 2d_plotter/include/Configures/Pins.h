@@ -5,12 +5,12 @@
 #define ENABLE 5
 
 // Stepper Motor - Trục X
-#define PIN_X_STEP 10
-#define PIN_X_DIR 11
+#define PIN_X_STEP 27
+#define PIN_X_DIR 14
 
 // Stepper Motor - Trục Y
-#define PIN_Y_STEP 20
-#define PIN_Y_DIR 19
+#define PIN_Y_STEP 4
+#define PIN_Y_DIR 2
 
 // Servo nhấc/hạ bút
 #define PIN_SERVO 25
@@ -25,15 +25,15 @@
 // PS4 Controller - Bluetooth, không cần pin cụ thể
 
 // Rotary Encoder (nếu dùng)
-#define PIN_CLK 6
-#define PIN_DT 7
-#define PIN_SW 9
+#define PIN_CLK 32
+#define PIN_DT 33
+#define PIN_SW 26
 
 // Nút chọn menu riêng (tuỳ chọn)
 #define PIN_MENU_BUTTON 15
 
 // SD Card (SPI)
-#define PIN_SD_CS 23
+#define PIN_SD_CS 5
 
 // RTC (I2C dùng chung SDA/SCL)
 #define RTC_SDA_PIN 21

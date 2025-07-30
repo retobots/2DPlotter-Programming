@@ -25,13 +25,16 @@ private:
 
   point data;
   File gcodeFile;
-  bool active = false;
+  bool active = true;
   bool paused = false;
   bool cancelled = false;
+  int percentage = 0;
+  String time = "";
+  int statusFlag = 0;
 
   void readSerial(point &actualPoint);
 
-  void readFile(File &file, point &actualPoint, int workingFlag);
+  void readFile(File &file, point &actualPoint, int workingFlag, int &percentage, String &time, int &statusFlag);
 
 public:
   static AutoModeController &getInstance();
@@ -53,4 +56,10 @@ public:
   void resetSerial();
 
   void runSerial();
+
+  int getPercentage() const;
+
+  String getTime() const;
+
+  int getStatusFlag() const;
 };

@@ -32,6 +32,7 @@ int FeedbackService::calculateTotalLines(File &file)
   Serial.print("Total lines in file: ");
   Serial.println(lineCount);
   totalLines = lineCount; // Lưu tổng số dòng
+  Serial.println("[PROCESS]: Total lines calculated: " + String(totalLines));
   return totalLines;
 }
 

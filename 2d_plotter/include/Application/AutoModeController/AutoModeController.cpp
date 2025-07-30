@@ -234,11 +234,13 @@ void AutoModeController::readSerial(point &actualPoint)
   }
 }
 
-void AutoModeController::readFile(File &file, point &actualPoint, int workingFlag)
+void AutoModeController::readFile(File &file, point &actualPoint, int workingFlag, int &percentage, String &time, int &statusFlag)
 {
   if (!active || !file.available())
   {
+    Serial.println("[PROCESS]: No active file or file not available.");
     active = false;
+    statusFlag = 0;
     if (cancelled)
     {
       UIMenuService::getInstance().statusScreen("", 0, "", workingFlag);
@@ -253,6 +255,10 @@ void AutoModeController::readFile(File &file, point &actualPoint, int workingFla
   FeedbackService::getInstance().calculateTotalLines(file);
   int currentLine = FeedbackService::getInstance().getCurrentLine();
   IoHwAb_RTC::getInstance().startTimer();
+
+  Serial.println("[PROCESS]: Reading G-code file...");
+  statusFlag = 1; // Đặt cờ trạng thái đang đọc file
+  active = true;
 
   char c = file.read();
 
@@ -270,8 +276,8 @@ void AutoModeController::readFile(File &file, point &actualPoint, int workingFla
       // Xử lý dòng lệnh G-code thực tế
       GcodeParserService::getInstance().processIncomingLine(line, lineIndex, actualPoint);
       currentLine++;
-      FeedbackService::getInstance().calculatePercentage(currentLine, FeedbackService::getInstance().getTotalLines());
-      UIMenuService::getInstance().statusScreen(file.name(), FeedbackService::getInstance().getPercentage(), IoHwAb_RTC::getInstance().getElapsedTime(), workingFlag);
+      percentage = FeedbackService::getInstance().calculatePercentage(currentLine, FeedbackService::getInstance().getTotalLines());
+      time = IoHwAb_RTC::getInstance().getElapsedTime();
       Serial.println("ok");
 
       // Reset buffer
@@ -338,7 +344,7 @@ void AutoModeController::getGcodeFile(const String &filename)
 
 void AutoModeController::runSD(int workingFlag)
 {
-  readFile(gcodeFile, data, workingFlag);
+  readFile(gcodeFile, data, workingFlag, percentage, time, statusFlag);
 }
 
 void AutoModeController::cancelSD()
@@ -400,4 +406,19 @@ void AutoModeController::continueSD()
   active = true;
   paused = false;
   Serial.println("Continuing reading G-code file...");
+}
+
+int AutoModeController::getPercentage() const
+{
+  return percentage;
+}
+
+String AutoModeController::getTime() const
+{
+  return time;
+}
+
+int AutoModeController::getStatusFlag() const
+{
+  return statusFlag;
 }

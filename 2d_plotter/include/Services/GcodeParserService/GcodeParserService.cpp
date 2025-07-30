@@ -16,6 +16,8 @@ void GcodeParserService::setup()
 
 void GcodeParserService::processIncomingLine(char *line, int charNB, point &actualPos)
 {
+  Serial.println("[PROCESS]: Processing Incoming Line");
+
   // Kiểm tra lệnh rỗng hoặc lệnh trạng thái GRBL
   if (line[0] == '\0' || strcmp(line, "?") == 0)
   {

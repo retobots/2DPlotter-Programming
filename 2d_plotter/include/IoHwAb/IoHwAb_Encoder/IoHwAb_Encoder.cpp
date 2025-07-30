@@ -33,8 +33,8 @@ void IoHwAb_Encoder::setup()
 {
   Serial.println("[SET UP]: Rotary Encoder Starting Setup!");
   // Cấu hình encoder
-  pinMode(PIN_CLK, INPUT);
-  pinMode(PIN_DT, INPUT);
+  pinMode(PIN_CLK, INPUT_PULLUP);
+  pinMode(PIN_DT, INPUT_PULLUP);
   pinMode(PIN_SW, INPUT_PULLUP);
   lastCLK = digitalRead(PIN_CLK);
 
@@ -48,9 +48,15 @@ void IoHwAb_Encoder::readEncoder()
 {
   int currentCLK = digitalRead(PIN_CLK);
 
+  // Serial.print("Encoder CLK state: ");
+  // Serial.println(currentCLK);
+
   if (currentCLK != lastCLK && currentCLK == LOW)
   { // Sườn xuống
     int dtState = digitalRead(PIN_DT);
+
+    // Serial.print("Encoder DT state: ");
+    // Serial.println(dtState);
 
     if (dtState != currentCLK)
     {
