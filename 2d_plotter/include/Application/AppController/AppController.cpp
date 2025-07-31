@@ -164,6 +164,7 @@ void AppController::runUGSMenu()
   while (1)
   {
     IoHwAb_Encoder::getInstance().readEncoder();
+    AutoModeController::getInstance().runSerial();
 
     if (IoHwAb_Encoder::getInstance().scrollUp() || IoHwAb_Encoder::getInstance().scrollDown())
     {

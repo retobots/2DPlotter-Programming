@@ -2,6 +2,7 @@
 #include <Arduino.h>
 #include "Settings.h"
 #include "IoHwAb_Stepper.h"
+#include "IoHwAb_Servo.h"
 
 class MotionControlService
 {
@@ -16,7 +17,9 @@ public:
 
   void setup();
   void drawLine(float xPos, float yPos);
+  void moveTo(float xPos, float yPos);
   void stop();
-
+  void drawArcCW(float xStart, float yStart, float xEnd, float yEnd, float iOffset, float jOffset);
+  void drawArcCCW(float xStart, float yStart, float xEnd, float yEnd, float iOffset, float jOffset);
   void updateData(point &newData);
 };

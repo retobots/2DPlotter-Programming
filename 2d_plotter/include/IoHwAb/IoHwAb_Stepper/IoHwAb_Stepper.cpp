@@ -16,10 +16,6 @@ void IoHwAb_Stepper::setup()
 {
   Serial.println("[SET UP]: Stepper Motor Starting Setup!");
 
-  // pinMode(ENABLE, OUTPUT);
-
-  // digitalWrite(ENABLE, LOW);
-
   if (stepperX == nullptr || stepperY == nullptr)
   {
     return;

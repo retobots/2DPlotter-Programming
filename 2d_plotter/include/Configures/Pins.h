@@ -2,8 +2,6 @@
 
 #include <Arduino.h>
 
-#define ENABLE 5
-
 // Stepper Motor - Trục X
 #define PIN_X_STEP 27
 #define PIN_X_DIR 14

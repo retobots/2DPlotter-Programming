@@ -32,8 +32,6 @@ void AutoModeController::readSerial(point &actualPoint)
   {
     c = Serial.read();
 
-    Serial.println(c);
-
     // Xử lý ký tự thời gian thực của GRBL
     if (c == '!')
     { // Feed hold
