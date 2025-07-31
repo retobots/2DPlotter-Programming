@@ -77,7 +77,6 @@ void MotionControlService::moveTo(float xPos, float yPos)
 
 void MotionControlService::drawArcCW(float xStart, float yStart, float xEnd, float yEnd, float iOffset, float jOffset)
 {
-  const int segments = 50; // chia cung thành 50 đoạn nhỏ
   float cx = xStart + iOffset;
   float cy = yStart + jOffset;
 
@@ -90,7 +89,10 @@ void MotionControlService::drawArcCW(float xStart, float yStart, float xEnd, flo
   if (endAngle > startAngle)
     endAngle -= 2 * PI;
 
-  for (int i = 1; i <= segments; ++i)
+  float arcLength = abs(endAngle - startAngle) * radius;
+  int segments = max((int)(arcLength / 1.0), 1); // mỗi đoạn ~1mm
+
+  for (int i = 0; i <= segments; ++i)
   {
     float angle = startAngle + (endAngle - startAngle) * (i / (float)segments);
     float x = cx + radius * cos(angle);
@@ -104,7 +106,6 @@ void MotionControlService::drawArcCW(float xStart, float yStart, float xEnd, flo
 
 void MotionControlService::drawArcCCW(float xStart, float yStart, float xEnd, float yEnd, float iOffset, float jOffset)
 {
-  const int segments = 50;
   float cx = xStart + iOffset;
   float cy = yStart + jOffset;
 
@@ -117,7 +118,10 @@ void MotionControlService::drawArcCCW(float xStart, float yStart, float xEnd, fl
   if (endAngle < startAngle)
     endAngle += 2 * PI;
 
-  for (int i = 1; i <= segments; ++i)
+  float arcLength = abs(endAngle - startAngle) * radius;
+  int segments = max((int)(arcLength / 1.0), 1); // mỗi đoạn ~1mm
+
+  for (int i = 0; i <= segments; ++i)
   {
     float angle = startAngle + (endAngle - startAngle) * (i / (float)segments);
     float x = cx + radius * cos(angle);
