@@ -30,7 +30,7 @@ int FeedbackService::calculateTotalLines(File &file)
     lineCount++;
   }
 
-  file.seek(0);
+  file.close();
 
   Serial.print("Total lines in file: ");
   Serial.println(lineCount);

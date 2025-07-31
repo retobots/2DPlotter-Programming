@@ -87,3 +87,29 @@ File &IoHwAb_SD::getFile(const String &filename)
   }
   return file;
 }
+
+char IoHwAb_SD::getCharFromVectorLine(int lineIndex, int charIndex)
+{
+  if (lineIndex >= 0 && lineIndex < fileContents.size())
+  {
+    String line = fileContents[lineIndex];
+
+    Serial.println("Get Line: " + line);
+
+    if (charIndex >= 0 && charIndex < line.length())
+    {
+      return line[charIndex];
+    }
+    // Nếu hết dòng, trả về '\n' để báo kết thúc dòng
+    if (charIndex == line.length())
+    {
+      return '\n';
+    }
+  }
+  return '\0'; // Trường hợp lỗi hoặc hết file
+}
+
+bool IoHwAb_SD::isFileContentsEmpty() const
+{
+  return fileContents.empty();
+}

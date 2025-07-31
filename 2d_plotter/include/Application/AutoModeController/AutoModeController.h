@@ -22,6 +22,9 @@ private:
   bool verbose = false;
   char line[LINE_BUFFER_LENGTH];
   char c;
+  int lineVectorIndex = 0;
+  int charVectorIndex = 0;
+  bool isLineFull = false;
 
   point data;
   File gcodeFile;

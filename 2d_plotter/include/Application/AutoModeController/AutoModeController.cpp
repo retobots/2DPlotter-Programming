@@ -235,7 +235,7 @@ void AutoModeController::readSerial(point &actualPoint)
 
 void AutoModeController::readFile(File &file, point &actualPoint, int workingFlag, int &percentage, String &time, int &statusFlag)
 {
-  if (!active || !file.available())
+  if (!active || IoHwAb_SD::getInstance().isFileContentsEmpty())
   {
     Serial.println("[PROCESS]: No active file or file not available.");
     active = false;
@@ -244,6 +244,7 @@ void AutoModeController::readFile(File &file, point &actualPoint, int workingFla
     {
       UIMenuService::getInstance().statusScreen("", 0, "", workingFlag);
       IoHwAb_RTC::getInstance().changeStatus();
+      isInitialized = false; // Reset initialization state
     }
     if (!file.available())
       IoHwAb_RTC::getInstance().changeStatus();
@@ -252,6 +253,7 @@ void AutoModeController::readFile(File &file, point &actualPoint, int workingFla
   }
 
   int currentLine;
+
   // String filename = '/' + gcodeFile.name();
   // Serial.println("[PROCESS]: Taking G-code filename: " + filename);
 
@@ -265,82 +267,93 @@ void AutoModeController::readFile(File &file, point &actualPoint, int workingFla
     IoHwAb_RTC::getInstance().startTimer();
     isInitialized = true;
   }
-
-  Serial.println("[PROCESS]: Reading G-code file...");
   statusFlag = 1; // Đặt cờ trạng thái đang đọc file
   active = true;
+  isLineFull = false; // Reset trạng thái dòng đầy
 
-  char c = file.read();
-
-  // Kết thúc dòng
-  if ((c == '\n') || (c == '\r'))
+  while (!isLineFull)
   {
-    if (lineIndex > 0)
-    {
-      line[lineIndex] = '\0'; // Kết thúc chuỗi
 
-      // In ra dòng lệnh đang xử lý (tuỳ chọn)
-      Serial.print("G-code: ");
-      Serial.println(line);
+    char c = IoHwAb_SD::getInstance().getCharFromVectorLine(lineVectorIndex, charVectorIndex);
 
-      // Xử lý dòng lệnh G-code thực tế
-      GcodeParserService::getInstance().processIncomingLine(line, lineIndex, actualPoint);
-      currentLine++;
-      percentage = FeedbackService::getInstance().calculatePercentage(currentLine, FeedbackService::getInstance().getTotalLines());
-      time = IoHwAb_RTC::getInstance().getElapsedTime();
-      Serial.println("ok");
+    Serial.print("Get Char: ");
+    Serial.println(c);
 
-      // Reset buffer
-      lineIndex = 0;
-    }
-    else
+    // Kết thúc dòng
+    if ((c == '\n') || (c == '\r'))
     {
-      // Dòng trống hoặc chỉ comment → bỏ qua
-      lineIsComment = false;
-      lineSemiColon = false;
-    }
-  }
-  else
-  {
-    // Xử lý các ký tự đang đọc
-    if (lineIsComment || lineSemiColon)
-    {
-      if (c == ')')
-        lineIsComment = false;
-    }
-    else
-    {
-      if (c <= ' ')
+      if (lineIndex > 0)
       {
-        // Bỏ qua whitespace
-      }
-      else if (c == '/')
-      {
-        // Bỏ qua block delete
-      }
-      else if (c == '(')
-      {
-        lineIsComment = true;
-      }
-      else if (c == ';')
-      {
-        lineSemiColon = true;
-      }
-      else if (lineIndex >= LINE_BUFFER_LENGTH - 1)
-      {
-        Serial.println("ERROR - lineBuffer overflow");
+        line[lineIndex] = '\0'; // Kết thúc chuỗi
+
+        // In ra dòng lệnh đang xử lý (tuỳ chọn)
+        Serial.print("G-code: ");
+        Serial.println(line);
+
+        lineVectorIndex++;
+        charVectorIndex = 0;
+        isLineFull = true; // Đánh dấu đã đầy dòng
+
+        // Xử lý dòng lệnh G-code thực tế
+        GcodeParserService::getInstance().processIncomingLine(line, lineIndex, actualPoint);
+        currentLine++;
+        percentage = FeedbackService::getInstance().calculatePercentage(currentLine, FeedbackService::getInstance().getTotalLines());
+        time = IoHwAb_RTC::getInstance().getElapsedTime();
+        Serial.println("ok");
+
+        // Reset buffer
         lineIndex = 0;
-        lineIsComment = false;
-        lineSemiColon = false;
-      }
-      else if (c >= 'a' && c <= 'z')
-      {
-        line[lineIndex++] = c - 'a' + 'A'; // Viết hoa
       }
       else
       {
-        line[lineIndex++] = c;
+        // Dòng trống hoặc chỉ comment → bỏ qua
+        lineIsComment = false;
+        lineSemiColon = false;
       }
+    }
+    else
+    {
+      // Xử lý các ký tự đang đọc
+      if (lineIsComment || lineSemiColon)
+      {
+        if (c == ')')
+          lineIsComment = false;
+      }
+      else
+      {
+        if (c <= ' ')
+        {
+          // Bỏ qua whitespace
+        }
+        else if (c == '/')
+        {
+          // Bỏ qua block delete
+        }
+        else if (c == '(')
+        {
+          lineIsComment = true;
+        }
+        else if (c == ';')
+        {
+          lineSemiColon = true;
+        }
+        else if (lineIndex >= LINE_BUFFER_LENGTH - 1)
+        {
+          Serial.println("ERROR - lineBuffer overflow");
+          lineIndex = 0;
+          lineIsComment = false;
+          lineSemiColon = false;
+        }
+        else if (c >= 'a' && c <= 'z')
+        {
+          line[lineIndex++] = c - 'a' + 'A'; // Viết hoa
+        }
+        else
+        {
+          line[lineIndex++] = c;
+        }
+      }
+      charVectorIndex++;
     }
   }
 }

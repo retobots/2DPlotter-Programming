@@ -33,4 +33,8 @@ public:
   void readSelectedFile(String &filename);
 
   File &getFile(const String &filename);
+
+  char getCharFromVectorLine(int lineIndex, int charIndex);
+
+  bool isFileContentsEmpty() const;
 };

@@ -249,6 +249,7 @@ void AppController::opening()
 void AppController::runSDMode()
 {
   IoHwAb_LCD::getInstance().clear();
+  IoHwAb_SD::getInstance().readSelectedFile("/" + selectedFile);
   AutoModeController::getInstance().getGcodeFile("/" + selectedFile);
   UIMenuService::getInstance().statusScreen(selectedFile, 0,
                                             "00:00:00",
