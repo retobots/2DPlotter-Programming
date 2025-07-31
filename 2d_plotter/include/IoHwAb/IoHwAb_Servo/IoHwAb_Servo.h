@@ -1,6 +1,5 @@
 #pragma once
 #include <Arduino.h>
-#include <ESP32Servo.h>
 #include "Pins.h"
 #include "Settings.h"
 
@@ -8,7 +7,8 @@ class IoHwAb_Servo
 {
 private:
   IoHwAb_Servo();
-  Servo myServo;
+
+  void setServoAngle(int angle);
 
 public:
   static IoHwAb_Servo &getInstance();

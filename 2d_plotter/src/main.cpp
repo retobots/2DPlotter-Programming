@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "AppController.h"
+#include "IoHwAb_Servo.h"
 
 void setup()
 {
@@ -7,8 +8,6 @@ void setup()
     Serial.begin(115200);  // Khởi tạo Serial với tốc độ 115200 bps
     // Khởi tạo app controller
     AppController::getInstance().setup();
-
-    pinMode(PIN_CLK, INPUT_PULLUP);
 }
 
 void loop()
@@ -68,4 +67,35 @@ void loop()
 //             Serial.println("Đi tới vị trí xa...");
 //         }
 //     }
+// }
+// #include <Arduino.h>
+
+// #define SERVO_PIN 25
+
+// void setup()
+// {
+//     Serial.begin(115200);
+//     ledcSetup(0, 50, 16);        // Channel 0, 50Hz, 16-bit resolution
+//     ledcAttachPin(SERVO_PIN, 0); // Attach pin 25 to channel 0
+//     Serial.println("[SET UP]: Raw PWM Servo Setup Done!");
+// }
+
+// void setServoAngle(int angle)
+// {
+//     // Map angle (0-180) to pulse width (500-2500us)
+//     int pulseWidth = map(angle, 0, 180, 500, 2500);
+//     // Convert pulse width to duty cycle (for 16-bit, 50Hz)
+//     uint32_t duty = (pulseWidth * 65535) / 20000;
+//     ledcWrite(0, duty);
+// }
+
+// void loop()
+// {
+//     Serial.println("[PROCESS]: Lifting Pen");
+//     setServoAngle(90); // Lift pen
+//     delay(1000);
+
+//     Serial.println("[PROCESS]: Dropping Pen");
+//     setServoAngle(0); // Drop pen
+//     delay(1000);
 // }

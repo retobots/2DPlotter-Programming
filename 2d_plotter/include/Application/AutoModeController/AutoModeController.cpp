@@ -14,6 +14,7 @@ void AutoModeController::setup()
 {
   IoHwAb_RTC::getInstance().setup();
   IoHwAb_SD::getInstance().setup();
+  IoHwAb_Servo::getInstance().setup();
   GcodeParserService::getInstance().setup();
   MotionControlService::getInstance().setup();
 
@@ -250,9 +251,20 @@ void AutoModeController::readFile(File &file, point &actualPoint, int workingFla
     return;
   }
 
-  FeedbackService::getInstance().calculateTotalLines(file);
-  int currentLine = FeedbackService::getInstance().getCurrentLine();
-  IoHwAb_RTC::getInstance().startTimer();
+  int currentLine;
+  // String filename = '/' + gcodeFile.name();
+  // Serial.println("[PROCESS]: Taking G-code filename: " + filename);
+
+  // Initialize
+  if (!isInitialized)
+  {
+    FeedbackService::getInstance().calculateTotalLines(file);
+    currentLine = FeedbackService::getInstance().getCurrentLine();
+    // file.seek(0);
+    // Start timer
+    IoHwAb_RTC::getInstance().startTimer();
+    isInitialized = true;
+  }
 
   Serial.println("[PROCESS]: Reading G-code file...");
   statusFlag = 1; // Đặt cờ trạng thái đang đọc file

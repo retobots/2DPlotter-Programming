@@ -23,12 +23,15 @@ int FeedbackService::calculateTotalLines(File &file)
   }
 
   int lineCount = 0;
+
   while (file.available())
   {
     String line = file.readStringUntil('\n');
     lineCount++;
   }
-  file.close();
+
+  file.seek(0);
+
   Serial.print("Total lines in file: ");
   Serial.println(lineCount);
   totalLines = lineCount; // Lưu tổng số dòng

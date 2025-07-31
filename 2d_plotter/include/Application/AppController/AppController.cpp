@@ -249,7 +249,7 @@ void AppController::opening()
 void AppController::runSDMode()
 {
   IoHwAb_LCD::getInstance().clear();
-  AutoModeController::getInstance().getGcodeFile(selectedFile);
+  AutoModeController::getInstance().getGcodeFile("/" + selectedFile);
   UIMenuService::getInstance().statusScreen(selectedFile, 0,
                                             "00:00:00",
                                             workingFlag);

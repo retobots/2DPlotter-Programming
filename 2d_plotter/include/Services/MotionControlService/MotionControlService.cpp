@@ -61,8 +61,8 @@ void MotionControlService::moveTo(float xPos, float yPos)
   long xSteps = xPos * STEPS_PER_MM_X;
   long ySteps = yPos * STEPS_PER_MM_Y;
 
-  // Nâng bút trước khi di chuyển
-  IoHwAb_Servo::getInstance().liftPen();
+  // // Nâng bút trước khi di chuyển
+  // IoHwAb_Servo::getInstance().liftPen();
 
   // Gửi lệnh di chuyển
   IoHwAb_Stepper::getInstance().moveTo(xSteps, ySteps);

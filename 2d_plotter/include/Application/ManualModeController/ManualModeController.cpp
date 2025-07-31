@@ -13,7 +13,6 @@ ManualModeController &ManualModeController::getInstance()
 void ManualModeController::setup()
 {
   IoHwAb_PS4::getInstance().setup();
-  MotionControlService::getInstance().setup();
 
   // Logging
   Serial.println("[SET UP]: Manual Controller Done!");
