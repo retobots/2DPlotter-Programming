@@ -39,20 +39,20 @@ public:
 
   void run();
 
-private:
-  AppController();
-
   uint8_t modeFlag = AUTOMODE;
   uint8_t workingFlag = WORKING_STATE;
   uint8_t workingStateFlag = PAUSE;
   uint8_t autoModeFlag = UGS;
   State currentState = State::MAIN_MENU;
 
-  // Vector to hold file names
-  vector<String> fileList;
-
   // Variable to save the selected file name
   String selectedFile;
+
+private:
+  AppController();
+
+  // Vector to hold file names
+  vector<String> fileList;
 
   void runMainMenu();
 
@@ -68,3 +68,7 @@ private:
 
   void runSDMode();
 };
+
+void taskRunSD(void *pvParameters);
+
+void taskUI(void *pvParameters);

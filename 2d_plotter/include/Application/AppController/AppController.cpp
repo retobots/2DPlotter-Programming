@@ -248,63 +248,27 @@ void AppController::opening()
 
 void AppController::runSDMode()
 {
+  // 1. Clear màn hình, load file
   IoHwAb_LCD::getInstance().clear();
-  IoHwAb_SD::getInstance().readSelectedFile("/" + selectedFile);
-  AutoModeController::getInstance().getGcodeFile("/" + selectedFile);
-  UIMenuService::getInstance().statusScreen(selectedFile, 0,
-                                            "00:00:00",
-                                            workingFlag);
+  IoHwAb_SD::getInstance().readSelectedFile("/" + AppController::getInstance().selectedFile);
+  AutoModeController::getInstance().getGcodeFile("/" + AppController::getInstance().selectedFile);
 
-  while (1)
+  // 2. Hiển thị màn hình ban đầu
+  UIMenuService::getInstance().statusScreen(
+      AppController::getInstance().selectedFile,
+      0,
+      "00:00:00",
+      AppController::getInstance().workingFlag);
+
+  // 3. Tạo task xử lý G-code
+  xTaskCreatePinnedToCore(taskRunSD, "RunSD", 4096, NULL, 2, NULL, 1); // Core 1
+
+  // 4. Tạo task giao diện
+  xTaskCreatePinnedToCore(taskUI, "UI", 4096, NULL, 2, NULL, 0); // Core 0
+
+  // 5. (Tuỳ chọn) Đợi đến khi task UI kết thúc → thoát về menu
+  while (AppController::getInstance().currentState == State::SD_MENU)
   {
-    IoHwAb_Encoder::getInstance().readEncoder();
-
-    AutoModeController::getInstance().runSD(workingFlag);
-    UIMenuService::getInstance().statusScreen(selectedFile,
-                                              AutoModeController::getInstance().getPercentage(),
-                                              AutoModeController::getInstance().getTime(),
-                                              workingFlag);
-
-    if (IoHwAb_Encoder::getInstance().scrollUp() || IoHwAb_Encoder::getInstance().scrollDown())
-    {
-      IoHwAb_Buzzer::getInstance().beepOnce();
-      bool isUp = IoHwAb_Encoder::getInstance().scrollUp();
-      workingFlag = (isUp) ? (workingFlag + 1) % 3 : (workingFlag + 2) % 3;
-      IoHwAb_LCD::getInstance().clear();
-      UIMenuService::getInstance().statusScreen(selectedFile, AutoModeController::getInstance().getPercentage(),
-                                                AutoModeController::getInstance().getTime(),
-                                                workingFlag);
-    }
-
-    if (IoHwAb_Encoder::getInstance().isRotaryPressed())
-    {
-      IoHwAb_Buzzer::getInstance().beepOnce();
-      if (workingFlag == WORKING_STATE)
-      {
-        if (workingStateFlag == PAUSE)
-        {
-          Serial.println("Pause");
-          AutoModeController::getInstance().pauseSD();
-          workingStateFlag = CONTINUE;
-        }
-        else
-        {
-          Serial.println("Continue");
-          AutoModeController::getInstance().continueSD();
-          workingStateFlag = PAUSE;
-        }
-      }
-      else if (workingFlag == CANCEL)
-      {
-        Serial.println("Cancel");
-        AutoModeController::getInstance().cancelSD();
-        AutoModeController::getInstance().resetSD();
-      }
-      else
-      {
-        currentState = State::SD_MENU;
-        break;
-      }
-    }
+    vTaskDelay(pdMS_TO_TICKS(100)); // Poll mỗi 100ms
   }
 }
