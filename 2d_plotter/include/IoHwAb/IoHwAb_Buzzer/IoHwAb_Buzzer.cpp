@@ -26,9 +26,9 @@ IoHwAb_Buzzer &IoHwAb_Buzzer::getInstance()
 void IoHwAb_Buzzer::setup()
 {
   Serial.println("[SET UP]: Buzzer Starting Setup!");
-  // Setup
-  ledcSetup(BUZZER_CHANNEL, 2000, 8); // tần số 2kHz, độ phân giải 8-bit
-  ledcAttachPin(PIN_BUZZER, BUZZER_CHANNEL);
+  // Simple digital I/O setup - no PWM conflicts
+  pinMode(PIN_BUZZER, OUTPUT);
+  digitalWrite(PIN_BUZZER, LOW); // Start with buzzer off
 
   // Logging
   Serial.println("[SET UP]: Buzzer Done!");
@@ -38,16 +38,34 @@ void IoHwAb_Buzzer::setup()
 
 void IoHwAb_Buzzer::buzzerTone(int freq)
 {
-  ledcAttachPin(PIN_BUZZER, BUZZER_CHANNEL);
-  ledcWriteTone(BUZZER_CHANNEL, freq);
+  // Generate tone using digitalWrite with calculated timing
+  if (freq > 0)
+  {
+    Serial.print("[BUZZER]: Playing tone at ");
+    Serial.print(freq);
+    Serial.println(" Hz");
+
+    // Calculate half period in microseconds
+    unsigned long halfPeriod = 1000000 / (freq * 2);
+
+    // Play tone for a short duration (100ms)
+    unsigned long startTime = millis();
+    while (millis() - startTime < 100)
+    {
+      digitalWrite(PIN_BUZZER, HIGH);
+      delayMicroseconds(halfPeriod);
+      digitalWrite(PIN_BUZZER, LOW);
+      delayMicroseconds(halfPeriod);
+    }
+  }
 }
 
 /*<===================================================>*/
 
 void IoHwAb_Buzzer::buzzerStop()
 {
-  ledcWriteTone(BUZZER_CHANNEL, 0);
-  ledcDetachPin(PIN_BUZZER);
+  digitalWrite(PIN_BUZZER, LOW);
+  Serial.println("[BUZZER]: Stopped");
 }
 
 /*<===================================================>*/
@@ -55,10 +73,10 @@ void IoHwAb_Buzzer::buzzerStop()
 void IoHwAb_Buzzer::beepOnce()
 {
   // Logging
-  Serial.println("Beep!");
+  Serial.println("[BUZZER]: Beep!");
 
-  buzzerTone(2000); // Tạo sóng âm 2kHz
-  delay(300);       // Kêu 300ms
+  buzzerTone(2000); // Tạo sóng âm 2kHz trong 100ms
+  delay(100);       // Small pause
   buzzerStop();     // Tắt buzzer
 }
 
@@ -66,16 +84,15 @@ void IoHwAb_Buzzer::beepOnce()
 
 void IoHwAb_Buzzer::startingSoundBuzzer()
 {
-  // Logging
-  Serial.println("Buzzer khởi động - Played!");
+  Serial.println("[BUZZER]: Playing startup melody");
 
   int melody[] = {523, 659, 784, 1047}; // C5, E5, G5, C6
   int duration[] = {200, 200, 300, 400};
 
   for (int i = 0; i < 4; i++)
   {
-    buzzerTone(melody[i]);
-    delay(duration[i]);
+    buzzerTone(melody[i]);    // This already includes the tone duration (100ms)
+    delay(duration[i] - 100); // Additional delay minus the tone duration
   }
   buzzerStop();
 }

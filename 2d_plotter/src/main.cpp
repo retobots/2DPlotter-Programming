@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include "AppController.h"
 #include "IoHwAb_Servo.h"
+#include "IoHwAb_Buzzer.h"
 
 void setup()
 {
@@ -15,6 +16,13 @@ void loop()
     Serial.println("[PROCESS]: Running Application Loop");
     // Chạy ứng dụng chính
     AppController::getInstance().run();
+
+    // IoHwAb_Servo::getInstance().dropPen();
+    // IoHwAb_Buzzer::getInstance().beepOnce();
+    // delay(5000);
+    // IoHwAb_Servo::getInstance().liftPen();
+    // IoHwAb_Buzzer::getInstance().beepOnce();
+    // delay(5000);
 }
 
 // #include <AccelStepper.h>

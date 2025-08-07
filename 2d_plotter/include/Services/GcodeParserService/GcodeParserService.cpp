@@ -16,7 +16,8 @@ void GcodeParserService::setup()
 
 void GcodeParserService::processIncomingLine(char *line, int charNB, point &actualPos)
 {
-  Serial.println("[PROCESS]: Processing Incoming Line");
+  Serial.print("Input: ");
+  Serial.println(line);
 
   if (line[0] == '\0' || strcmp(line, "?") == 0)
     return;
@@ -31,6 +32,7 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
   float iValue = 0.0, jValue = 0.0; // Tâm cung tương đối (dùng cho G02/G03)
   float feedrate = 0.0;
   bool hasX = false, hasY = false, hasZ = false, hasI = false, hasJ = false;
+  static bool penDown = false;
 
   while (currentIndex < charNB && line[currentIndex] != '\0')
   {
@@ -43,16 +45,24 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
     int i = 0;
     char sign = '+';
 
-    if (line[currentIndex] == '-' || line[currentIndex] == '+')
+    // Check bounds before reading sign
+    if (currentIndex < charNB && (line[currentIndex] == '-' || line[currentIndex] == '+'))
       sign = line[currentIndex++];
 
-    while ((isdigit(line[currentIndex]) || line[currentIndex] == '.') && i < sizeof(buffer) - 1)
+    // Check bounds in while condition
+    while (currentIndex < charNB &&
+           (isdigit(line[currentIndex]) || line[currentIndex] == '.') &&
+           i < sizeof(buffer) - 1)
       buffer[i++] = line[currentIndex++];
     buffer[i] = '\0';
 
-    float value = atof(buffer);
-    if (sign == '-')
-      value = -value;
+    float value = 0.0;
+    if (i > 0) // Only parse if we have data
+    {
+      value = atof(buffer);
+      if (sign == '-')
+        value = -value;
+    }
 
     switch (cmd)
     {
@@ -65,14 +75,16 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
 
       switch (mcode)
       {
-      case 3: // M3 – bật bút
+      case 3:
         IoHwAb_Servo::getInstance().dropPen();
         Serial.println("M3 → Pen Down");
+        penDown = true;
         break;
 
-      case 5: // M5 – tắt bút
+      case 5:
         IoHwAb_Servo::getInstance().liftPen();
         Serial.println("M5 → Pen Up");
+        penDown = false;
         break;
 
       case 2:
@@ -90,11 +102,12 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
         break;
 
       case 300: // M300 S30 or S50 – servo control (Inkscape)
-        // Đọc ký tự tiếp theo
+        // Parse S parameter
         while (currentIndex < charNB && line[currentIndex] != '\0')
         {
-          if (line[currentIndex++] == 'S')
+          if (line[currentIndex] == 'S')
           {
+            currentIndex++; // Skip 'S'
             int i = 0;
             char sBuffer[10];
             while (currentIndex < charNB &&
@@ -105,23 +118,34 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
               sBuffer[i++] = line[currentIndex++];
             }
             sBuffer[i] = '\0';
-            int sval = atoi(sBuffer);
 
-            if (sval == 30)
+            if (i > 0) // Only parse if we have data
             {
-              IoHwAb_Servo::getInstance().dropPen();
-              Serial.println("M300 S30 → Pen Down");
+              int sval = atoi(sBuffer);
+
+              if (sval == 30)
+              {
+                IoHwAb_Servo::getInstance().dropPen();
+                Serial.println("M300 S30 → Pen Down");
+                penDown = true;
+              }
+              else if (sval == 50)
+              {
+                IoHwAb_Servo::getInstance().liftPen();
+                Serial.println("M300 S50 → Pen Up");
+                penDown = false;
+              }
+              else
+              {
+                Serial.print("M300 unknown S value: ");
+                Serial.println(sval);
+              }
             }
-            else if (sval == 50)
-            {
-              IoHwAb_Servo::getInstance().liftPen();
-              Serial.println("M300 S50 → Pen Up");
-            }
-            else
-            {
-              Serial.print("M300 unknown S value: ");
-              Serial.println(sval);
-            }
+            break; // Exit after processing S parameter
+          }
+          else
+          {
+            currentIndex++; // Skip non-S characters
           }
         }
         break;
@@ -163,20 +187,45 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
     }
   }
 
-  // === Điều khiển bút vẽ ===
-  static bool penDown = false;
+  // === Debug output ===
+  if (gcode >= 0)
+  {
+    Serial.print("Parsed G-code: G");
+    Serial.println(gcode);
+  }
+  if (hasX || hasY)
+  {
+    Serial.print("Target: X=");
+    Serial.print(newPos.x, 3);
+    Serial.print(" Y=");
+    Serial.println(newPos.y, 3);
+  }
   if (hasZ)
+  {
+    Serial.print("Z=");
+    Serial.println(zValue, 3);
+  }
+  if (hasI || hasJ)
+  {
+    Serial.print("Arc center offset: I=");
+    Serial.print(iValue, 6);
+    Serial.print(" J=");
+    Serial.println(jValue, 6);
+  }
+
+  // === Điều khiển bút vẽ (chỉ cho G00/G01, không cho G02/G03) ===
+  if (hasZ && (gcode == 0 || gcode == 1 || gcode == -1))
   {
     if (zValue < 0 && !penDown)
     {
       IoHwAb_Servo::getInstance().dropPen();
-      Serial.println("Pen Down");
+      Serial.println("Z-axis: Pen Down");
       penDown = true;
     }
     else if (zValue > 0 && penDown)
     {
       IoHwAb_Servo::getInstance().liftPen();
-      Serial.println("Pen Up");
+      Serial.println("Z-axis: Pen Up");
       penDown = false;
     }
   }
@@ -261,4 +310,5 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
   }
 
   Serial.println("ok");
+  delay(500);
 }

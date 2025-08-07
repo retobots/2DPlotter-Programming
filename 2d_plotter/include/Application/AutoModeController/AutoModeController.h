@@ -26,7 +26,7 @@ private:
   int charVectorIndex = 0;
   bool isLineFull = false;
 
-  point data;
+  point data = {0.0, 0.0};
   File gcodeFile;
   bool active = true;
   bool paused = false;

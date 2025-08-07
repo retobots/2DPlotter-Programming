@@ -61,9 +61,6 @@ void AutoModeController::readSerial(point &actualPoint)
       {
         line[lineIndex] = '\0'; // Kết thúc chuỗi
 
-        Serial.print("Lệnh nhận được: ");
-        Serial.println(line);
-
         // Xử lý các lệnh GRBL
         if (strcmp(line, "?") == 0)
         {
@@ -175,7 +172,6 @@ void AutoModeController::readSerial(point &actualPoint)
           Serial.println(line);
         }
         GcodeParserService::getInstance().processIncomingLine(line, lineIndex, actualPoint);
-        Serial.println("ok");
         lineIndex = 0;
       }
       else
@@ -183,6 +179,7 @@ void AutoModeController::readSerial(point &actualPoint)
         // Bỏ qua dòng trống hoặc comment
         lineIsComment = false;
         lineSemiColon = false;
+        lineIndex = 0; // Reset lineIndex để tránh lỗi
       }
     }
     else
@@ -226,7 +223,13 @@ void AutoModeController::readSerial(point &actualPoint)
         }
         else
         {
-          line[lineIndex++] = c; // Lưu ký tự
+          if (lineIndex < LINE_BUFFER_LENGTH - 1)
+            line[lineIndex++] = c;
+          else
+          {
+            Serial.println("ERROR - buffer overflow");
+            lineIndex = 0;
+          }
         }
       }
     }

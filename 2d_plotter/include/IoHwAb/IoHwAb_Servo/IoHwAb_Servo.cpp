@@ -14,8 +14,13 @@ void IoHwAb_Servo::setup()
 {
   Serial.println("[SET UP]: Servo Starting Setup!");
 
-  // Gắn servo vào chân PWM
-  pinMode(PIN_SERVO, OUTPUT);
+  // Configure PWM for servo control
+  // frequency: 50Hz, resolution: 16-bit, channel: 0
+  ledcSetup(servoChannel, 50, 16); // 50Hz, 16-bit resolution
+  ledcAttachPin(PIN_SERVO, servoChannel);
+
+  // Initialize servo to middle position
+  dropPen();
 
   // Logging
   Serial.println("[SET UP]: Servo Done!");
@@ -23,28 +28,33 @@ void IoHwAb_Servo::setup()
 
 void IoHwAb_Servo::setServoAngle(int angle)
 {
-  // Map angle (0-180) to pulse width (500-2500us)
-  int pulseWidth = map(angle, 0, 180, 500, 2500);
-  // Convert pulse width to duty cycle (for 16-bit, 50Hz)
-  for (int i = 0; i < 50; i++)
-  { // Send pulses for 1 second
-    digitalWrite(PIN_SERVO, HIGH);
-    delayMicroseconds(pulseWidth);
-    digitalWrite(PIN_SERVO, LOW);
-    delayMicroseconds(20000 - pulseWidth);
-  }
+  // Clamp angle to valid range
+  angle = constrain(angle, 0, 180);
+
+  // Map angle (0-180) to duty cycle (1638-8192 for 16-bit, 50Hz)
+  // 1ms = 1638, 1.5ms = 4915, 2ms = 8192
+  int dutyCycle = map(angle, 0, 180, 1638, 8192);
+
+  // Set PWM duty cycle - this maintains the signal continuously
+  ledcWrite(servoChannel, dutyCycle);
+
+  Serial.print("[SERVO]: Set angle to ");
+  Serial.print(angle);
+  Serial.print("° (duty: ");
+  Serial.print(dutyCycle);
+  Serial.println(")");
 }
 
 void IoHwAb_Servo::liftPen()
 {
-  // Góc nâng bút
+  Serial.println("[SERVO]: Lifting pen...");
   setServoAngle(PEN_UP_ANGLE);
-  delay(300);
+  delay(500); // Wait for servo to reach position
 }
 
 void IoHwAb_Servo::dropPen()
 {
-  // Góc hạ bút
+  Serial.println("[SERVO]: Dropping pen...");
   setServoAngle(PEN_DOWN_ANGLE);
-  delay(300);
+  delay(500); // Wait for servo to reach position
 }

@@ -7,7 +7,7 @@ class IoHwAb_Servo
 {
 private:
   IoHwAb_Servo();
-
+  int servoChannel = 1; // PWM channel 1 for ESP32 (avoid conflict with buzzer channel 0)
   void setServoAngle(int angle);
 
 public:

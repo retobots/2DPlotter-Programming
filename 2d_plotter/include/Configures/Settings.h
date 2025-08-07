@@ -9,8 +9,8 @@ typedef struct point
 /*========== SERVO SETTING ==========*/
 
 // Góc servo nhấc/hạ bút
-#define PEN_DOWN_ANGLE 30
-#define PEN_UP_ANGLE 90
+#define PEN_DOWN_ANGLE 90
+#define PEN_UP_ANGLE 30
 
 /*=========== STEPPER SETTING ==========*/
 
@@ -24,9 +24,9 @@ typedef struct point
 
 // Giới hạn toạ độ làm việc (theo mm)
 #define X_MIN 0.0
-#define X_MAX 200.0
+#define X_MAX 400.0
 #define Y_MIN 0.0
-#define Y_MAX 200.0
+#define Y_MAX 400.0
 
 // Thời gian delay sau mỗi bước
 #define STEP_DELAY_US 500

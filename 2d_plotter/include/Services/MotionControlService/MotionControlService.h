@@ -10,7 +10,7 @@ private:
   MotionControlService();
 
   // Data lưu dữ liệu
-  point Data;
+  point Data = {0.0, 0.0};
 
 public:
   static MotionControlService &getInstance();
