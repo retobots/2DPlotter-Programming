@@ -43,5 +43,7 @@ public:
 
   void loadingScreen();
 
-  void statusScreen(String filename, int percenum, String time, uint8_t workingStateMode);
+  void statusScreen(String filename, int percenum, String time, uint8_t workingStateMode, uint8_t workingStateFlag);
+
+  void UGSModeScreen();
 };

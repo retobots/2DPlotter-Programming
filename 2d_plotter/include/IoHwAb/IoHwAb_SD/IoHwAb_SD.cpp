@@ -94,7 +94,11 @@ char IoHwAb_SD::getCharFromVectorLine(int lineIndex, int charIndex)
   {
     String line = fileContents[lineIndex];
 
-    Serial.println("Get Line: " + line);
+    // Print the line only once when starting a new line
+    if (charIndex == 0)
+    {
+      Serial.println("Get Line: " + line);
+    }
 
     if (charIndex >= 0 && charIndex < line.length())
     {

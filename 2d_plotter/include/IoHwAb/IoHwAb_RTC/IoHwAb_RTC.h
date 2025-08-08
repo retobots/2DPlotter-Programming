@@ -22,4 +22,5 @@ public:
   void startTimer();
   String getElapsedTime();
   void changeStatus();
+  void resetTimer();
 };

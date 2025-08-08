@@ -47,8 +47,7 @@ void AppController::runSDMenu()
     if (state == State::SD_STATUS)
     {
       currentState = State::SD_STATUS;
-      runSDMode();
-      break;
+      break; // Remove recursive call, let main loop handle it
     }
 
     IoHwAb_Encoder::getInstance().readEncoder();
@@ -70,6 +69,9 @@ void AppController::runSDMenu()
       IoHwAb_Buzzer::getInstance().beepOnce();
       UIMenuService::getInstance().sdModeScreen(fileList, 2, ar_idx, startIndex, fileList.size(), state, selectedFile);
     }
+
+    // Add small delay to prevent tight loop
+    vTaskDelay(pdMS_TO_TICKS(5)); // Reduced for better encoder responsiveness
   }
 }
 
@@ -98,6 +100,9 @@ void AppController::runMainMenu()
       currentState = (modeFlag == AUTOMODE) ? State::AUTO_MODE : State::MANUAL_MODE;
       break;
     }
+
+    // Add small delay to prevent tight loop
+    vTaskDelay(pdMS_TO_TICKS(5)); // Reduced for better encoder responsiveness
   }
 }
 
@@ -137,6 +142,9 @@ void AppController::runAutoMode()
       }
       break;
     }
+
+    // Add small delay to prevent tight loop
+    vTaskDelay(pdMS_TO_TICKS(5)); // Reduced for better encoder responsiveness
   }
 }
 
@@ -151,6 +159,9 @@ void AppController::runManualMode()
     IoHwAb_LCD::getInstance().lcdDisplay("Manual Mode", IoHwAb_LCD::getInstance().getMiddleXCursor("Manual Mode"), 1);
     // ManualModeController::getInstance().run();
     // TODO: thêm logic nếu có cancel/exit
+
+    // Add delay to prevent tight loop
+    vTaskDelay(pdMS_TO_TICKS(50));
   }
 }
 
@@ -159,48 +170,24 @@ void AppController::runManualMode()
 void AppController::runUGSMenu()
 {
   IoHwAb_LCD::getInstance().clear();
-  UIMenuService::getInstance().serialModeScreen(workingFlag);
+  UIMenuService::getInstance().UGSModeScreen();
 
   while (1)
   {
     IoHwAb_Encoder::getInstance().readEncoder();
     AutoModeController::getInstance().runSerial();
 
-    if (IoHwAb_Encoder::getInstance().scrollUp() || IoHwAb_Encoder::getInstance().scrollDown())
-    {
-      IoHwAb_Buzzer::getInstance().beepOnce();
-      bool isUp = IoHwAb_Encoder::getInstance().scrollUp();
-      workingFlag = (isUp) ? (workingFlag + 1) % 3 : (workingFlag + 2) % 3;
-      IoHwAb_LCD::getInstance().clear();
-      UIMenuService::getInstance().serialModeScreen(workingFlag);
-    }
-
     if (IoHwAb_Encoder::getInstance().isRotaryPressed())
     {
       IoHwAb_Buzzer::getInstance().beepOnce();
-      if (workingFlag == WORKING_STATE)
-      {
-        if (workingStateFlag == PAUSE)
-        {
-          Serial.println("Pause");
-          workingStateFlag = CONTINUE;
-        }
-        else
-        {
-          Serial.println("Continue");
-          workingStateFlag = PAUSE;
-        }
-      }
-      else if (workingFlag == CANCEL)
-      {
-        Serial.println("Cancel");
-      }
-      else
-      {
-        currentState = State::AUTO_MODE;
-        break;
-      }
+
+      currentState = State::AUTO_MODE;
+      delay(200);
+      break;
     }
+
+    // Add small delay to prevent tight loop
+    vTaskDelay(pdMS_TO_TICKS(5)); // Reduced for better encoder responsiveness
   }
 }
 
@@ -227,7 +214,13 @@ void AppController::run()
   case SD_MENU:
     runSDMenu();
     break;
+  case SD_STATUS:
+    runSDMode();
+    break;
   }
+
+  // Add delay to prevent tight loop and reduce CPU usage
+  vTaskDelay(pdMS_TO_TICKS(5)); // Reduced for better overall responsiveness
 }
 
 /*<===================================================>*/
@@ -248,6 +241,10 @@ void AppController::opening()
 
 void AppController::runSDMode()
 {
+  // Ensure fresh control state for a new run
+  workingStateFlag = PAUSE;    // First action means "PAUSE" (press to pause)
+  workingFlag = WORKING_STATE; // Highlight the first option by default
+
   // 1. Clear màn hình, load file
   IoHwAb_LCD::getInstance().clear();
   IoHwAb_SD::getInstance().readSelectedFile("/" + AppController::getInstance().selectedFile);
@@ -258,17 +255,70 @@ void AppController::runSDMode()
       AppController::getInstance().selectedFile,
       0,
       "00:00:00",
-      AppController::getInstance().workingFlag);
+      AppController::getInstance().workingFlag,
+      AppController::getInstance().workingStateFlag);
 
-  // 3. Tạo task xử lý G-code
-  xTaskCreatePinnedToCore(taskRunSD, "RunSD", 4096, NULL, 2, NULL, 1); // Core 1
+  // Check available memory before creating tasks
+  Serial.printf("[DEBUG]: Free heap before task creation: %d bytes\n", ESP.getFreeHeap());
+  Serial.printf("[DEBUG]: Free stack space: %d bytes\n", uxTaskGetStackHighWaterMark(NULL));
 
-  // 4. Tạo task giao diện
-  xTaskCreatePinnedToCore(taskUI, "UI", 4096, NULL, 2, NULL, 0); // Core 0
+  // 3. Only create tasks if they don't already exist, otherwise resume them
+  if (taskRunSDHandle == NULL)
+  {
+    BaseType_t result1 = xTaskCreatePinnedToCore(taskRunSD, "RunSD", 4096, NULL, 2, &taskRunSDHandle, 1); // Core 1
+    if (result1 != pdPASS)
+    {
+      Serial.printf("[ERROR]: Failed to create RunSD task! Result: %d\n", result1);
+      Serial.printf("[ERROR]: Free heap after failure: %d bytes\n", ESP.getFreeHeap());
+      currentState = State::SD_MENU;
+      return;
+    }
+    else
+    {
+      Serial.println("[DEBUG]: RunSD task created");
+    }
+  }
+  else
+  {
+    // Resume if previously suspended
+    vTaskResume(taskRunSDHandle);
+    Serial.println("[DEBUG]: RunSD task resumed");
+  }
 
-  // 5. (Tuỳ chọn) Đợi đến khi task UI kết thúc → thoát về menu
-  while (AppController::getInstance().currentState == State::SD_MENU)
+  if (taskUIHandle == NULL)
+  {
+    BaseType_t result2 = xTaskCreatePinnedToCore(taskUI, "UI", 4096, NULL, 2, &taskUIHandle, 0); // Core 0
+    if (result2 != pdPASS)
+    {
+      Serial.printf("[ERROR]: Failed to create UI task! Result: %d\n", result2);
+      Serial.printf("[ERROR]: Free heap after failure: %d bytes\n", ESP.getFreeHeap());
+      // If UI task failed but RunSD exists, suspend it to keep system stable
+      if (taskRunSDHandle != NULL)
+      {
+        vTaskSuspend(taskRunSDHandle);
+      }
+      currentState = State::SD_MENU;
+      return;
+    }
+    else
+    {
+      Serial.println("[DEBUG]: UI task created");
+    }
+  }
+  else
+  {
+    vTaskResume(taskUIHandle);
+    Serial.println("[DEBUG]: UI task resumed");
+  }
+
+  Serial.println("[DEBUG]: Tasks ready (created or resumed)");
+
+  // 5. Đợi đến khi state đổi (Cancel/Back) → thoát về menu
+  while (AppController::getInstance().currentState == State::SD_STATUS)
   {
     vTaskDelay(pdMS_TO_TICKS(100)); // Poll mỗi 100ms
   }
+
+  Serial.println("[DEBUG]: Exiting SD mode - tasks will suspend themselves for reuse");
+  Serial.printf("[DEBUG]: Free heap after SD mode: %d bytes\n", ESP.getFreeHeap());
 }

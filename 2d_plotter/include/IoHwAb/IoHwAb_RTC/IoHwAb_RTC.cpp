@@ -62,3 +62,8 @@ void IoHwAb_RTC::changeStatus()
 {
   isStart = !isStart;
 }
+
+void IoHwAb_RTC::resetTimer()
+{
+  isStart = false;
+}

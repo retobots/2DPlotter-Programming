@@ -41,9 +41,9 @@ void IoHwAb_Buzzer::buzzerTone(int freq)
   // Generate tone using digitalWrite with calculated timing
   if (freq > 0)
   {
-    Serial.print("[BUZZER]: Playing tone at ");
-    Serial.print(freq);
-    Serial.println(" Hz");
+    // Serial.print("[BUZZER]: Playing tone at ");
+    // Serial.print(freq);
+    // Serial.println(" Hz");
 
     // Calculate half period in microseconds
     unsigned long halfPeriod = 1000000 / (freq * 2);

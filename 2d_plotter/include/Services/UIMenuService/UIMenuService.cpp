@@ -116,10 +116,10 @@ void UIMenuService::sdModeScreen(vector<String> files, int8_t signal, uint8_t &a
   int selectedFile = startIndex + ar_idx;
 
   /*=======DEBUG======*/
-  Serial.println("--------------------------------------");
-  Serial.printf("Selected file: %d\nStart Index: %d\nArrow Index: %d\nState: %d\n",
-                selectedFile, startIndex, ar_idx, state);
-  Serial.println("-------**************--------");
+  // Serial.println("--------------------------------------");
+  // Serial.printf("Selected file: %d\nStart Index: %d\nArrow Index: %d\nState: %d\n",
+  //               selectedFile, startIndex, ar_idx, state);
+  // Serial.println("-------**************--------");
 
   /*--- Xử lý dịch chỉ số ---*/
   if (signal == 1)
@@ -191,17 +191,17 @@ void UIMenuService::sdModeScreen(vector<String> files, int8_t signal, uint8_t &a
 
   /*========DEBUG=========*/
   selectedFile = startIndex + ar_idx;
-  Serial.println("--------------------------------------");
-  Serial.printf("Selected file: %d\nStart Index: %d\nArrow Index: %d\nState: %d\n",
-                selectedFile, startIndex, ar_idx, state);
-  Serial.println("-------**************--------");
+  //   Serial.println("--------------------------------------");
+  //   Serial.printf("Selected file: %d\nStart Index: %d\nArrow Index: %d\nState: %d\n",
+  //                 selectedFile, startIndex, ar_idx, state);
+  //   Serial.println("-------**************--------");
 }
 
 /*<===================================================>*/
 
 void UIMenuService::serialModeScreen(uint8_t workingStateMode)
 {
-  String title = "RCSA PLATFORM";
+  String title = "RGSA PLATFORM";
   // String percentage = "  % : " + String(percenum) + "%";
   // String filename = "File: " + file;
 
@@ -219,6 +219,15 @@ void UIMenuService::serialModeScreen(uint8_t workingStateMode)
   }
 }
 
+void UIMenuService::UGSModeScreen()
+{
+  String title = "RGSA PLATFORM";
+
+  IoHwAb_LCD::getInstance().lcdDisplay(title, IoHwAb_LCD::getInstance().getMiddleXCursor(title), 1);
+
+  IoHwAb_LCD::getInstance().lcdDisplay("> Back", 14, 3);
+}
+
 /*<===================================================>*/
 
 void UIMenuService::loadingScreen()
@@ -229,13 +238,15 @@ void UIMenuService::loadingScreen()
 
 /*<===================================================>*/
 
-void UIMenuService::statusScreen(String filename, int percenum, String time, uint8_t workingStateMode)
+void UIMenuService::statusScreen(String filename, int percenum, String time, uint8_t workingStateMode, uint8_t workingStateFlag)
 {
   String title = "File: " + filename;
   String percentage = "  % : " + String(percenum) + "%";
   String timeDisplay = "Time: " + time;
 
-  String options[3] = {"PAUSE", "CANCEL", "Back"};
+  // First option depends on pause/continue flag (0: PAUSE, 1: CONTINUE)
+  String option0 = (workingStateFlag == 0) ? "PAUSE" : "RESUME";
+  String options[3] = {option0, "CANCEL", "Back"};
   int positions[3] = {0, 7, 15};
 
   IoHwAb_LCD::getInstance().lcdDisplay(title, 0, 0);

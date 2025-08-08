@@ -2,9 +2,25 @@
 
 void taskRunSD(void *pvParameters)
 {
-    while (1)
+    Serial.println("[TASK]: G-code processing task started on Core 1");
+
+    for (;;)
     {
+        // Suspend when SD status screen is not active; resume will continue here
+        if (AppController::getInstance().currentState != State::SD_STATUS)
+        {
+            Serial.println("[TASK]: G-code processing task suspended");
+            vTaskSuspend(NULL);
+            Serial.println("[TASK]: G-code processing task resumed");
+            continue;
+        }
+
+        // Process one step of G-code
         AutoModeController::getInstance().runSD(AppController::getInstance().workingFlag);
-        vTaskDelay(pdMS_TO_TICKS(10)); // Adjust delay as needed
+
+        // Small delay to yield CPU
+        vTaskDelay(pdMS_TO_TICKS(5));
     }
+
+    // Should never reach here
 }

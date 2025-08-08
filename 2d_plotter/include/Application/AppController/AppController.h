@@ -48,6 +48,10 @@ public:
   // Variable to save the selected file name
   String selectedFile;
 
+  // Task handles for proper cleanup
+  TaskHandle_t taskRunSDHandle = NULL;
+  TaskHandle_t taskUIHandle = NULL;
+
 private:
   AppController();
 

@@ -236,51 +236,83 @@ void AutoModeController::readSerial(point &actualPoint)
   }
 }
 
+void AutoModeController::getGcodeFile(const String &filename)
+{
+  gcodeFile = IoHwAb_SD::getInstance().getFile(filename);
+  Serial.print("Opened G-code file: ");
+  Serial.println(filename);
+
+  // Prepare internal state for a fresh run
+  isInitialized = false;
+  active = true;
+  paused = false;
+  cancelled = false;
+  statusFlag = 0;
+  percentage = 0;
+
+  lineIndex = 0;
+  lineIsComment = false;
+  lineSemiColon = false;
+  isLineFull = false;
+  lineVectorIndex = 0;
+  charVectorIndex = 0;
+
+  // Reset current XY reference to machine minima for a clean start
+  data.x = X_MIN;
+  data.y = Y_MIN;
+  MotionControlService::getInstance().updateData(data);
+
+  // Reset feedback counters for a new file
+  FeedbackService::getInstance().getCurrentLine() = 0;
+
+  // Reset timer to 00:00:00 and start fresh when processing begins
+  IoHwAb_RTC::getInstance().resetTimer();
+}
+
 void AutoModeController::readFile(File &file, point &actualPoint, int workingFlag, int &percentage, String &time, int &statusFlag)
 {
-  if (!active || IoHwAb_SD::getInstance().isFileContentsEmpty())
+  // Respect control flags: do nothing if paused, inactive, or cancelled
+  if (paused || !active || cancelled)
   {
-    Serial.println("[PROCESS]: No active file or file not available.");
-    active = false;
-    statusFlag = 0;
-    if (cancelled)
-    {
-      UIMenuService::getInstance().statusScreen("", 0, "", workingFlag);
-      IoHwAb_RTC::getInstance().changeStatus();
-      isInitialized = false; // Reset initialization state
-    }
-    if (!file.available())
-      IoHwAb_RTC::getInstance().changeStatus();
-
     return;
   }
 
-  int currentLine;
+  // Only abort when SD buffered contents are empty
+  if (IoHwAb_SD::getInstance().isFileContentsEmpty())
+  {
+    Serial.println("[PROCESS]: File not available (empty contents).");
+    active = false;
+    statusFlag = 0;
+    return;
+  }
 
-  // String filename = '/' + gcodeFile.name();
-  // Serial.println("[PROCESS]: Taking G-code filename: " + filename);
-
-  // Initialize
+  // Initialize at the beginning of a new file processing session
   if (!isInitialized)
   {
+    // Reset parsing indices and flags
+    lineIndex = 0;
+    lineIsComment = false;
+    lineSemiColon = false;
+    isLineFull = false;
+    lineVectorIndex = 0;
+    charVectorIndex = 0;
+
+    // Recalc total lines and reset progress
     FeedbackService::getInstance().calculateTotalLines(file);
-    currentLine = FeedbackService::getInstance().getCurrentLine();
-    // file.seek(0);
+    FeedbackService::getInstance().getCurrentLine() = 0;
+    percentage = 0;
+
     // Start timer
     IoHwAb_RTC::getInstance().startTimer();
     isInitialized = true;
   }
-  statusFlag = 1; // Đặt cờ trạng thái đang đọc file
-  active = true;
+
+  statusFlag = 1;     // Đặt cờ trạng thái đang đọc file
   isLineFull = false; // Reset trạng thái dòng đầy
 
   while (!isLineFull)
   {
-
     char c = IoHwAb_SD::getInstance().getCharFromVectorLine(lineVectorIndex, charVectorIndex);
-
-    Serial.print("Get Char: ");
-    Serial.println(c);
 
     // Kết thúc dòng
     if ((c == '\n') || (c == '\r'))
@@ -299,9 +331,16 @@ void AutoModeController::readFile(File &file, point &actualPoint, int workingFla
 
         // Xử lý dòng lệnh G-code thực tế
         GcodeParserService::getInstance().processIncomingLine(line, lineIndex, actualPoint);
-        currentLine++;
-        percentage = FeedbackService::getInstance().calculatePercentage(currentLine, FeedbackService::getInstance().getTotalLines());
+        FeedbackService::getInstance().getCurrentLine()++; // Increment FeedbackService's currentLine
+        percentage = FeedbackService::getInstance().calculatePercentage(FeedbackService::getInstance().getCurrentLine(), FeedbackService::getInstance().getTotalLines());
         time = IoHwAb_RTC::getInstance().getElapsedTime();
+
+        // Debug percentage calculation
+        Serial.printf("[DEBUG]: Current line: %d, Total lines: %d, Percentage: %d%%\n",
+                      FeedbackService::getInstance().getCurrentLine(),
+                      FeedbackService::getInstance().getTotalLines(),
+                      percentage);
+
         Serial.println("ok");
 
         // Reset buffer
@@ -361,42 +400,65 @@ void AutoModeController::readFile(File &file, point &actualPoint, int workingFla
   }
 }
 
-void AutoModeController::getGcodeFile(const String &filename)
-{
-  gcodeFile = IoHwAb_SD::getInstance().getFile(filename);
-  Serial.print("Opened G-code file: ");
-  Serial.println(filename);
-}
-
-void AutoModeController::runSD(int workingFlag)
-{
-  readFile(gcodeFile, data, workingFlag, percentage, time, statusFlag);
-}
-
 void AutoModeController::cancelSD()
 {
   if (gcodeFile)
   {
     gcodeFile.close();
-    active = false;
-    cancelled = true;
-    Serial.println("Canceled reading G-code file.");
   }
+  // Set flags so processing stops and a new selection starts fresh
+  active = false;
+  paused = false;
+  cancelled = true;
+
+  // Reset XY reference to origin so next run starts clean
+  data.x = X_MIN;
+  data.y = Y_MIN;
+  MotionControlService::getInstance().updateData(data);
+
+  // Reset time display to 00:00:00
+  IoHwAb_RTC::getInstance().resetTimer();
+  Serial.println("Canceled reading G-code file.");
 }
 
 void AutoModeController::pauseSD()
 {
+  // Pause processing; keep indices so we can resume
   active = false;
   paused = true;
+  // Optionally pause timer
+  IoHwAb_RTC::getInstance().changeStatus();
 }
 
 void AutoModeController::resetSD()
 {
-  int lineIndex = 0;
-  bool lineIsComment = false;
-  bool lineSemiColon = false;
-  bool verbose = false;
+  // Reset internal parser state (avoid local variable shadowing)
+  lineIndex = 0;
+  lineIsComment = false;
+  lineSemiColon = false;
+  verbose = false;
   memset(line, 0, sizeof(line)); // Xoá bộ đệm dòng
+
+  // Reset vector indices and flags
+  lineVectorIndex = 0;
+  charVectorIndex = 0;
+  isLineFull = false;
+
+  // Reset control flags
+  active = false;
+  paused = false;
+  cancelled = false;
+  isInitialized = false;
+
+  // Reset FeedbackService's currentLine and percentage
+  FeedbackService::getInstance().getCurrentLine() = 0;
+  percentage = 0;
+
+  // Reset XY reference to origin to avoid stale coordinates on next run
+  data.x = X_MIN;
+  data.y = Y_MIN;
+  MotionControlService::getInstance().updateData(data);
+
   Serial.println("SD reset done.");
 }
 
@@ -417,13 +479,8 @@ void AutoModeController::runSerial()
 
 void AutoModeController::continueSD()
 {
-  if (!gcodeFile)
-  {
-    Serial.println("No G-code file opened.");
-    return;
-  }
-
-  if (active)
+  // Allow resume even if underlying File object is closed; we stream from the buffered vector
+  if (paused == false && active == true)
   {
     Serial.println("Already reading G-code file.");
     return;
@@ -431,7 +488,22 @@ void AutoModeController::continueSD()
 
   active = true;
   paused = false;
+  cancelled = false;
+  // Optionally resume timer
+  IoHwAb_RTC::getInstance().changeStatus();
   Serial.println("Continuing reading G-code file...");
+}
+
+void AutoModeController::runSD(int workingFlag)
+{
+  // If paused/inactive/cancelled, do nothing (UI remains on status screen)
+  if (paused || !active || cancelled)
+  {
+    return;
+  }
+
+  // Process one line/frame from the prepared G-code file
+  readFile(gcodeFile, data, workingFlag, percentage, time, statusFlag);
 }
 
 int AutoModeController::getPercentage() const
