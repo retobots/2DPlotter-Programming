@@ -45,6 +45,8 @@ public:
   uint8_t autoModeFlag = UGS;
   State currentState = State::MAIN_MENU;
 
+  bool isPS4Initialized = false;
+
   // Variable to save the selected file name
   String selectedFile;
 

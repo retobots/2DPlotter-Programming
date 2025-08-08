@@ -15,6 +15,7 @@
 #include "IoHwAb_LCD.h"
 #include "IoHwAb_Encoder.h"
 #include "IoHwAb_Button.h"
+#include "IoHwAb_PS4.h"
 #include <vector>
 #include <string>
 using namespace std;
@@ -46,4 +47,6 @@ public:
   void statusScreen(String filename, int percenum, String time, uint8_t workingStateMode, uint8_t workingStateFlag);
 
   void UGSModeScreen();
+
+  void PS4ModeScreen(int choice);
 };

@@ -209,8 +209,6 @@ void UIMenuService::serialModeScreen(uint8_t workingStateMode)
   int positions[3] = {0, 7, 15};
 
   IoHwAb_LCD::getInstance().lcdDisplay(title, IoHwAb_LCD::getInstance().getMiddleXCursor(title), 0);
-  // IoHwAb_LCD::getInstance().lcdDisplay(filename, 0, 1);
-  // IoHwAb_LCD::getInstance().lcdDisplay(percentage, 0, 2);
 
   for (int i = 0; i < 3; i++)
   {
@@ -258,4 +256,32 @@ void UIMenuService::statusScreen(String filename, int percenum, String time, uin
     String prefix = (i == workingStateMode) ? ">" : " ";
     IoHwAb_LCD::getInstance().lcdDisplay(prefix + options[i], positions[i], 3);
   }
+}
+
+void UIMenuService::PS4ModeScreen(int choice)
+{
+  String title = "MANUAL MODE";
+  String macAdress = IoHwAb_PS4::getInstance().getMacAdress();
+
+  IoHwAb_LCD::getInstance().lcdDisplay(title, IoHwAb_LCD::getInstance().getMiddleXCursor(title), 0);
+
+  // Options Sections
+
+  if (choice == 0)
+  {
+    IoHwAb_LCD::getInstance().lcdDisplay("MAC Address", IoHwAb_LCD::getInstance().getMiddleXCursor("MAC Address"), 1);
+    IoHwAb_LCD::getInstance().lcdDisplay(macAdress, IoHwAb_LCD::getInstance().getMiddleXCursor(macAdress), 2);
+  }
+
+  else if (choice == 1)
+  {
+    IoHwAb_LCD::getInstance().lcdDisplay("Connected", IoHwAb_LCD::getInstance().getMiddleXCursor("Connected"), 1);
+  }
+
+  else if (choice == 2)
+  {
+    IoHwAb_LCD::getInstance().lcdDisplay("Not Connected", IoHwAb_LCD::getInstance().getMiddleXCursor("Not Connected"), 1);
+  }
+
+  IoHwAb_LCD::getInstance().lcdDisplay("> Back", 14, 3);
 }

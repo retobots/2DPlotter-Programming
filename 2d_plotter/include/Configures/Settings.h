@@ -43,10 +43,10 @@ typedef struct point
 /*========== PS4 SETTING ==========*/
 
 // Tốc độ tối đa di chuyển khi điều khiển tay
-#define MAX_MANUAL_SPEED 0.5 // mm/s
+#define MAX_MANUAL_SPEED 1.0 // mm/s
 
 // Vùng an toàn
-#define SAFE_ZONE_MARGIN 5.0
+#define SAFE_ZONE_MARGIN 15.0
 
 // Ngưỡng giới hạn để cảnh báo buzzer
 #define EDGE_WARNING_THRESHOLD 1.0 // mm gần biên sẽ cảnh báo

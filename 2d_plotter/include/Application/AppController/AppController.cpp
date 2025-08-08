@@ -155,10 +155,25 @@ void AppController::runManualMode()
   IoHwAb_LCD::getInstance().clear();
   while (1)
   {
+
     IoHwAb_Encoder::getInstance().readEncoder();
-    IoHwAb_LCD::getInstance().lcdDisplay("Manual Mode", IoHwAb_LCD::getInstance().getMiddleXCursor("Manual Mode"), 1);
-    // ManualModeController::getInstance().run();
-    // TODO: thêm logic nếu có cancel/exit
+
+    if (IoHwAb_PS4::getInstance().isConnected() && !isPS4Initialized)
+    {
+      IoHwAb_LCD::getInstance().clear();
+      UIMenuService::getInstance().PS4ModeScreen(1);
+      isPS4Initialized = true;
+    }
+
+    ManualModeController::getInstance().run();
+
+    if (IoHwAb_Encoder::getInstance().isRotaryPressed())
+    {
+      IoHwAb_Buzzer::getInstance().beepOnce();
+      currentState = State::MAIN_MENU;
+      Serial.println("[UI]: Back to Main Menu");
+      break;
+    }
 
     // Add delay to prevent tight loop
     vTaskDelay(pdMS_TO_TICKS(50));
