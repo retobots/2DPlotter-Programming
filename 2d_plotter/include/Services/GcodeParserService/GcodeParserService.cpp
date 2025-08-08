@@ -180,6 +180,7 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
       break;
     case 'F':
       feedrate = value;
+      IoHwAb_Stepper::getInstance().setSpeed(feedrate);
       break;
     default:
       // Ignored or unsupported

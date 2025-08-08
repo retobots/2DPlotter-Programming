@@ -34,16 +34,20 @@ typedef struct point
 // Độ nhạy joystick
 #define JOYSTICK_DEADZONE 10
 
-// Tốc độ tối đa
-#define MAX_SPEED 1000
+// Tốc độ tối đa cho các lệnh vị trí (moveTo)
+// Max positional speed (steps/s). Keep high enough so it won't bottleneck runSpeed.
+#define MAX_SPEED 200000
+
+// Tốc độ tối đa riêng cho chế độ lăn tay (steps/s)
+#define ROLL_MAX_SPEED 200000
 
 // Gia tốc
 #define ACCELERATION 500
 
 /*========== PS4 SETTING ==========*/
 
-// Tốc độ tối đa di chuyển khi điều khiển tay
-#define MAX_MANUAL_SPEED 1.0 // mm/s
+// Tốc độ tối đa di chuyển khi điều khiển tay (mm/s base)
+#define MAX_MANUAL_SPEED 2.0 // mm/s
 
 // Vùng an toàn
 #define SAFE_ZONE_MARGIN 15.0

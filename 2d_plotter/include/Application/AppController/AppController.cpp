@@ -153,6 +153,7 @@ void AppController::runAutoMode()
 void AppController::runManualMode()
 {
   IoHwAb_LCD::getInstance().clear();
+  IoHwAb_PS4::getInstance().reconnect();
   while (1)
   {
 
@@ -172,11 +173,13 @@ void AppController::runManualMode()
       IoHwAb_Buzzer::getInstance().beepOnce();
       currentState = State::MAIN_MENU;
       Serial.println("[UI]: Back to Main Menu");
+      isPS4Initialized = false;
       break;
     }
 
-    // Add delay to prevent tight loop
-    vTaskDelay(pdMS_TO_TICKS(50));
+    // Keep loop responsive for AccelStepper::runSpeed() tick rate
+    // 50 ms limited speed severely (~20 Hz). 1 ms allows up to ~1 kHz step rate per axis.
+    vTaskDelay(pdMS_TO_TICKS(1));
   }
 }
 

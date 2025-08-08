@@ -22,11 +22,9 @@ void IoHwAb_Stepper::setup()
   }
 
   stepperX->setMaxSpeed(MAX_SPEED);
-
   stepperX->setAcceleration(ACCELERATION);
 
   stepperY->setMaxSpeed(MAX_SPEED);
-
   stepperY->setAcceleration(ACCELERATION);
 
   // Logging
@@ -55,4 +53,62 @@ void IoHwAb_Stepper::stop()
 
   stepperX->disableOutputs(); // Tắt xung (ngắt nguồn giữ motor)
   stepperY->disableOutputs(); // (giúp tiết kiệm điện, tránh nóng motor)
+}
+
+// ================= Continuous (non-positional) control =================
+
+void IoHwAb_Stepper::enableOutputs()
+{
+  stepperX->enableOutputs();
+  stepperY->enableOutputs();
+}
+
+void IoHwAb_Stepper::setRollSteps(float xStepsPerSec, float yStepsPerSec)
+{
+  // Constrain to manual roll max (separate from positional MAX_SPEED)
+  xStepsPerSec = constrain(xStepsPerSec, -ROLL_MAX_SPEED, ROLL_MAX_SPEED);
+  yStepsPerSec = constrain(yStepsPerSec, -ROLL_MAX_SPEED, ROLL_MAX_SPEED);
+
+  stepperX->setSpeed(xStepsPerSec);
+  stepperY->setSpeed(yStepsPerSec);
+}
+
+void IoHwAb_Stepper::setRollMM(float xMmPerSec, float yMmPerSec)
+{
+  float xStepsPerSec = xMmPerSec * STEPS_PER_MM_X;
+  float yStepsPerSec = yMmPerSec * STEPS_PER_MM_Y;
+  setRollSteps(xStepsPerSec, yStepsPerSec);
+  // Throttle logging; frequent Serial prints can starve step generation
+  static unsigned long lastLog = 0;
+  static float lx = 0, ly = 0;
+  unsigned long now = millis();
+  if (now - lastLog > 250 && (fabs(lx - xStepsPerSec) > 50 || fabs(ly - yStepsPerSec) > 50))
+  {
+    Serial.print("[ROLL]: xStepsPerSec: ");
+    Serial.println(xStepsPerSec);
+    Serial.print("[ROLL]: yStepsPerSec: ");
+    Serial.println(yStepsPerSec);
+    lastLog = now;
+    lx = xStepsPerSec;
+    ly = yStepsPerSec;
+  }
+}
+
+void IoHwAb_Stepper::runSpeedTick()
+{
+  // Generates steps at the last setSpeed without acceleration profile
+  stepperX->runSpeed();
+  stepperY->runSpeed();
+}
+
+void IoHwAb_Stepper::stopRolling()
+{
+  stepperX->setSpeed(0);
+  stepperY->setSpeed(0);
+}
+
+void IoHwAb_Stepper::setSpeed(float speed)
+{
+  stepperX->setSpeed(speed);
+  stepperY->setSpeed(speed);
 }

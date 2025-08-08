@@ -55,41 +55,37 @@ void IoHwAb_PS4::cancel()
     IoHwAb_Servo::getInstance().liftPen();
     Serial.println("[PS4]: Pen lifted (cancel)");
     removePairedDevices();
-    PS4.end();
     Serial.println("[PS4]: Disconnected");
-    points = {0.00, 0.00}; // Reset points
     IoHwAb_LCD::getInstance().clear();
+    PS4.end(); // Disconnect the controller
     UIMenuService::getInstance().PS4ModeScreen(2);
   }
 }
 
 point IoHwAb_PS4::readPS4()
 {
+  point points = {0.00, 0.00};
+
   if (!PS4.isConnected())
     return point{};
 
   int rx = PS4.RStickX();
   int ry = PS4.RStickY();
 
-  Serial.print("[PS4]: RStickX: ");
-  Serial.print(rx);
-  Serial.print(" RStickY: ");
-  Serial.println(ry);
-
   // Vùng chết
   if (abs(rx) < SAFE_ZONE_MARGIN && abs(ry) < SAFE_ZONE_MARGIN)
-    return points;
+    return point{};
 
   // Tính vector chuẩn hóa
   float magnitude = sqrt(rx * rx + ry * ry);
   float vx = rx / magnitude;
   float vy = ry / magnitude;
 
-  // Di chuyển một đoạn nhỏ theo hướng
+  // Di chuyển một đoạn nhỏ theo hướng (here interpreted as velocity hint)
   points.x += vx * MAX_MANUAL_SPEED;
   points.y += vy * MAX_MANUAL_SPEED;
 
-  delay(10); // Điều chỉnh mượt tùy tốc độ máy
+  // Removed delay(10) to avoid blocking speed tick
 
   // Trả về tọa độ
   return points;
@@ -138,4 +134,13 @@ String IoHwAb_PS4::getMacAdress()
 bool IoHwAb_PS4::isConnected()
 {
   return PS4.isConnected();
+}
+
+void IoHwAb_PS4::reconnect()
+{
+  if (!PS4.isConnected())
+  {
+    Serial.println("[PS4]: Reconnecting...");
+    PS4.begin();
+  }
 }

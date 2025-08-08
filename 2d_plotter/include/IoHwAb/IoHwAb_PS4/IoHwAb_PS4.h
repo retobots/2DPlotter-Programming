@@ -25,9 +25,8 @@ public:
   void removePairedDevices();
   String getMacAdress();
   bool isConnected();
+  void reconnect();
 
 private:
   IoHwAb_PS4();
-
-  point points = {0.00, 0.00};
 };
