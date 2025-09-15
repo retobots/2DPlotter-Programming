@@ -1,27 +1,11 @@
-#include "../lib/config.hpp"
-#include "../lib/motor_control.hpp"
-#include "../lib/pen_control.hpp"
-#include "../lib/input_process.hpp"
-#include "../lib/motion_control.hpp"
-#include "../lib/manual_control.hpp"
-#include "../lib/display_manager.hpp"
-#include "../lib/iot_manager.hpp"
+#include "Controller.hpp"  // lớp trung tâm của Application Layer
 
-int currentMode = MODE_AUTO;
+Controller app;  // Khởi tạo controller chính (có thể là singleton)
 
-void setup()
-{
-  Serial.begin(115200);
-  setupMotors();
-  setupPen();
-  setupManualControl();
-  setupDisplay();
-  setupIoT();
-  homePosition();
-  penUp();
-  Serial.println("Plotter Ready!");
+void setup() {
+    app.init();  // Khởi tạo toàn bộ hệ thống: LCD, PS4, Stepper, v.v.
 }
 
-void loop()
-{
+void loop() {
+    app.run();   // Gọi luồng xử lý chính (chọn mode, điều khiển, vẽ G-code)
 }
