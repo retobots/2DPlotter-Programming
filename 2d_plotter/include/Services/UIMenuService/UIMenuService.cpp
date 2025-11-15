@@ -32,7 +32,8 @@ UIMenuService &UIMenuService::getInstance()
 
 /*<===================================================>*/
 
-void UIMenuService::setup()
+
+  void UIMenuService::setup()
 {
   // Set phần cứng liên quan
   IoHwAb_LCD::getInstance().setup();

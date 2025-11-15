@@ -12,7 +12,6 @@ AutoModeController &AutoModeController::getInstance()
 
 void AutoModeController::setup()
 {
-  IoHwAb_RTC::getInstance().setup();
   IoHwAb_SD::getInstance().setup();
   IoHwAb_Servo::getInstance().setup();
   GcodeParserService::getInstance().setup();
@@ -264,9 +263,6 @@ void AutoModeController::getGcodeFile(const String &filename)
 
   // Reset feedback counters for a new file
   FeedbackService::getInstance().getCurrentLine() = 0;
-
-  // Reset timer to 00:00:00 and start fresh when processing begins
-  IoHwAb_RTC::getInstance().resetTimer();
 }
 
 void AutoModeController::readFile(File &file, point &actualPoint, int workingFlag, int &percentage, String &time, int &statusFlag)
@@ -303,7 +299,6 @@ void AutoModeController::readFile(File &file, point &actualPoint, int workingFla
     percentage = 0;
 
     // Start timer
-    IoHwAb_RTC::getInstance().startTimer();
     isInitialized = true;
   }
 
@@ -333,7 +328,6 @@ void AutoModeController::readFile(File &file, point &actualPoint, int workingFla
         GcodeParserService::getInstance().processIncomingLine(line, lineIndex, actualPoint);
         FeedbackService::getInstance().getCurrentLine()++; // Increment FeedbackService's currentLine
         percentage = FeedbackService::getInstance().calculatePercentage(FeedbackService::getInstance().getCurrentLine(), FeedbackService::getInstance().getTotalLines());
-        time = IoHwAb_RTC::getInstance().getElapsedTime();
 
         // Debug percentage calculation
         Serial.printf("[DEBUG]: Current line: %d, Total lines: %d, Percentage: %d%%\n",
@@ -415,9 +409,6 @@ void AutoModeController::cancelSD()
   data.x = X_MIN;
   data.y = Y_MIN;
   MotionControlService::getInstance().updateData(data);
-
-  // Reset time display to 00:00:00
-  IoHwAb_RTC::getInstance().resetTimer();
   Serial.println("Canceled reading G-code file.");
 }
 
@@ -426,8 +417,6 @@ void AutoModeController::pauseSD()
   // Pause processing; keep indices so we can resume
   active = false;
   paused = true;
-  // Optionally pause timer
-  IoHwAb_RTC::getInstance().changeStatus();
 }
 
 void AutoModeController::resetSD()
@@ -489,8 +478,7 @@ void AutoModeController::continueSD()
   active = true;
   paused = false;
   cancelled = false;
-  // Optionally resume timer
-  IoHwAb_RTC::getInstance().changeStatus();
+
   Serial.println("Continuing reading G-code file...");
 }
 

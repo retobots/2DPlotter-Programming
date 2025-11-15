@@ -74,7 +74,12 @@ void MotionControlService::moveTo(float xPos, float yPos)
   Data.x = xPos;
   Data.y = yPos;
 }
-
+//<===================================================>//
+// Vẽ cung tròn theo chiều kim đồng hồ
+//<===================================================>//
+// xStart, yStart: Tọa độ điểm bắt đầu cung
+// xEnd, yEnd: Tọa độ điểm kết thúc cung
+// iOffset, jOffset: Khoảng cách từ điểm bắt đầu đến tâm cung
 void MotionControlService::drawArcCW(float xStart, float yStart, float xEnd, float yEnd, float iOffset, float jOffset)
 {
   float cx = xStart + iOffset;
