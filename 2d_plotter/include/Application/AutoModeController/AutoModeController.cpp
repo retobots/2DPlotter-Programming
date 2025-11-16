@@ -326,7 +326,6 @@ void AutoModeController::readFile(File &file, point &actualPoint, int workingFla
 
         // Xử lý dòng lệnh G-code thực tế
         GcodeParserService::getInstance().processIncomingLine(line, lineIndex, actualPoint);
-        FeedbackService::getInstance().getCurrentLine()++; // Increment FeedbackService's currentLine
         percentage = FeedbackService::getInstance().calculatePercentage(FeedbackService::getInstance().getCurrentLine(), FeedbackService::getInstance().getTotalLines());
 
         // Debug percentage calculation
@@ -346,6 +345,7 @@ void AutoModeController::readFile(File &file, point &actualPoint, int workingFla
         lineIsComment = false;
         lineSemiColon = false;
       }
+      FeedbackService::getInstance().getCurrentLine()++; // Increment FeedbackService's currentLine
     }
     else
     {

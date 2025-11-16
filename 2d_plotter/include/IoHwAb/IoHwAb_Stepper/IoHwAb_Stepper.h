@@ -18,6 +18,8 @@ public:
   void setup();
   void moveTo(float x, float y);
   void stop();
+  // Immediately set the internal current position (in steps) without moving motors.
+  void setCurrentPosition(long xSteps, long ySteps);
 
   // --- Continuous (non-positional) control ---
   // Enable driver outputs (after stop() disables them)

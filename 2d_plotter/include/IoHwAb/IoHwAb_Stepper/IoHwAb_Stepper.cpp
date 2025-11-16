@@ -27,12 +27,16 @@ void IoHwAb_Stepper::setup()
   stepperY->setMaxSpeed(MAX_SPEED);
   stepperY->setAcceleration(ACCELERATION);
 
+  // Đảo chiều chân x
+  stepperX->setPinsInverted(true, false, false); // Invert direction pin
+
   // Logging
   Serial.println("[SET UP]: Stepper Motor Done!");
 }
 
 void IoHwAb_Stepper::moveTo(float x, float y)
 {
+
   // Tính toán bước và điều khiển motor
   stepperX->moveTo(x);
   stepperY->moveTo(y);
@@ -111,4 +115,12 @@ void IoHwAb_Stepper::setSpeed(float speed)
 {
   stepperX->setSpeed(speed);
   stepperY->setSpeed(speed);
+}
+
+void IoHwAb_Stepper::setCurrentPosition(long xSteps, long ySteps)
+{
+  if (stepperX)
+    stepperX->setCurrentPosition(xSteps);
+  if (stepperY)
+    stepperY->setCurrentPosition(ySteps);
 }

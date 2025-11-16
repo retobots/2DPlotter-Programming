@@ -36,3 +36,7 @@
 // RTC (I2C dùng chung SDA/SCL)
 #define RTC_SDA_PIN 21
 #define RTC_SCL_PIN 22
+
+// Công tắc hành trình
+#define PIN_ENDSTOP_X 34
+#define PIN_ENDSTOP_Y 35
