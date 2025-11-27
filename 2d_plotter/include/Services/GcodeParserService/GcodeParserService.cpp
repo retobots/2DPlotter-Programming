@@ -253,7 +253,7 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
   case 2: // G02 - Vẽ cung tròn CW (chiều kim đồng hồ)
     if (hasI && hasJ)
     {
-      MotionControlService::getInstance().drawArcCW(actualPos.x, actualPos.y, newPos.x, newPos.y, iValue, jValue);
+      MotionControlService::getInstance().drawArc(actualPos.x, actualPos.y, newPos.x, newPos.y, iValue, jValue, true);
       Serial.print("Draw arc CW to X=");
       Serial.print(newPos.x);
       Serial.print(" Y=");
@@ -272,7 +272,7 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
   case 3: // G03 - Vẽ cung tròn CCW (ngược chiều kim đồng hồ)
     if (hasI && hasJ)
     {
-      MotionControlService::getInstance().drawArcCCW(actualPos.x, actualPos.y, newPos.x, newPos.y, iValue, jValue);
+      MotionControlService::getInstance().drawArc(actualPos.x, actualPos.y, newPos.x, newPos.y, iValue, jValue, false);
       Serial.print("Draw arc CCW to X=");
       Serial.print(newPos.x);
       Serial.print(" Y=");

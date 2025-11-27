@@ -34,6 +34,12 @@ void IoHwAb_Stepper::setup()
   Serial.println("[SET UP]: Stepper Motor Done!");
 }
 
+void IoHwAb_Stepper::move(uint32_t steps_x, uint32_t steps_y)
+{
+  stepperX->move(steps_x);
+  stepperY->move(steps_y);
+}
+
 void IoHwAb_Stepper::moveTo(float x, float y)
 {
 
@@ -47,6 +53,8 @@ void IoHwAb_Stepper::moveTo(float x, float y)
     stepperY->run();
   }
 }
+
+
 
 void IoHwAb_Stepper::stop()
 {
