@@ -35,7 +35,7 @@ void homeMove()
     Serial.println("[PROCESS]: Homing X Axis...");
   }
   IoHwAb_Stepper::getInstance().setCurrentPosition(0, 0);
-  IoHwAb_Stepper::getInstance().moveTo(0, 0); // rất quan trọng
+  IoHwAb_Stepper::getInstance().moveTo(0, 0);
   Serial.println("[PROCESS]: X Axis Homed");
 
   Serial.println("[PROCESS]: Homing Sequence Completed");
