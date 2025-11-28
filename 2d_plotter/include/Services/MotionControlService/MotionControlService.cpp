@@ -1,24 +1,46 @@
+/************************************************************************************************************************
+ * @file     MotionControlService.cpp
+ * @brief    Definitions of functions in the source file
+ * @author   Do Duc Nghia
+ * @version  1.0
+ ************************************************************************************************************************/
+
 #include "MotionControlService.h"
 
+/*************************************************************************************************************************
+ * @brief   Constructor
+ ************************************************************************************************************************/
 MotionControlService::MotionControlService()
 {
 }
 
+/*************************************************************************************************************************
+ * @brief   Get the singleton instance of MotionControlService
+ * @return  Reference to the MotionControlService instance
+ ************************************************************************************************************************/
 MotionControlService &MotionControlService::getInstance()
 {
   static MotionControlService instance;
   return instance;
 }
 
+/*************************************************************************************************************************
+ * @brief   Setup the Motion Control Service
+ ************************************************************************************************************************/
 void MotionControlService::setup()
 {
-  // Khởi tạo stepper
   IoHwAb_Stepper::getInstance().setup();
 
   // Logging
   Serial.println("[SET UP]: Motion Control Done!");
 }
 
+/*************************************************************************************************************************
+ * @brief   Draw a line to the specified position
+ *
+ * @param   xPos    Target X position in mm
+ * @param   yPos    Target Y position in mm
+ ************************************************************************************************************************/
 void MotionControlService::drawLine(float xPos, float yPos)
 {
   Serial.println("[DRAW]: Drawing line to X: " + String(xPos) + ", Y: " + String(yPos));
@@ -32,7 +54,7 @@ void MotionControlService::drawLine(float xPos, float yPos)
   if (yPos > Y_MAX)
     yPos = Y_MAX;
 
-  // Tính delta theo mm -> steps (signed)
+  // Calculate the difference in steps
   int32_t dx = (xPos - Data.x) * STEPS_PER_MM_X;
   int32_t dy = (yPos - Data.y) * STEPS_PER_MM_Y;
 
@@ -74,14 +96,20 @@ void MotionControlService::drawLine(float xPos, float yPos)
       stepCount++;
     }
   }
-  // Cập nhật vị trí hiện tại
+  // Update current position
   Data.x = xPos;
   Data.y = yPos;
 }
 
+/*************************************************************************************************************************
+ * @brief   Move rapidly to the specified position
+ *
+ * @param   xPos    Target X position in mm
+ * @param   yPos    Target Y position in mm
+ ************************************************************************************************************************/
 void MotionControlService::moveTo(float xPos, float yPos)
 {
-  // Giới hạn trong vùng cho phép
+  // Deadzone check
   if (xPos < X_MIN)
     xPos = X_MIN;
   if (xPos > X_MAX)
@@ -91,24 +119,32 @@ void MotionControlService::moveTo(float xPos, float yPos)
   if (yPos > Y_MAX)
     yPos = Y_MAX;
 
-  // Chuyển đổi mm → step
+  // Convert mm to steps
   long xSteps = xPos * STEPS_PER_MM_X;
   long ySteps = yPos * STEPS_PER_MM_Y;
 
-  // // Nâng bút trước khi di chuyển
-  // IoHwAb_Servo::getInstance().liftPen();
-
-  // Gửi lệnh di chuyển
+  // Send move command
   IoHwAb_Stepper::getInstance().moveTo(xSteps, ySteps);
 
   // Logging
   Serial.println("[MOVE]: Rapid move to X: " + String(xPos) + ", Y: " + String(yPos));
 
-  // Cập nhật vị trí
+  // Update current position
   Data.x = xPos;
   Data.y = yPos;
 }
 
+/*************************************************************************************************************************
+ * @brief   Draw an arc from start to end position with given center offsets
+ *
+ * @param   xStart        Starting X position in mm
+ * @param   yStart        Starting Y position in mm
+ * @param   xEnd          Ending X position in mm
+ * @param   yEnd          Ending Y position in mm
+ * @param   iOffset       Center offset in X from start position in mm
+ * @param   jOffset       Center offset in Y from start position in mm
+ * @param   is_clockwise  Direction of arc (true for clockwise, false for counter-clockwise)
+ ************************************************************************************************************************/
 void MotionControlService::drawArc(float xStart, float yStart, float xEnd, float yEnd, float iOffset, float jOffset, bool is_clockwise)
 {
   float cx = xStart + iOffset;
@@ -119,7 +155,7 @@ void MotionControlService::drawArc(float xStart, float yStart, float xEnd, float
   float startAngle = atan2(yStart - cy, xStart - cx);
   float endAngle = atan2(yEnd - cy, xEnd - cx);
 
-  // Đảm bảo xoay theo chiều kim đồng hồ
+  // Ensure clockwise rotation
   if (is_clockwise)
   {
     if (endAngle > startAngle)
@@ -155,12 +191,20 @@ void MotionControlService::drawArc(float xStart, float yStart, float xEnd, float
   delete[] points;
 }
 
+/*************************************************************************************************************************
+ * @brief   Stop all motion
+ ************************************************************************************************************************/
 void MotionControlService::stop()
 {
-  // Dừng mọi chuyển động
+  // Stop all motion
   IoHwAb_Stepper::getInstance().stop();
 }
 
+/*************************************************************************************************************************
+ * @brief   Update internal data with new position
+ *
+ * @param   newData   New position data
+ ************************************************************************************************************************/
 void MotionControlService::updateData(point &newData)
 {
   Data = newData;

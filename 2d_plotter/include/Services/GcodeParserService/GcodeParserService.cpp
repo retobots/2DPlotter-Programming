@@ -1,19 +1,42 @@
+/************************************************************************************************************************
+ * @file     GcodeParserService.cpp
+ * @brief    Implementation of G-code parsing service
+ * @author   Do Duc Nghia
+ * @version  1.0
+ ************************************************************************************************************************/
 #include "GcodeParserService.h"
 
+/*************************************************************************************************************************
+ * @brief   Constructor
+ ************************************************************************************************************************/
 GcodeParserService::GcodeParserService() {}
 
+/*************************************************************************************************************************
+ * @brief   Get the singleton instance of GcodeParserService
+ * @return  Reference to the GcodeParserService instance
+ ************************************************************************************************************************/
 GcodeParserService &GcodeParserService::getInstance()
 {
   static GcodeParserService instance;
   return instance;
 }
 
+/*************************************************************************************************************************
+ * @brief   Setup the G-code Parser Service
+ ************************************************************************************************************************/
 void GcodeParserService::setup()
 {
   // Logging
   Serial.println("[SET UP]: Gcode Parser Done!");
 }
 
+/*************************************************************************************************************************
+ * @brief   Process an incoming G-code line
+ *
+ * @param   line      The G-code line to process
+ * @param   charNB    Number of characters in the line
+ * @param   actualPos Current position of the plotter
+ ************************************************************************************************************************/
 void GcodeParserService::processIncomingLine(char *line, int charNB, point &actualPos)
 {
   Serial.print("Input: ");
@@ -25,11 +48,11 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
   int currentIndex = 0;
   char buffer[32];
 
-  // Trạng thái di chuyển
+  // Parsed values
   int gcode = -1;                   // G00, G01, G02, G03
-  point newPos = actualPos;         // Tọa độ đích
-  float zValue = 5.0;               // Z hiện tại
-  float iValue = 0.0, jValue = 0.0; // Tâm cung tương đối (dùng cho G02/G03)
+  point newPos = actualPos;         // New target position
+  float zValue = 5.0;               // Current Z
+  float iValue = 0.0, jValue = 0.0; // Center offset relative to start (used for G02/G03)
   float feedrate = 0.0;
   bool hasX = false, hasY = false, hasZ = false, hasI = false, hasJ = false;
   static bool penDown = false;
@@ -188,7 +211,7 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
     }
   }
 
-  // === Debug output ===
+  // Debug output
   if (gcode >= 0)
   {
     Serial.print("Parsed G-code: G");
@@ -214,7 +237,7 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
     Serial.println(jValue, 6);
   }
 
-  // === Điều khiển bút vẽ (chỉ cho G00/G01, không cho G02/G03) ===
+  // Pen control (only for G00/G01, not for G02/G03)
   if (hasZ && (gcode == 0 || gcode == 1 || gcode == -1))
   {
     if (zValue < 0 && !penDown)
@@ -231,10 +254,10 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
     }
   }
 
-  // === Xử lý theo loại G-code ===
+  // Handle based on G-code type
   switch (gcode)
   {
-  case 0: // G00 - Move nhanh (không vẽ)
+  case 0: // G00 - Rapid move (no drawing)
     MotionControlService::getInstance().moveTo(newPos.x, newPos.y);
     Serial.print("Move to X=");
     Serial.print(newPos.x);
@@ -242,7 +265,7 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
     Serial.println(newPos.y);
     break;
 
-  case 1: // G01 - Vẽ đường thẳng
+  case 1: // G01 - Draw line
     MotionControlService::getInstance().drawLine(newPos.x, newPos.y);
     Serial.print("Draw line to X=");
     Serial.print(newPos.x);
@@ -250,7 +273,7 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
     Serial.println(newPos.y);
     break;
 
-  case 2: // G02 - Vẽ cung tròn CW (chiều kim đồng hồ)
+  case 2: // G02 - Draw arc CW (clockwise)
     if (hasI && hasJ)
     {
       MotionControlService::getInstance().drawArc(actualPos.x, actualPos.y, newPos.x, newPos.y, iValue, jValue, true);
@@ -269,7 +292,7 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
     }
     break;
 
-  case 3: // G03 - Vẽ cung tròn CCW (ngược chiều kim đồng hồ)
+  case 3: // G03 - Draw arc CCW (counter-clockwise)
     if (hasI && hasJ)
     {
       MotionControlService::getInstance().drawArc(actualPos.x, actualPos.y, newPos.x, newPos.y, iValue, jValue, false);
@@ -304,7 +327,7 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
     break;
   }
 
-  // Cập nhật vị trí hiện tại
+  // Update current position
   if (hasX || hasY)
   {
     actualPos = newPos;

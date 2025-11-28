@@ -1,41 +1,39 @@
-/**
+/*************************************************************************************************************************
  * @file    UIMenuService.cpp
- * @author  Do Duc Nghia
- * @brief   File chứa logic chính của UIMenu
+ * @brief   Definitions of functions in the source file
  * @version 1.0
- * @date    2025-06-20
- */
-
-/*================================================ [ INCLUDE LIBRARY ] ==================================================*/
+ * @date    2025-06-19
+ * @author  Do Duc Nghia
+ ************************************************************************************************************************/
 
 #include "UIMenuService.h"
-
-/*================================================ [ CONFIGURATION ] ==================================================*/
 
 #define MAX_FILES 6
 #define NUM_DISPLAY_LINES 3
 
-/*================================================= [ DEFINITION ] ==================================================*/
-
+/*************************************************************************************************************************
+ * @brief   Constructor
+ ************************************************************************************************************************/
 UIMenuService::UIMenuService()
 {
   Serial.println("[DEBUG] UIMenuService constructor");
 }
 
-/*<===================================================>*/
-
+/*************************************************************************************************************************
+ * @brief   Get the singleton instance of UIMenuService
+ * @return  Reference to the UIMenuService instance
+ ************************************************************************************************************************/
 UIMenuService &UIMenuService::getInstance()
 {
   static UIMenuService instance;
   return instance;
 }
 
-/*<===================================================>*/
-
-
-  void UIMenuService::setup()
+/*************************************************************************************************************************
+ * @brief   Setup the UI Menu Service
+ ************************************************************************************************************************/
+void UIMenuService::setup()
 {
-  // Set phần cứng liên quan
   IoHwAb_LCD::getInstance().setup();
   IoHwAb_Encoder::getInstance().setup();
   IoHwAb_Buzzer::getInstance().setup();
@@ -45,39 +43,28 @@ UIMenuService &UIMenuService::getInstance()
   Serial.println("[SET UP]: UI Menu Done!");
 }
 
-/*<===================================================>*/
-
-// bool UIMenuService::cancelSignal()
-// {
-//   if (Button.isButtonPressed() == true)
-//   {
-//     Buzzer.beepOnce();
-//     currentState = MAIN_MENU;
-//     return true;
-//   }
-//   return false;
-// }
-
-/*<===================================================>*/
-
+/*************************************************************************************************************************
+ * @brief   Run the UI Menu Service
+ ************************************************************************************************************************/
 void UIMenuService::welcomeScreen()
 {
   String wel1 = "2DPLOTER";
   String wel2 = "RETOBOTS";
   String wel3 = "WELCOME ANH KHAI";
 
-  // Màn hình 1
+  // Show welcome screen
   IoHwAb_LCD::getInstance().lcdDisplay(wel1, IoHwAb_LCD::getInstance().getMiddleXCursor(wel1), 1);
   IoHwAb_LCD::getInstance().lcdDisplay(wel2, IoHwAb_LCD::getInstance().getMiddleXCursor(wel2), 2);
 
-  // Màn hình 2
+  // Show second screen
   delay(2000);
   IoHwAb_LCD::getInstance().clear();
   IoHwAb_LCD::getInstance().lcdDisplay(wel3, IoHwAb_LCD::getInstance().getMiddleXCursor(wel3), 1);
 }
 
-/*<===================================================>*/
-
+/*************************************************************************************************************************
+ * @brief   Display the mode selection screen
+ ************************************************************************************************************************/
 void UIMenuService::modeScreen(uint8_t update)
 {
   String options[2] = {"AUTO MODE", "MANUAL MODE"};
@@ -88,8 +75,9 @@ void UIMenuService::modeScreen(uint8_t update)
   }
 }
 
-/*<===================================================>*/
-
+/*************************************************************************************************************************
+ * @brief   Display the automode selection screen
+ ************************************************************************************************************************/
 void UIMenuService::automodeScreen(uint8_t update)
 {
   String options[3] = {
@@ -104,8 +92,16 @@ void UIMenuService::automodeScreen(uint8_t update)
   }
 }
 
-/*<===================================================>*/
-
+/*************************************************************************************************************************
+ * @brief   Display the SD mode selection screen
+ *
+ * @param   files         Vector of file names available on the SD card
+ * @param   signal        Signal indicating user action (1: down, -1: up, 2: select)
+ * @param   ar_idx        Reference to the arrow index for display
+ * @param   startIndex    Reference to the start index for file listing
+ * @param   fileCount     Total number of files available
+ * @param   state         Reference to the current state variable
+ ************************************************************************************************************************/
 void UIMenuService::sdModeScreen(vector<String> files, int8_t signal, uint8_t &ar_idx, int &startIndex, int fileCount, int &state, String &filename)
 {
   lcd.clear();
@@ -116,13 +112,6 @@ void UIMenuService::sdModeScreen(vector<String> files, int8_t signal, uint8_t &a
   String arrow = ">> ";
   int selectedFile = startIndex + ar_idx;
 
-  /*=======DEBUG======*/
-  // Serial.println("--------------------------------------");
-  // Serial.printf("Selected file: %d\nStart Index: %d\nArrow Index: %d\nState: %d\n",
-  //               selectedFile, startIndex, ar_idx, state);
-  // Serial.println("-------**************--------");
-
-  /*--- Xử lý dịch chỉ số ---*/
   if (signal == 1)
   { // Scroll xuống
     if (ar_idx < 2)
@@ -143,7 +132,8 @@ void UIMenuService::sdModeScreen(vector<String> files, int8_t signal, uint8_t &a
     }
   }
   else if (signal == -1)
-  { // Scroll lên
+  {
+    // Scroll up
     if (ar_idx > 0)
     {
       ar_idx--;
@@ -162,7 +152,8 @@ void UIMenuService::sdModeScreen(vector<String> files, int8_t signal, uint8_t &a
     }
   }
   else if (signal == 2)
-  { // Nhấn chọn
+  {
+    // Select file
     if (selectedFile == 0)
     {
       Serial.println("Back");
@@ -177,12 +168,10 @@ void UIMenuService::sdModeScreen(vector<String> files, int8_t signal, uint8_t &a
       IoHwAb_LCD::getInstance().clear();
       filename = files[selectedFile];
       state = 5; // Set state to indicate file selection
-      // IoHwAb_LCD::getInstance().lcdDisplay("Read file", IoHwAb_LCD::getInstance().getMiddleXCursor("Read file"), 1);
       return;
     }
   }
 
-  // --- Hiển thị 3 dòng với mũi tên ---
   for (int i = 0; i < 3; i++)
   {
     int index = (startIndex + i) % fileCount;
@@ -190,16 +179,14 @@ void UIMenuService::sdModeScreen(vector<String> files, int8_t signal, uint8_t &a
     IoHwAb_LCD::getInstance().lcdDisplay(prefix + files[index], 0, i + 1);
   }
 
-  /*========DEBUG=========*/
   selectedFile = startIndex + ar_idx;
-  //   Serial.println("--------------------------------------");
-  //   Serial.printf("Selected file: %d\nStart Index: %d\nArrow Index: %d\nState: %d\n",
-  //                 selectedFile, startIndex, ar_idx, state);
-  //   Serial.println("-------**************--------");
 }
 
-/*<===================================================>*/
-
+/*************************************************************************************************************************
+ * @brief   Display the serial mode selection screen
+ *
+ * @param   workingStateMode   Current working state mode index
+ ************************************************************************************************************************/
 void UIMenuService::serialModeScreen(uint8_t workingStateMode)
 {
   String title = "RGSA PLATFORM";
@@ -218,6 +205,9 @@ void UIMenuService::serialModeScreen(uint8_t workingStateMode)
   }
 }
 
+/*************************************************************************************************************************
+ * @brief   Display the UGS mode selection screen
+ ************************************************************************************************************************/
 void UIMenuService::UGSModeScreen()
 {
   String title = "RGSA PLATFORM";
@@ -227,16 +217,24 @@ void UIMenuService::UGSModeScreen()
   IoHwAb_LCD::getInstance().lcdDisplay("> Back", 14, 3);
 }
 
-/*<===================================================>*/
-
+/*************************************************************************************************************************
+ * @brief   Display the loading screen
+ ************************************************************************************************************************/
 void UIMenuService::loadingScreen()
 {
   String loading = "--LOADING.--";
   IoHwAb_LCD::getInstance().lcdDisplay(loading, IoHwAb_LCD::getInstance().getMiddleXCursor(loading), 1);
 }
 
-/*<===================================================>*/
-
+/*************************************************************************************************************************
+ * @brief   Display the status screen
+ *
+ * @param   filename            Name of the file being processed
+ * @param   percenum            Percentage of completion
+ * @param   time                Elapsed time
+ * @param   workingStateMode    Current working state mode index
+ * @param   workingStateFlag    Pause/continue flag (0: PAUSE, 1: CONTINUE)
+ ************************************************************************************************************************/
 void UIMenuService::statusScreen(String filename, int percenum, String time, uint8_t workingStateMode, uint8_t workingStateFlag)
 {
   String title = "File: " + filename;
@@ -259,6 +257,11 @@ void UIMenuService::statusScreen(String filename, int percenum, String time, uin
   }
 }
 
+/*************************************************************************************************************************
+ * @brief   Display the PS4 mode selection screen
+ *
+ * @param   choice    Current choice index
+ ************************************************************************************************************************/
 void UIMenuService::PS4ModeScreen(int choice)
 {
   String title = "MANUAL MODE";

@@ -1,14 +1,11 @@
-#pragma once
-
-/**
+/*************************************************************************************************************************
  * @file    UIMenuService.h
- * @author  Do Duc Nghia
- * @brief   File này quản lý class, thông số cho Menu
+ * @brief   Declarations of functions in the header file
  * @version 1.0
- * @date    2025-06-20
- */
-
-/*================================================ [ INCLUDE LIBRARY ] ==================================================*/
+ * @date    2025-06-19
+ * @author  Do Duc Nghia
+ ************************************************************************************************************************/
+#pragma once
 
 #include <Arduino.h>
 #include "IoHwAb_Buzzer.h"

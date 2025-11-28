@@ -1,4 +1,3 @@
-#pragma once
 /*************************************************************************************************************************
  * @file    IoHwAb_Encoder.h
  * @brief   Declarations of functions in the header file
@@ -6,6 +5,8 @@
  * @date    2025-06-19
  * @author  Do Duc Nghia
  ************************************************************************************************************************/
+#pragma once
+
 #include <Arduino.h>
 
 class IoHwAb_Encoder
