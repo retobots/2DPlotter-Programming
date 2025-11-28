@@ -19,7 +19,6 @@ public:
   void drawLine(float xPos, float yPos);
   void moveTo(float xPos, float yPos);
   void stop();
-  void drawArcCW(float xStart, float yStart, float xEnd, float yEnd, float iOffset, float jOffset);
-  void drawArcCCW(float xStart, float yStart, float xEnd, float yEnd, float iOffset, float jOffset);
+  void drawArc(float xStart, float yStart, float xEnd, float yEnd, float iOffset, float jOffset, bool is_clockwise = true);
   void updateData(point &newData);
 };
