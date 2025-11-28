@@ -21,6 +21,7 @@ void MotionControlService::setup()
 
 void MotionControlService::drawLine(float xPos, float yPos)
 {
+  Serial.println("[DRAW]: Drawing line to X: " + String(xPos) + ", Y: " + String(yPos));
   // Giới hạn trong vùng cho phép
   if (xPos < X_MIN)
     xPos = X_MIN;
@@ -31,36 +32,46 @@ void MotionControlService::drawLine(float xPos, float yPos)
   if (yPos > Y_MAX)
     yPos = Y_MAX;
 
-  uint32_t deltaPulse_X = (xPos - Data.x) * STEPS_PER_MM_X;
-  uint32_t deltaPulse_Y = (yPos - Data.y) * STEPS_PER_MM_Y;
+  // Tính delta theo mm -> steps (signed)
+  int32_t dx = (xPos - Data.x) * STEPS_PER_MM_X;
+  int32_t dy = (yPos - Data.y) * STEPS_PER_MM_Y;
+
+  int stepDirX = (dx >= 0) ? 1 : -1;
+  int stepDirY = (dy >= 0) ? 1 : -1;
+
+  uint32_t deltaPulse_X = abs(dx);
+  uint32_t deltaPulse_Y = abs(dy);
   uint32_t error = 0;
+  uint32_t stepCount = 0;
 
   if (deltaPulse_X >= deltaPulse_Y)
   {
     while (deltaPulse_X > 0)
     {
-      IoHwAb_Stepper::getInstance().move(1, 0);
-      error = error + deltaPulse_Y;
+      IoHwAb_Stepper::getInstance().move(stepDirX, 0);
+      error += deltaPulse_Y;
       if (error >= deltaPulse_X)
       {
-        IoHwAb_Stepper::getInstance().move(0, 1);
-        error = error - deltaPulse_X;
+        IoHwAb_Stepper::getInstance().move(0, stepDirY);
+        error -= deltaPulse_X;
       }
       deltaPulse_X--;
+      stepCount++;
     }
   }
   else
   {
     while (deltaPulse_Y > 0)
     {
-      IoHwAb_Stepper::getInstance().move(0, 1);
-      error = error + deltaPulse_X;
+      IoHwAb_Stepper::getInstance().move(0, stepDirY);
+      error += deltaPulse_X;
       if (error >= deltaPulse_Y)
       {
-        IoHwAb_Stepper::getInstance().move(1, 0);
-        error = error - deltaPulse_Y;
+        IoHwAb_Stepper::getInstance().move(stepDirX, 0);
+        error -= deltaPulse_Y;
       }
       deltaPulse_Y--;
+      stepCount++;
     }
   }
   // Cập nhật vị trí hiện tại
@@ -125,14 +136,14 @@ void MotionControlService::drawArc(float xStart, float yStart, float xEnd, float
 
   point *points = new point[segments];
 
-  for (int i = 0; i <= segments; i++)
+  for (int i = 0; i < segments; i++)
   {
     float angle = startAngle + (endAngle - startAngle) * (i / (float)segments);
     points[i].x = cx + radius * cos(angle);
     points[i].y = cy + radius * sin(angle);
   }
 
-  for (int i = 0; i <= segments; i++)
+  for (int i = 0; i < segments; i++)
   {
     drawLine(points[i].x, points[i].y);
     Data.x = points[i].x;
