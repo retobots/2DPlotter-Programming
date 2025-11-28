@@ -1,5 +1,13 @@
 #pragma once
 
+/*************************************************************************************************************************
+ * @file    IoHwAb_RTC.h
+ * @brief   Declarations of functions in the header file
+ * @version 1.0
+ * @date    2025-06-19
+ * @author  Do Duc Nghia
+ ************************************************************************************************************************/
+
 #include <string>
 #include <Arduino.h>
 #include <RTClib.h>

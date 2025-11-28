@@ -1,41 +1,54 @@
+/*************************************************************************************************************************
+ * @file    IoHwAb_Servo.cpp
+ * @brief   Implementation of functions to control a servo motor using PWM on ESP32
+ * @version 1.0
+ * @date    2025-06-19
+ * @author  Do Duc Nghia
+ ************************************************************************************************************************/
+
 #include "IoHwAb_Servo.h"
 
+/*************************************************************************************************************************
+ * @brief Constructor
+ ************************************************************************************************************************/
 IoHwAb_Servo::IoHwAb_Servo()
 {
 }
 
+/*************************************************************************************************************************
+ * @brief Get the singleton instance
+ ************************************************************************************************************************/
 IoHwAb_Servo &IoHwAb_Servo::getInstance()
 {
   static IoHwAb_Servo instance;
   return instance;
 }
 
+/*************************************************************************************************************************
+ * @brief Setup the servo motor
+ ************************************************************************************************************************/
 void IoHwAb_Servo::setup()
 {
   Serial.println("[SET UP]: Servo Starting Setup!");
 
-  // Configure PWM for servo control
-  // frequency: 50Hz, resolution: 16-bit, channel: 0
-  ledcSetup(servoChannel, 50, 16); // 50Hz, 16-bit resolution
+  ledcSetup(servoChannel, 50, 16);
   ledcAttachPin(PIN_SERVO, servoChannel);
 
-  // Initialize servo to middle position
   dropPen();
 
   // Logging
   Serial.println("[SET UP]: Servo Done!");
 }
 
+/*************************************************************************************************************************
+ * @brief Set the servo angle
+ *
+ * @param angle Angle in degrees (0-180)
+ ************************************************************************************************************************/
 void IoHwAb_Servo::setServoAngle(int angle)
 {
-  // Clamp angle to valid range
   angle = constrain(angle, 0, 180);
-
-  // Map angle (0-180) to duty cycle (1638-8192 for 16-bit, 50Hz)
-  // 1ms = 1638, 1.5ms = 4915, 2ms = 8192
   int dutyCycle = map(angle, 0, 180, 1638, 8192);
-
-  // Set PWM duty cycle - this maintains the signal continuously
   ledcWrite(servoChannel, dutyCycle);
 
   Serial.print("[SERVO]: Set angle to ");
@@ -45,6 +58,9 @@ void IoHwAb_Servo::setServoAngle(int angle)
   Serial.println(")");
 }
 
+/*************************************************************************************************************************
+ * @brief Lift the pen by setting the servo to the up angle
+ ************************************************************************************************************************/
 void IoHwAb_Servo::liftPen()
 {
   Serial.println("[SERVO]: Lifting pen...");
@@ -52,6 +68,9 @@ void IoHwAb_Servo::liftPen()
   delay(500); // Wait for servo to reach position
 }
 
+/*************************************************************************************************************************
+ * @brief Drop the pen by setting the servo to the down angle
+ ************************************************************************************************************************/
 void IoHwAb_Servo::dropPen()
 {
   Serial.println("[SERVO]: Dropping pen...");

@@ -1,38 +1,36 @@
-/*******************************************************************************
+/************************************************************************************************************************
  * @file    IoHwAb_Encoder.cpp
- * @brief   Định nghĩa các hàm trong file header
+ * @author  NghiaDD
+ * @date    2023-11-12
+ * @brief   This file contains the implementation of the IoHwAb_Encoder class for handling rotary encoder inputs.
  * @version 1.0
- * @date    2025-06-19
- * @author  Do Duc Nghia
- ******************************************************************************/
-
-/*================================================ [ INCLUDE LIBRARY ] ==================================================*/
+ ************************************************************************************************************************/
 
 #include "IoHwAb_Encoder.h"
 #include "Pins.h"
 
-/*================================================= [ DEFINITION ] ==================================================*/
-
-/*<===================================================>*/
-
+/*************************************************************************************************************************
+ * @brief Constructor
+ ************************************************************************************************************************/
 IoHwAb_Encoder::IoHwAb_Encoder()
 {
 }
 
-/*<===================================================>*/
-
+/*************************************************************************************************************************
+ * @brief Get the singleton instance
+ ************************************************************************************************************************/
 IoHwAb_Encoder &IoHwAb_Encoder::getInstance()
 {
   static IoHwAb_Encoder instance;
   return instance;
 }
 
-/*<===================================================>*/
-
+/*************************************************************************************************************************
+ * @brief Setup the rotary encoder
+ ************************************************************************************************************************/
 void IoHwAb_Encoder::setup()
 {
   Serial.println("[SET UP]: Rotary Encoder Starting Setup!");
-  // Cấu hình encoder
   pinMode(PIN_CLK, INPUT_PULLUP);
   pinMode(PIN_DT, INPUT_PULLUP);
   pinMode(PIN_SW, INPUT_PULLUP);
@@ -42,21 +40,16 @@ void IoHwAb_Encoder::setup()
   Serial.println("[SET UP]: Rotary Encode Done!");
 }
 
-/*<===================================================>*/
-
+/*************************************************************************************************************************
+ * @brief Read the rotary encoder signals and update flags
+ ************************************************************************************************************************/
 void IoHwAb_Encoder::readEncoder()
 {
   int currentCLK = digitalRead(PIN_CLK);
 
-  // Serial.print("Encoder CLK state: ");
-  // Serial.println(currentCLK);
-
   if (currentCLK != lastCLK && currentCLK == LOW)
-  { // Sườn xuống
+  {
     int dtState = digitalRead(PIN_DT);
-
-    // Serial.print("Encoder DT state: ");
-    // Serial.println(dtState);
 
     if (dtState != currentCLK)
     {
@@ -71,8 +64,11 @@ void IoHwAb_Encoder::readEncoder()
   lastCLK = currentCLK;
 }
 
-/*<===================================================>*/
-
+/*************************************************************************************************************************
+ * @brief Check if the encoder is being turned up
+ *
+ * @return true if turned up, false otherwise
+ ************************************************************************************************************************/
 bool IoHwAb_Encoder::scrollUp()
 {
   if (upFlag)
@@ -83,8 +79,11 @@ bool IoHwAb_Encoder::scrollUp()
   return false;
 }
 
-/*<===================================================>*/
-
+/*************************************************************************************************************************
+ * @brief Check if the encoder is being turned down
+ *
+ * @return true if turned down, false otherwise
+ ************************************************************************************************************************/
 bool IoHwAb_Encoder::scrollDown()
 {
   if (downFlag)
@@ -95,8 +94,11 @@ bool IoHwAb_Encoder::scrollDown()
   return false;
 }
 
-/*<===================================================>*/
-
+/*************************************************************************************************************************
+ * @brief Check if the rotary encoder button is pressed
+ *
+ * @return true if pressed, false otherwise
+ ************************************************************************************************************************/
 bool IoHwAb_Encoder::isRotaryPressed()
 {
   return digitalRead(PIN_SW) == LOW;

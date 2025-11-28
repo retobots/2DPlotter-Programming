@@ -1,15 +1,32 @@
+/*************************************************************************************************************************
+ * @file    IoHwAb_PS4.cpp
+ * @brief   Definitions of functions declared in the header file
+ * @version 1.0
+ * @date    2025-06-19
+ * @author  Do Duc Nghia
+ ************************************************************************************************************************/
+
 #include "IoHwAb_PS4.h"
 
+/*************************************************************************************************************************
+ * @brief Constructor
+ ************************************************************************************************************************/
 IoHwAb_PS4::IoHwAb_PS4()
 {
 }
 
+/*************************************************************************************************************************
+ * @brief Get the singleton instance
+ ************************************************************************************************************************/
 IoHwAb_PS4 &IoHwAb_PS4::getInstance()
 {
   static IoHwAb_PS4 instance;
   return instance;
 }
 
+/*************************************************************************************************************************
+ * @brief Setup the PS4 controller
+ ************************************************************************************************************************/
 void IoHwAb_PS4::setup()
 {
   Serial.println("[SET UP]: PS4 Controller Starting Setup!");
@@ -19,6 +36,9 @@ void IoHwAb_PS4::setup()
   Serial.println("[SET UP]: PS4 Controller Done!");
 }
 
+/*************************************************************************************************************************
+ * @brief Start connecting to the PS4 controller
+ ************************************************************************************************************************/
 void IoHwAb_PS4::startConnect()
 {
   if (!PS4.isConnected())
@@ -30,6 +50,9 @@ void IoHwAb_PS4::startConnect()
   }
 }
 
+/*************************************************************************************************************************
+ * @brief Lift the pen when R1 button is pressed
+ ************************************************************************************************************************/
 void IoHwAb_PS4::liftPen()
 {
   if (PS4.R1() && PS4.isConnected())
@@ -39,6 +62,9 @@ void IoHwAb_PS4::liftPen()
   }
 }
 
+/*************************************************************************************************************************
+ * @brief Drop the pen when L1 button is pressed
+ ************************************************************************************************************************/
 void IoHwAb_PS4::dropPen()
 {
   if (PS4.L1() && PS4.isConnected())
@@ -48,6 +74,9 @@ void IoHwAb_PS4::dropPen()
   }
 }
 
+/*************************************************************************************************************************
+ * @brief Cancel the PS4 connection when Touchpad button is pressed
+ ************************************************************************************************************************/
 void IoHwAb_PS4::cancel()
 {
   if (PS4.Touchpad() && PS4.isConnected())
@@ -62,6 +91,11 @@ void IoHwAb_PS4::cancel()
   }
 }
 
+/*************************************************************************************************************************
+ * @brief Read the PS4 controller joystick and convert to movement point
+ *
+ * @return point structure containing x and y movement values
+ ************************************************************************************************************************/
 point IoHwAb_PS4::readPS4()
 {
   point points = {0.00, 0.00};
@@ -72,30 +106,38 @@ point IoHwAb_PS4::readPS4()
   int rx = PS4.RStickX();
   int ry = PS4.RStickY();
 
-  // Vùng chết
+  // Dead zone
   if (abs(rx) < SAFE_ZONE_MARGIN && abs(ry) < SAFE_ZONE_MARGIN)
     return point{};
 
-  // Tính vector chuẩn hóa
+  // Calculate the normalized vector
   float magnitude = sqrt(rx * rx + ry * ry);
   float vx = rx / magnitude;
   float vy = ry / magnitude;
 
-  // Di chuyển một đoạn nhỏ theo hướng (here interpreted as velocity hint)
+  // Move a small step in the direction of the joystick input
   points.x += vx * MAX_MANUAL_SPEED;
   points.y += vy * MAX_MANUAL_SPEED;
 
   // Removed delay(10) to avoid blocking speed tick
 
-  // Trả về tọa độ
+  // Return the coordinates
   return points;
 }
 
+/*************************************************************************************************************************
+ * @brief Check if any button is pressed on the PS4 controller
+ *
+ * @return true if any button is pressed, false otherwise
+ ************************************************************************************************************************/
 bool IoHwAb_PS4::isButtonPressed()
 {
   return false;
 }
 
+/*************************************************************************************************************************
+ * @brief Remove all paired devices from the PS4 controller
+ ************************************************************************************************************************/
 void IoHwAb_PS4::removePairedDevices()
 {
   uint8_t pairedDeviceBtAddr[20][6];
@@ -107,6 +149,9 @@ void IoHwAb_PS4::removePairedDevices()
   }
 }
 
+/*************************************************************************************************************************
+ * @brief Print the MAC address of the PS4 controller
+ ************************************************************************************************************************/
 void IoHwAb_PS4::printDeviceAddress()
 {
   const uint8_t *point = esp_bt_dev_get_address();
@@ -123,6 +168,11 @@ void IoHwAb_PS4::printDeviceAddress()
   Serial.println();
 }
 
+/*************************************************************************************************************************
+ * @brief Get the MAC address of the PS4 controller as a String
+ *
+ * @return MAC address in String format
+ ************************************************************************************************************************/
 String IoHwAb_PS4::getMacAdress()
 {
   const uint8_t *mac = esp_bt_dev_get_address();
@@ -131,11 +181,19 @@ String IoHwAb_PS4::getMacAdress()
   return String(buf);
 }
 
+/*************************************************************************************************************************
+ * @brief Check if the PS4 controller is connected
+ *
+ * @return true if connected, false otherwise
+ ************************************************************************************************************************/
 bool IoHwAb_PS4::isConnected()
 {
   return PS4.isConnected();
 }
 
+/*************************************************************************************************************************
+ * @brief Reconnect to the PS4 controller if disconnected
+ ************************************************************************************************************************/
 void IoHwAb_PS4::reconnect()
 {
   if (!PS4.isConnected())

@@ -1,30 +1,49 @@
+/*************************************************************************************************************************
+ * @file    IoHwAb_SD.cpp
+ * @brief   Implementation of functions to handle SD card operations
+ * @version 1.0
+ * @date    2025-06-19
+ * @author  Do Duc Nghia
+ ************************************************************************************************************************/
+
 #include "IoHwAb_SD.h"
 using namespace std;
 
+/*************************************************************************************************************************
+ * @brief Constructor
+ ************************************************************************************************************************/
 IoHwAb_SD::IoHwAb_SD()
 {
   // Constructor logic if needed
 }
 
+/*************************************************************************************************************************
+ * @brief Get the singleton instance
+ ************************************************************************************************************************/
 IoHwAb_SD &IoHwAb_SD::getInstance()
 {
   static IoHwAb_SD instance;
   return instance;
 }
 
+/*************************************************************************************************************************
+ * @brief Setup the SD card
+ ************************************************************************************************************************/
 void IoHwAb_SD::setup()
 {
-  Serial.println("[SET UP]: SD Card Starting Setup!");
-
   SD.begin(PIN_SD_CS);
 
   Serial.println("[SET UP]: SD Card Done!");
 }
 
+/*************************************************************************************************************************
+ * @brief Load the list of files from the SD card
+ *
+ * @return Reference to the vector containing the list of file names
+ ************************************************************************************************************************/
 vector<String> &IoHwAb_SD::loadFileListFromSD()
 {
   fileList.clear();
-  // Add "Back" as the first element
   fileList.push_back("Back");
 
   File root = SD.open("/");
@@ -43,6 +62,11 @@ vector<String> &IoHwAb_SD::loadFileListFromSD()
   return fileList;
 }
 
+/*************************************************************************************************************************
+ * @brief Read the selected file from the SD card and store its contents
+ *
+ * @param filename Name of the file to read
+ ************************************************************************************************************************/
 void IoHwAb_SD::readSelectedFile(String &filename)
 {
   fileContents.clear();
@@ -77,6 +101,12 @@ void IoHwAb_SD::readSelectedFile(String &filename)
   f.close();
 }
 
+/*************************************************************************************************************************
+ * @brief Get a File object for the specified filename
+ *
+ * @param filename Name of the file to open
+ * @return Reference to the File object
+ ************************************************************************************************************************/
 File &IoHwAb_SD::getFile(const String &filename)
 {
   static File file;
@@ -88,6 +118,13 @@ File &IoHwAb_SD::getFile(const String &filename)
   return file;
 }
 
+/*************************************************************************************************************************
+ * @brief Get a character from the specified line and character index in the file contents
+ *
+ * @param lineIndex Index of the line in the file contents
+ * @param charIndex Index of the character in the specified line
+ * @return The character at the specified position, or '\0' if out of bounds
+ ************************************************************************************************************************/
 char IoHwAb_SD::getCharFromVectorLine(int lineIndex, int charIndex)
 {
   if (lineIndex >= 0 && lineIndex < fileContents.size())
@@ -104,15 +141,19 @@ char IoHwAb_SD::getCharFromVectorLine(int lineIndex, int charIndex)
     {
       return line[charIndex];
     }
-    // Nếu hết dòng, trả về '\n' để báo kết thúc dòng
     if (charIndex == line.length())
     {
       return '\n';
     }
   }
-  return '\0'; // Trường hợp lỗi hoặc hết file
+  return '\0';
 }
 
+/*************************************************************************************************************************
+ * @brief Check if the file contents vector is empty
+ *
+ * @return true if the file contents vector is empty, false otherwise
+ ************************************************************************************************************************/
 bool IoHwAb_SD::isFileContentsEmpty() const
 {
   return fileContents.empty();

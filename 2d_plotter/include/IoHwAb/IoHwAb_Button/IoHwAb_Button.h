@@ -1,62 +1,29 @@
 #pragma once
 
-/**
+/*************************************************************************************************************************
  * @file    IoHwAb_Button.h
- * @author  Do Duc Nghia
- * @brief   File này chứa hàm đọc nút nhấn, setup cho nút nhấn
+ * @brief   Declarations of functions in the header file
  * @version 1.0
  * @date    2025-06-19
- *
- * @copyright Copyright (c) 2025
- *
- */
-/*================================================ [ INCLUDE LIBRARY ] ==================================================*/
+ * @author  Do Duc Nghia
+ ************************************************************************************************************************/
+
 #include <Arduino.h>
 
-/*================================================= [ DECLARATION ] ==================================================*/
-
-/****************************************************************************************
+/*************************************************************************************************************************
  * @class   IoHwAb_Button
- * @brief   Class này khai báo, setup nút nhấn và đọc tín hiệu nút nhấn
- ****************************************************************************************
- */
+ * @brief   Class containing functions to control button input
+ * @details This structure contains button object parameters and functions to read button state and setup parameters
+ ************************************************************************************************************************/
 class IoHwAb_Button
 {
 private:
-    /**
-     * @brief Constructor khởi tạo các thông số cho nút nhấn khi tạo đối tượng
-     *
-     */
+    // Constructor
     IoHwAb_Button();
 
 public:
-    /**
-     * @brief   Tạo đối tượng nút nhấn
-     *
-     * @return  IoHwAb_Button&
-     */
     static IoHwAb_Button &getInstance();
-
-    /**
-     * @brief setup nút nhấn
-     *
-     */
     void setup();
-
-    /**
-     * @brief   Đọc tín hiệu nút nhấn
-     *
-     * @return  true
-     * @return  false
-     */
     bool isButtonPressed();
-
-    /**
-     * @brief   đọc tín hiệu nút nhấn, nếu giữ quá 3s thì sẽ hiểu là hold
-     *
-     * @param   isButtonPressed đọc tín hiệu nhấn nút
-     * @return  true
-     * @return  false
-     */
     bool isButtonHeld3s(bool (*isButtonPressed)());
 };

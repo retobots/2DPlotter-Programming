@@ -1,34 +1,35 @@
-/*******************************************************************************
+/*************************************************************************************************************************
  * @file    IoHwAb_Button.cpp
- * @brief   Định nghĩa các hàm trong file header
+ * @brief   Definitions of functions in the header file
  * @version 1.0
  * @date    2025-06-19
  * @author  Do Duc Nghia
- ******************************************************************************/
-/*================================================ [ INCLUDE LIBRARY ] ==================================================*/
+ ************************************************************************************************************************/
 #include "IoHwAb_Button.h"
 #include "Pins.h"
 
-/*================================================= [ DEFINITION ] ==================================================*/
-
+/*************************************************************************************************************************
+ * @brief Constructor
+ ************************************************************************************************************************/
 IoHwAb_Button::IoHwAb_Button()
 {
 }
 
-/*<===================================================>*/
-
+/*************************************************************************************************************************
+ * @brief Get the singleton instance
+ ************************************************************************************************************************/
 IoHwAb_Button &IoHwAb_Button::getInstance()
 {
     static IoHwAb_Button instance;
     return instance;
 }
 
-/*<===================================================>*/
-
+/*************************************************************************************************************************
+ * @brief Setup the button
+ ************************************************************************************************************************/
 void IoHwAb_Button::setup()
 {
     Serial.println("[SET UP]: Button Starting Setup!");
-    // Cấu hình chân GPIO làm output
 
     // Setup
     pinMode(PIN_MENU_BUTTON, INPUT);
@@ -37,7 +38,9 @@ void IoHwAb_Button::setup()
     Serial.println("[SET UP]: Button Done!");
 }
 
-/*<===================================================>*/
+/*************************************************************************************************************************
+ * @brief Check if the button is pressed
+ ************************************************************************************************************************/
 
 bool IoHwAb_Button::isButtonPressed()
 {
@@ -48,34 +51,33 @@ bool IoHwAb_Button::isButtonPressed()
     return false;
 }
 
-/*<===================================================>*/
-
+/*************************************************************************************************************************
+ * @brief Check if the button is held for 3 seconds
+ *
+ * @param isButtonPressed Pointer to the function that checks if the button is pressed
+ * @return true if the button is held for 3 seconds, false otherwise
+ ************************************************************************************************************************/
 bool IoHwAb_Button::isButtonHeld3s(bool (*isButtonPressed)())
 {
-    // Logging
-    Serial.println("Check nếu nút được giữ 3 giây!");
-
-    const unsigned long holdDuration = 3000; // 3 giây
+    const unsigned long holdDuration = 3000; // 3 seconds
     unsigned long startTime = millis();
 
-    // Kiểm tra nếu nút đang được nhấn
+    // Check if the button is currently pressed
     if (isButtonPressed() == true)
     {
-        // Chờ cho đến khi hết thời gian hold hoặc bị nhả ra
+        // Wait until the hold duration is reached or the button is released
         while (millis() - startTime < holdDuration)
         {
             if (isButtonPressed() == false)
             {
-                // Bị nhả ra trước khi đủ 2 giây
+                // Released before 3 seconds
                 return false;
             }
         }
-        // Nếu qua được vòng while nghĩa là nút đã giữ đủ 2 giây
+        // If the while loop is passed, the button has been held for 3 seconds
         return true;
     }
 
-    // Không nhấn ngay từ đầu
+    // Not pressed from the beginning
     return false;
 }
-
-/*<===================================================>*/

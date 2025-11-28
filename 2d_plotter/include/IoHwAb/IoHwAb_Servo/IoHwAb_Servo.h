@@ -1,4 +1,13 @@
 #pragma once
+
+/*************************************************************************************************************************
+ * @file    IoHwAb_Servo.h
+ * @brief   Declarations of functions in the header file
+ * @version 1.0
+ * @date    2025-06-19
+ * @author  Do Duc Nghia
+ ************************************************************************************************************************/
+
 #include <Arduino.h>
 #include "Pins.h"
 #include "Settings.h"

@@ -17,7 +17,7 @@ public:
 
   void setup();
   void moveTo(float x, float y);
-  void move(uint32_t steps_x, uint32_t steps_y);
+  void move(int32_t steps_x, int32_t steps_y);
   void stop();
   // Immediately set the internal current position (in steps) without moving motors.
   void setCurrentPosition(long xSteps, long ySteps);

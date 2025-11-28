@@ -34,10 +34,18 @@ void IoHwAb_Stepper::setup()
   Serial.println("[SET UP]: Stepper Motor Done!");
 }
 
-void IoHwAb_Stepper::move(uint32_t steps_x, uint32_t steps_y)
+void IoHwAb_Stepper::move(int32_t steps_x, int32_t steps_y)
 {
-  stepperX->move(steps_x);
-  stepperY->move(steps_y);
+  if (steps_x != 0)
+    stepperX->move(steps_x); // relative
+  if (steps_y != 0)
+    stepperY->move(steps_y);
+
+  while (stepperX->distanceToGo() != 0 || stepperY->distanceToGo() != 0)
+  {
+    stepperX->run();
+    stepperY->run();
+  }
 }
 
 void IoHwAb_Stepper::moveTo(float x, float y)
@@ -53,8 +61,6 @@ void IoHwAb_Stepper::moveTo(float x, float y)
     stepperY->run();
   }
 }
-
-
 
 void IoHwAb_Stepper::stop()
 {
@@ -109,14 +115,13 @@ void IoHwAb_Stepper::setRollMM(float xMmPerSec, float yMmPerSec)
 void IoHwAb_Stepper::runSpeedTickX()
 {
 
-    stepperX->runSpeed();
+  stepperX->runSpeed();
 }
-
 
 void IoHwAb_Stepper::runSpeedTickY()
 {
 
-    stepperY->runSpeed();
+  stepperY->runSpeed();
 }
 
 void IoHwAb_Stepper::stopRolling()
