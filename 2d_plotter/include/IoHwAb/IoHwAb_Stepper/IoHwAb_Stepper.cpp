@@ -98,11 +98,17 @@ void IoHwAb_Stepper::setRollMM(float xMmPerSec, float yMmPerSec)
   }
 }
 
-void IoHwAb_Stepper::runSpeedTick()
+void IoHwAb_Stepper::runSpeedTickX()
 {
-  // Generates steps at the last setSpeed without acceleration profile
-  stepperX->runSpeed();
-  stepperY->runSpeed();
+
+    stepperX->runSpeed();
+}
+
+
+void IoHwAb_Stepper::runSpeedTickY()
+{
+
+    stepperY->runSpeed();
 }
 
 void IoHwAb_Stepper::stopRolling()

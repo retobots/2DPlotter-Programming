@@ -13,26 +13,29 @@ void homeMove()
   // x steps, y steps
   float x = 0.0; // Move negative direction
   float y = 0.0; // Move negative direction
-
+  IoHwAb_Stepper::getInstance().setSpeed(-400);
   // Di chuyển trục Y về vị trí công tắc hành trình
-  while (digitalRead(PIN_ENDSTOP_Y) == HIGH)
-  {
-    y -= 10.0;
-    float ySteps = y * STEPS_PER_MM_Y;
-    IoHwAb_Stepper::getInstance().moveTo(0, ySteps); // Di chuyển ngược trục Y
-    Serial.println("[PROCESS]: Homing Y Axis...");
-  }
-  IoHwAb_Stepper::getInstance().setCurrentPosition(0, 0);
-  IoHwAb_Stepper::getInstance().moveTo(0, 0); // rất quan trọng
-  Serial.println("[PROCESS]: Y Axis Homed");
+  bool home_X_done = false;
+  bool home_Y_done = false;
 
-  // Di chuyển trục X về vị trí công tắc hành trình
-  while (digitalRead(PIN_ENDSTOP_X) == HIGH)
+  while (!home_X_done || !home_Y_done)
   {
-    x -= 10.0;
-    float xSteps = x * STEPS_PER_MM_X;
-    IoHwAb_Stepper::getInstance().moveTo(xSteps, 0); // Di chuyển ngược trục X
-    Serial.println("[PROCESS]: Homing X Axis...");
+    if (digitalRead(PIN_ENDSTOP_Y) == HIGH)
+    {
+      IoHwAb_Stepper::getInstance().runSpeedTickY(); // Di chuyển ngược trục Y
+    }
+    else
+    {
+      home_X_done = true;
+    }
+    if (digitalRead(PIN_ENDSTOP_X) == HIGH)
+    {
+      IoHwAb_Stepper::getInstance().runSpeedTickX(); // Di chuyển ngược trục X}
+    }
+    else
+    {
+      home_Y_done = true;
+    }
   }
   IoHwAb_Stepper::getInstance().setCurrentPosition(0, 0);
   IoHwAb_Stepper::getInstance().moveTo(0, 0);

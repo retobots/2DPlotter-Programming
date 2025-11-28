@@ -56,7 +56,8 @@ void ManualModeController::run()
   // Tick multiple times to maximize achievable step rate within this loop iteration
   for (int i = 0; i < 5; ++i)
   {
-    IoHwAb_Stepper::getInstance().runSpeedTick();
+    IoHwAb_Stepper::getInstance().runSpeedTickX();
+    IoHwAb_Stepper::getInstance().runSpeedTickY();
   }
 
   // Buttons

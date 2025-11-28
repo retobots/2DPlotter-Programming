@@ -97,16 +97,24 @@ void MotionControlService::drawArcCW(float xStart, float yStart, float xEnd, flo
   float arcLength = abs(endAngle - startAngle) * radius;
   int segments = max((int)(arcLength / 1.0), 1); // mỗi đoạn ~1mm
 
+  point *points = new point[segments + 1];
+
   for (int i = 0; i <= segments; ++i)
   {
     float angle = startAngle + (endAngle - startAngle) * (i / (float)segments);
     float x = cx + radius * cos(angle);
     float y = cy + radius * sin(angle);
-    drawLine(x, y);
+    points[i].x = x;
+    points[i].y = y;
+  }
+  for (int i = 0; i < segments; i++)
+  {
+    drawLine(points[i].x, points[i].y);
   }
 
   Data.x = xEnd;
   Data.y = yEnd;
+  delete[] points;
 }
 
 void MotionControlService::drawArcCCW(float xStart, float yStart, float xEnd, float yEnd, float iOffset, float jOffset)
@@ -126,16 +134,25 @@ void MotionControlService::drawArcCCW(float xStart, float yStart, float xEnd, fl
   float arcLength = abs(endAngle - startAngle) * radius;
   int segments = max((int)(arcLength / 1.0), 1); // mỗi đoạn ~1mm
 
+  point *points = new point[segments + 1];
+
   for (int i = 0; i <= segments; ++i)
   {
     float angle = startAngle + (endAngle - startAngle) * (i / (float)segments);
     float x = cx + radius * cos(angle);
     float y = cy + radius * sin(angle);
-    drawLine(x, y);
+    points[i].x = x;
+    points[i].y = y;
+  }
+
+  for (int i = 0; i <= segments; ++i)
+  {
+    drawLine(points[i].x, points[i].y);
   }
 
   Data.x = xEnd;
   Data.y = yEnd;
+  delete[] points;
 }
 
 void MotionControlService::stop()

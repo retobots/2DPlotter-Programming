@@ -29,7 +29,8 @@ public:
   // Convenience: set rolling speeds in mm/second
   void setRollMM(float xMmPerSec, float yMmPerSec);
   // Call frequently (e.g., each loop or task tick) to generate steps at set speeds
-  void runSpeedTick();
+  void runSpeedTickX();
+  void runSpeedTickY();
   // Stop rolling (sets speed=0 and keeps outputs enabled; call stop() to fully disable)
   void stopRolling();
 
