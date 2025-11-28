@@ -40,11 +40,18 @@ void MotionControlService::setup()
  *
  * @param   xPos    Target X position in mm
  * @param   yPos    Target Y position in mm
+ *
+ * NOTE:
+ *  - Old implementation used a Bresenham loop and called IoHwAb_Stepper::move()
+ *    for every single micro step, which was extremely slow.
+ *  - New implementation computes the relative delta in steps once and lets the
+ *    timer-driven stepper engine handle the interpolation in real-time.
  ************************************************************************************************************************/
 void MotionControlService::drawLine(float xPos, float yPos)
 {
   Serial.println("[DRAW]: Drawing line to X: " + String(xPos) + ", Y: " + String(yPos));
-  // Giới hạn trong vùng cho phép
+
+  // Clamp target position within allowed workspace
   if (xPos < X_MIN)
     xPos = X_MIN;
   if (xPos > X_MAX)
@@ -54,49 +61,15 @@ void MotionControlService::drawLine(float xPos, float yPos)
   if (yPos > Y_MAX)
     yPos = Y_MAX;
 
-  // Calculate the difference in steps
-  int32_t dx = (xPos - Data.x) * STEPS_PER_MM_X;
-  int32_t dy = (yPos - Data.y) * STEPS_PER_MM_Y;
+  // Compute relative delta in steps from current position to target
+  // (same conversion as before, but we no longer run a Bresenham loop here)
+  int32_t dxSteps = static_cast<int32_t>((xPos - Data.x) * STEPS_PER_MM_X);
+  int32_t dySteps = static_cast<int32_t>((yPos - Data.y) * STEPS_PER_MM_Y);
 
-  int stepDirX = (dx >= 0) ? 1 : -1;
-  int stepDirY = (dy >= 0) ? 1 : -1;
+  // Delegate the whole move to the stepper engine as a single segment
+  IoHwAb_Stepper::getInstance().move(dxSteps, dySteps);
 
-  uint32_t deltaPulse_X = abs(dx);
-  uint32_t deltaPulse_Y = abs(dy);
-  uint32_t error = 0;
-  uint32_t stepCount = 0;
-
-  if (deltaPulse_X >= deltaPulse_Y)
-  {
-    while (deltaPulse_X > 0)
-    {
-      IoHwAb_Stepper::getInstance().move(stepDirX, 0);
-      error += deltaPulse_Y;
-      if (error >= deltaPulse_X)
-      {
-        IoHwAb_Stepper::getInstance().move(0, stepDirY);
-        error -= deltaPulse_X;
-      }
-      deltaPulse_X--;
-      stepCount++;
-    }
-  }
-  else
-  {
-    while (deltaPulse_Y > 0)
-    {
-      IoHwAb_Stepper::getInstance().move(0, stepDirY);
-      error += deltaPulse_X;
-      if (error >= deltaPulse_Y)
-      {
-        IoHwAb_Stepper::getInstance().move(stepDirX, 0);
-        error -= deltaPulse_Y;
-      }
-      deltaPulse_Y--;
-      stepCount++;
-    }
-  }
-  // Update current position
+  // Update current position in mm
   Data.x = xPos;
   Data.y = yPos;
 }
@@ -106,10 +79,16 @@ void MotionControlService::drawLine(float xPos, float yPos)
  *
  * @param   xPos    Target X position in mm
  * @param   yPos    Target Y position in mm
+ *
+ * NOTE:
+ *  - For now, rapid move (G0) uses the same engine as drawLine(), but it is
+ *    still a single timer-driven segment, not a step-by-step loop.
+ *  - Feed rate used for this move is controlled via IoHwAb_Stepper::setSpeed()
+ *    by the G-code parser (F word handling).
  ************************************************************************************************************************/
 void MotionControlService::moveTo(float xPos, float yPos)
 {
-  // Deadzone check
+  // Clamp target position within allowed workspace
   if (xPos < X_MIN)
     xPos = X_MIN;
   if (xPos > X_MAX)
@@ -119,17 +98,17 @@ void MotionControlService::moveTo(float xPos, float yPos)
   if (yPos > Y_MAX)
     yPos = Y_MAX;
 
-  // Convert mm to steps
-  long xSteps = xPos * STEPS_PER_MM_X;
-  long ySteps = yPos * STEPS_PER_MM_Y;
+  // Compute relative delta in steps from current position to target
+  int32_t dxSteps = static_cast<int32_t>((xPos - Data.x) * STEPS_PER_MM_X);
+  int32_t dySteps = static_cast<int32_t>((yPos - Data.y) * STEPS_PER_MM_Y);
 
-  // Send move command
-  IoHwAb_Stepper::getInstance().moveTo(xSteps, ySteps);
+  // Execute rapid move as a single segment
+  IoHwAb_Stepper::getInstance().move(dxSteps, dySteps);
 
   // Logging
   Serial.println("[MOVE]: Rapid move to X: " + String(xPos) + ", Y: " + String(yPos));
 
-  // Update current position
+  // Update current position in mm
   Data.x = xPos;
   Data.y = yPos;
 }
@@ -155,7 +134,7 @@ void MotionControlService::drawArc(float xStart, float yStart, float xEnd, float
   float startAngle = atan2(yStart - cy, xStart - cx);
   float endAngle = atan2(yEnd - cy, xEnd - cx);
 
-  // Ensure clockwise rotation
+  // Ensure correct rotation direction
   if (is_clockwise)
   {
     if (endAngle > startAngle)
@@ -168,13 +147,14 @@ void MotionControlService::drawArc(float xStart, float yStart, float xEnd, float
   }
 
   float arcLength = abs(endAngle - startAngle) * radius;
-  int segments = max((int)(arcLength / 1.0), 1); // mỗi đoạn ~1mm
+  int segments = max((int)(arcLength / 1.0), 1); // approx. 1 mm per segment
 
   point *points = new point[segments];
 
   for (int i = 0; i < segments; i++)
   {
-    float angle = startAngle + (endAngle - startAngle) * (i / (float)segments);
+    float t = static_cast<float>(i) / static_cast<float>(segments);
+    float angle = startAngle + (endAngle - startAngle) * t;
     points[i].x = cx + radius * cos(angle);
     points[i].y = cy + radius * sin(angle);
   }
