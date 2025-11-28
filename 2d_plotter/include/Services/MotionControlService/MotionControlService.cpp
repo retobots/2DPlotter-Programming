@@ -31,15 +31,38 @@ void MotionControlService::drawLine(float xPos, float yPos)
   if (yPos > Y_MAX)
     yPos = Y_MAX;
 
-  // Chuyển đổi mm -> step
-  long x1_steps = xPos * STEPS_PER_MM_X;
-  long y1_steps = yPos * STEPS_PER_MM_Y;
+  uint32_t deltaPulse_X = (xPos - Data.x) * STEPS_PER_MM_X;
+  uint32_t deltaPulse_Y = (yPos - Data.y) * STEPS_PER_MM_Y;
+  uint32_t error = 0;
 
-  // Chạy tới vị trí mới
-  IoHwAb_Stepper::getInstance().moveTo(x1_steps, y1_steps);
-
-  Serial.println("[PROCESS]: Moving to position X: " + String(xPos) + ", Y: " + String(yPos));
-
+  if (deltaPulse_X >= deltaPulse_Y)
+  {
+    while (deltaPulse_X > 0)
+    {
+      IoHwAb_Stepper::getInstance().move(1, 0);
+      error = error + deltaPulse_Y;
+      if (error >= deltaPulse_X)
+      {
+        IoHwAb_Stepper::getInstance().move(0, 1);
+        error = error - deltaPulse_X;
+      }
+      deltaPulse_X--;
+    }
+  }
+  else
+  {
+    while (deltaPulse_Y > 0)
+    {
+      IoHwAb_Stepper::getInstance().move(0, 1);
+      error = error + deltaPulse_X;
+      if (error >= deltaPulse_Y)
+      {
+        IoHwAb_Stepper::getInstance().move(1, 0);
+        error = error - deltaPulse_Y;
+      }
+      deltaPulse_Y--;
+    }
+  }
   // Cập nhật vị trí hiện tại
   Data.x = xPos;
   Data.y = yPos;
@@ -74,13 +97,8 @@ void MotionControlService::moveTo(float xPos, float yPos)
   Data.x = xPos;
   Data.y = yPos;
 }
-//<===================================================>//
-// Vẽ cung tròn theo chiều kim đồng hồ
-//<===================================================>//
-// xStart, yStart: Tọa độ điểm bắt đầu cung
-// xEnd, yEnd: Tọa độ điểm kết thúc cung
-// iOffset, jOffset: Khoảng cách từ điểm bắt đầu đến tâm cung
-void MotionControlService::drawArcCW(float xStart, float yStart, float xEnd, float yEnd, float iOffset, float jOffset)
+
+void MotionControlService::drawArc(float xStart, float yStart, float xEnd, float yEnd, float iOffset, float jOffset, bool is_clockwise)
 {
   float cx = xStart + iOffset;
   float cy = yStart + jOffset;
@@ -91,51 +109,39 @@ void MotionControlService::drawArcCW(float xStart, float yStart, float xEnd, flo
   float endAngle = atan2(yEnd - cy, xEnd - cx);
 
   // Đảm bảo xoay theo chiều kim đồng hồ
-  if (endAngle > startAngle)
-    endAngle -= 2 * PI;
+  if (is_clockwise)
+  {
+    if (endAngle > startAngle)
+      endAngle -= 2 * PI;
+  }
+  else
+  {
+    if (endAngle < startAngle)
+      endAngle += 2 * PI;
+  }
 
   float arcLength = abs(endAngle - startAngle) * radius;
   int segments = max((int)(arcLength / 1.0), 1); // mỗi đoạn ~1mm
 
-  for (int i = 0; i <= segments; ++i)
+  point *points = new point[segments];
+
+  for (int i = 0; i <= segments; i++)
   {
     float angle = startAngle + (endAngle - startAngle) * (i / (float)segments);
-    float x = cx + radius * cos(angle);
-    float y = cy + radius * sin(angle);
-    drawLine(x, y);
+    points[i].x = cx + radius * cos(angle);
+    points[i].y = cy + radius * sin(angle);
+  }
+
+  for (int i = 0; i <= segments; i++)
+  {
+    drawLine(points[i].x, points[i].y);
+    Data.x = points[i].x;
+    Data.y = points[i].y;
   }
 
   Data.x = xEnd;
   Data.y = yEnd;
-}
-
-void MotionControlService::drawArcCCW(float xStart, float yStart, float xEnd, float yEnd, float iOffset, float jOffset)
-{
-  float cx = xStart + iOffset;
-  float cy = yStart + jOffset;
-
-  float radius = sqrt(iOffset * iOffset + jOffset * jOffset);
-
-  float startAngle = atan2(yStart - cy, xStart - cx);
-  float endAngle = atan2(yEnd - cy, xEnd - cx);
-
-  // Đảm bảo xoay ngược chiều kim đồng hồ
-  if (endAngle < startAngle)
-    endAngle += 2 * PI;
-
-  float arcLength = abs(endAngle - startAngle) * radius;
-  int segments = max((int)(arcLength / 1.0), 1); // mỗi đoạn ~1mm
-
-  for (int i = 0; i <= segments; ++i)
-  {
-    float angle = startAngle + (endAngle - startAngle) * (i / (float)segments);
-    float x = cx + radius * cos(angle);
-    float y = cy + radius * sin(angle);
-    drawLine(x, y);
-  }
-
-  Data.x = xEnd;
-  Data.y = yEnd;
+  delete[] points;
 }
 
 void MotionControlService::stop()
