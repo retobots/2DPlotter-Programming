@@ -129,7 +129,7 @@ char IoHwAb_SD::getCharFromVectorLine(int lineIndex, int charIndex)
 {
   if (lineIndex >= 0 && lineIndex < fileContents.size())
   {
-    String line = fileContents[lineIndex];
+    const String &line = fileContents[lineIndex];
 
     // Print the line only once when starting a new line
     if (charIndex == 0)

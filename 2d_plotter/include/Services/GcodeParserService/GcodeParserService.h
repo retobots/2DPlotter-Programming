@@ -10,6 +10,7 @@
 #include <string>
 #include "MotionControlService.h"
 #include "IoHwAb_Servo.h"
+#include <esp_system.h>
 
 class GcodeParserService
 {

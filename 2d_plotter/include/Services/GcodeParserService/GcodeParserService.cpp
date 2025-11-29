@@ -377,6 +377,9 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
     actualPos = newPos;
   }
 
+  Serial.print("[HEAP] Free heap: ");
+  Serial.println(ESP.getFreeHeap());
+
   Serial.println("ok");
   // IMPORTANT: removed delay(500); to avoid artificial slowdown
 }

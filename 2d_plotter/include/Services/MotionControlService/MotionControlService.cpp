@@ -98,25 +98,9 @@ void MotionControlService::moveTo(float xPos, float yPos)
   if (yPos > Y_MAX)
     yPos = Y_MAX;
 
-  // DEBUG: in / out, Data.x/y hiện tại
-  Serial.print("[DEBUG moveTo] from (");
-  Serial.print(Data.x, 3);
-  Serial.print(", ");
-  Serial.print(Data.y, 3);
-  Serial.print(") to (");
-  Serial.print(xPos, 3);
-  Serial.print(", ");
-  Serial.print(yPos, 3);
-  Serial.println(")");
-
   // Compute relative delta in steps from current position to target
   int32_t dxSteps = static_cast<int32_t>((xPos - Data.x) * STEPS_PER_MM_X);
   int32_t dySteps = static_cast<int32_t>((yPos - Data.y) * STEPS_PER_MM_Y);
-
-  Serial.print("[DEBUG moveTo] dxSteps=");
-  Serial.print(dxSteps);
-  Serial.print(" dySteps=");
-  Serial.println(dySteps);
 
   // Execute rapid move as a single segment
   IoHwAb_Stepper::getInstance().move(dxSteps, dySteps);
@@ -175,15 +159,16 @@ void MotionControlService::drawArc(float xStart, float yStart, float xEnd, float
     points[i].y = cy + radius * sin(angle);
   }
 
-  for (int i = 0; i < segments; i++)
+  for (int i = 0; i <= segments; ++i) // <= để có cả điểm cuối
   {
-    drawLine(points[i].x, points[i].y);
-    Data.x = points[i].x;
-    Data.y = points[i].y;
+    float t = (float)i / (float)segments;
+    float angle = startAngle + (endAngle - startAngle) * t;
+    float px = cx + radius * cosf(angle);
+    float py = cy + radius * sinf(angle);
+
+    drawLine(px, py); // drawLine đã cập nhật Data.x/y đúng với vị trí thực tế
   }
 
-  Data.x = xEnd;
-  Data.y = yEnd;
   delete[] points;
 }
 
