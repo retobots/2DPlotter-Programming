@@ -7,39 +7,66 @@ void homeMove()
 {
   Serial.println("[PROCESS]: Starting Homing Sequence");
 
-  // Set speed for homing
-  IoHwAb_Stepper::getInstance().setSpeed(400); // Set a slower speed for homing
+  IoHwAb_Stepper &stepper = IoHwAb_Stepper::getInstance();
+  IoHwAb_Servo &servo = IoHwAb_Servo::getInstance();
 
-  // x steps, y steps
-  float x = 0.0; // Move negative direction
-  float y = 0.0; // Move negative direction
-  IoHwAb_Stepper::getInstance().setSpeed(-400);
-  // Di chuyển trục Y về vị trí công tắc hành trình
+  // Đảm bảo servo bút đã được nâng lên
+  servo.liftPen();
+
+  // Tốc độ homing (mm/s) - chỉnh lại cho phù hợp cơ khí của bạn
+  const float HOME_SPEED_X_MM_S = -20.0f; // giả sử hướng âm là hướng về công tắc
+  const float HOME_SPEED_Y_MM_S = -20.0f;
+
+  // Bật chế độ rolling với tốc độ homing
+  stepper.setRollMM(HOME_SPEED_X_MM_S, HOME_SPEED_Y_MM_S);
+
   bool home_X_done = false;
   bool home_Y_done = false;
 
   while (!home_X_done || !home_Y_done)
   {
-    if (digitalRead(PIN_ENDSTOP_Y) == HIGH)
+    // HOME Y
+    if (!home_Y_done)
     {
-      IoHwAb_Stepper::getInstance().runSpeedTickY(); // Di chuyển ngược trục Y
+      if (digitalRead(PIN_ENDSTOP_Y) == HIGH) // chưa chạm endstop
+      {
+        stepper.runSpeedTickY();
+      }
+      else
+      {
+        home_Y_done = true;
+        Serial.println("[HOMING]: Y Axis reached endstop");
+      }
     }
-    else
+
+    // HOME X
+    if (!home_X_done)
     {
-      home_X_done = true;
-    }
-    if (digitalRead(PIN_ENDSTOP_X) == HIGH)
-    {
-      IoHwAb_Stepper::getInstance().runSpeedTickX(); // Di chuyển ngược trục X}
-    }
-    else
-    {
-      home_Y_done = true;
+      if (digitalRead(PIN_ENDSTOP_X) == HIGH) // chưa chạm endstop
+      {
+        stepper.runSpeedTickX();
+      }
+      else
+      {
+        home_X_done = true;
+        Serial.println("[HOMING]: X Axis reached endstop");
+      }
     }
   }
-  IoHwAb_Stepper::getInstance().setCurrentPosition(0, 0);
-  IoHwAb_Stepper::getInstance().moveTo(0, 0);
-  Serial.println("[PROCESS]: X Axis Homed");
+
+  // Dừng rolling
+  stepper.stopRolling();
+
+  // Đặt lại vị trí logic về (0,0)
+  stepper.setCurrentPosition(0, 0);
+
+  MotionControlService::getInstance().resetData();
+  AutoModeController::getInstance().resetData();
+
+  const float DEFAULT_FEED_MM_PER_MIN = 600.0f;
+  float feed_mm_per_sec = DEFAULT_FEED_MM_PER_MIN / 60.0f;
+  float steps_per_sec = feed_mm_per_sec * STEPS_PER_MM_X;
+  IoHwAb_Stepper::getInstance().setSpeed(steps_per_sec);
 
   Serial.println("[PROCESS]: Homing Sequence Completed");
 }

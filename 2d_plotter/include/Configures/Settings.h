@@ -49,10 +49,10 @@ typedef struct point
 
 // Tốc độ tối đa cho các lệnh vị trí (moveTo)
 // Max positional speed (steps/s). Keep high enough so it won't bottleneck runSpeed.
-#define MAX_SPEED 200000
+#define MAX_SPEED 20000
 
 // Tốc độ tối đa riêng cho chế độ lăn tay (steps/s)
-#define ROLL_MAX_SPEED 200000
+#define ROLL_MAX_SPEED 20000
 
 // Gia tốc
 #define ACCELERATION 500

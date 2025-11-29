@@ -282,8 +282,17 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
   switch (gcode)
   {
   case 0: // G00 - Rapid move (no drawing)
+    Serial.print("[DEBUG G0] actualPos.x=");
+    Serial.print(actualPos.x, 3);
+    Serial.print(" actualPos.y=");
+    Serial.print(actualPos.y, 3);
+    Serial.print(" targetX=");
+    Serial.print(newPos.x, 3);
+    Serial.print(" targetY=");
+    Serial.println(newPos.y, 3);
+
     MotionControlService::getInstance().moveTo(newPos.x, newPos.y);
-    Serial.print("Move to X=");
+    Serial.print("[G0] Move to X=");
     Serial.print(newPos.x);
     Serial.print(" Y=");
     Serial.println(newPos.y);

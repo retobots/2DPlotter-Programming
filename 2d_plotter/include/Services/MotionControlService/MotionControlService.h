@@ -26,4 +26,5 @@ public:
   void stop();
   void drawArc(float xStart, float yStart, float xEnd, float yEnd, float iOffset, float jOffset, bool is_clockwise = true);
   void updateData(point &newData);
+  void resetData();
 };

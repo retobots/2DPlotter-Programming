@@ -62,6 +62,10 @@ private:
   static constexpr uint32_t STEPPER_TIMER_FREQ_HZ = 20000UL; // 20 kHz tick rate
   static constexpr uint32_t TIMER_TICKS_PER_ISR = TIMER_BASE_FREQ_HZ / STEPPER_TIMER_FREQ_HZ;
 
+  // Direction
+  static constexpr bool X_DIR_INVERT = true;  // đổi thành true nếu X đang ngược
+  static constexpr bool Y_DIR_INVERT = false; // tương tự cho Y nếu cần
+
   // Timer-based engine state
   hw_timer_t *_timer = nullptr;
 

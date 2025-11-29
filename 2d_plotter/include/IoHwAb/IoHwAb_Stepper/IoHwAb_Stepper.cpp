@@ -401,16 +401,22 @@ void IRAM_ATTR IoHwAb_Stepper::onTimerISR()
 
 inline void IoHwAb_Stepper::stepPulseX(int8_t dir)
 {
-  digitalWrite(PIN_X_DIR, (dir > 0) ? HIGH : LOW);
+  bool level = (dir > 0);
+  if (X_DIR_INVERT)
+    level = !level;
+
+  digitalWrite(PIN_X_DIR, level ? HIGH : LOW);
   digitalWrite(PIN_X_STEP, HIGH);
-  // For high speeds you may want to replace this with direct register access
-  // and/or keep STEP high for more than one ISR tick.
   digitalWrite(PIN_X_STEP, LOW);
 }
 
 inline void IoHwAb_Stepper::stepPulseY(int8_t dir)
 {
-  digitalWrite(PIN_Y_DIR, (dir > 0) ? HIGH : LOW);
+  bool level = (dir > 0);
+  if (Y_DIR_INVERT)
+    level = !level;
+
+  digitalWrite(PIN_Y_DIR, level ? HIGH : LOW);
   digitalWrite(PIN_Y_STEP, HIGH);
   digitalWrite(PIN_Y_STEP, LOW);
 }

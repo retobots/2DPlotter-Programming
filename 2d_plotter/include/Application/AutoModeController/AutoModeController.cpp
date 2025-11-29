@@ -295,7 +295,7 @@ void AutoModeController::readFile(File &file, point &actualPoint, int workingFla
 
     // Recalc total lines and reset progress
     FeedbackService::getInstance().calculateTotalLines(file);
-    FeedbackService::getInstance().getCurrentLine() = 0;
+    FeedbackService::getInstance().getCurrentLine() = 1;
     percentage = 0;
 
     // Start timer
@@ -345,6 +345,7 @@ void AutoModeController::readFile(File &file, point &actualPoint, int workingFla
         lineIsComment = false;
         lineSemiColon = false;
       }
+
       FeedbackService::getInstance().getCurrentLine()++; // Increment FeedbackService's currentLine
     }
     else
@@ -507,4 +508,10 @@ String AutoModeController::getTime() const
 int AutoModeController::getStatusFlag() const
 {
   return statusFlag;
+}
+
+void AutoModeController::resetData()
+{
+  data.x = 0.0;
+  data.y = 0.0;
 }

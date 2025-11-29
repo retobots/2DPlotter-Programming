@@ -15,27 +15,39 @@ void FeedbackService::setup()
 
 int FeedbackService::calculateTotalLines(File &file)
 {
-  // Đọc file và tính tổng số dòng
+  // Check file
   if (!file)
   {
     Serial.println("Cannot open file!");
-    return 0; // Trả về 0 nếu không mở được file
+    return 0;
   }
 
   int lineCount = 0;
 
   while (file.available())
   {
+    // Đọc tới dấu xuống dòng
     String line = file.readStringUntil('\n');
+
+    // Xoá khoảng trắng đầu/cuối, gồm cả '\r', ' ', '\t'
+    line.trim();
+
+    // Nếu dòng trống (chỉ toàn whitespace) thì bỏ qua
+    if (line.length() == 0)
+    {
+      continue;
+    }
+
+    // Dòng còn lại được coi là "có nội dung G-code"
     lineCount++;
   }
 
-  file.close();
+  file.close(); // Giữ nguyên hành vi cũ
 
-  Serial.print("Total lines in file: ");
+  Serial.print("Total NON-EMPTY lines in file: ");
   Serial.println(lineCount);
-  totalLines = lineCount; // Lưu tổng số dòng
-  Serial.println("[PROCESS]: Total lines calculated: " + String(totalLines));
+  totalLines = lineCount;
+  Serial.println("[PROCESS]: Total lines (non-empty) calculated: " + String(totalLines));
   return totalLines;
 }
 

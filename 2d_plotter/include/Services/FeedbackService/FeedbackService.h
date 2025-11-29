@@ -17,6 +17,6 @@ private:
   FeedbackService();
 
   int totalLines = 0;  // Total lines in the file
-  int currentLine = 0; // Current line being processed
+  int currentLine = 1; // Current line being processed
   int percentage = 0;  // Percentage of completion
 };

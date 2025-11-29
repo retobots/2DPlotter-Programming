@@ -98,9 +98,25 @@ void MotionControlService::moveTo(float xPos, float yPos)
   if (yPos > Y_MAX)
     yPos = Y_MAX;
 
+  // DEBUG: in / out, Data.x/y hiện tại
+  Serial.print("[DEBUG moveTo] from (");
+  Serial.print(Data.x, 3);
+  Serial.print(", ");
+  Serial.print(Data.y, 3);
+  Serial.print(") to (");
+  Serial.print(xPos, 3);
+  Serial.print(", ");
+  Serial.print(yPos, 3);
+  Serial.println(")");
+
   // Compute relative delta in steps from current position to target
   int32_t dxSteps = static_cast<int32_t>((xPos - Data.x) * STEPS_PER_MM_X);
   int32_t dySteps = static_cast<int32_t>((yPos - Data.y) * STEPS_PER_MM_Y);
+
+  Serial.print("[DEBUG moveTo] dxSteps=");
+  Serial.print(dxSteps);
+  Serial.print(" dySteps=");
+  Serial.println(dySteps);
 
   // Execute rapid move as a single segment
   IoHwAb_Stepper::getInstance().move(dxSteps, dySteps);
@@ -188,4 +204,13 @@ void MotionControlService::stop()
 void MotionControlService::updateData(point &newData)
 {
   Data = newData;
+}
+
+/*************************************************************************************************************************
+ * @brief   Reset internal position data to origin
+ ************************************************************************************************************************/
+void MotionControlService::resetData()
+{
+  Data.x = 0.0;
+  Data.y = 0.0;
 }

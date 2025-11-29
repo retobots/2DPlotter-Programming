@@ -66,4 +66,6 @@ public:
   String getTime() const;
 
   int getStatusFlag() const;
+
+  void resetData();
 };
