@@ -237,6 +237,7 @@ void AutoModeController::readSerial(point &actualPoint)
 
 void AutoModeController::getGcodeFile(const String &filename)
 {
+  Serial.println("[PROCESS]: Loading and parsing G-code file: " + filename);
   gcodeFile = IoHwAb_SD::getInstance().getFile(filename);
   Serial.print("Opened G-code file: ");
   Serial.println(filename);

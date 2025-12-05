@@ -69,6 +69,7 @@ vector<String> &IoHwAb_SD::loadFileListFromSD()
  ************************************************************************************************************************/
 void IoHwAb_SD::readSelectedFile(String &filename)
 {
+  Serial.println("Reading file: " + filename);
   fileContents.clear();
   File f = SD.open(filename.c_str());
   if (!f)
@@ -77,16 +78,32 @@ void IoHwAb_SD::readSelectedFile(String &filename)
     return;
   }
 
+  Serial.println("File opened successfully.");
   String line;
+  size_t lineCount = 0;
   while (f.available())
   {
     char c = f.read();
     if (c == '\n' || c == '\r')
     {
+      // if (!line.isEmpty())
+      // {
+      //   // fileContents.push_back(line);
+      //   line.clear();
+      // }
       if (!line.isEmpty())
       {
         fileContents.push_back(line);
         line.clear();
+        lineCount++;
+
+        if (lineCount % 50 == 0)
+        {
+          Serial.print("Lines: ");
+          Serial.print(lineCount);
+          Serial.print(" | Free heap: ");
+          Serial.println(ESP.getFreeHeap());
+        }
       }
     }
     else
@@ -94,11 +111,16 @@ void IoHwAb_SD::readSelectedFile(String &filename)
       line += c;
     }
   }
+
+  Serial.println("File stored successfully.");
+
   if (!line.isEmpty())
   {
-    fileContents.push_back(line);
+    // fileContents.push_back(line);
   }
   f.close();
+
+  Serial.println("File read complete. Total lines: " + String(fileContents.size()));
 }
 
 /*************************************************************************************************************************

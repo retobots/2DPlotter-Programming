@@ -20,10 +20,10 @@ class IoHwAb_SD
 {
 private:
   // Vector to store file names
-  vector<String> fileList;
+  vector<String> fileList = vector<String>(); // empty for now
 
   // Vector to store file contents
-  vector<String> fileContents;
+  vector<String> fileContents = vector<String>(); // empty for now
 
   // Constructor
   IoHwAb_SD();

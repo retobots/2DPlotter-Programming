@@ -259,6 +259,8 @@ void AppController::opening()
 
 void AppController::runSDMode()
 {
+  Serial.println("[PROCESS]: Entering SD Mode");
+
   // Ensure fresh control state for a new run
   workingStateFlag = PAUSE;    // First action means "PAUSE" (press to pause)
   workingFlag = WORKING_STATE; // Highlight the first option by default
@@ -267,6 +269,8 @@ void AppController::runSDMode()
   IoHwAb_LCD::getInstance().clear();
   IoHwAb_SD::getInstance().readSelectedFile("/" + AppController::getInstance().selectedFile);
   AutoModeController::getInstance().getGcodeFile("/" + AppController::getInstance().selectedFile);
+
+  Serial.println("[PROCESS]: File loaded and G-code parsed");
 
   // 2. Hiển thị màn hình ban đầu
   UIMenuService::getInstance().statusScreen(
