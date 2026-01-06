@@ -308,9 +308,9 @@ void AutoModeController::readFile(File &file, point &actualPoint,
   }
 
   // Only abort when SD buffered contents are empty
-  if (IoHwAb_SD::getInstance().isFileContentsEmpty())
+  if (!file)
   {
-    Serial.println("[PROCESS]: File not available (empty contents).");
+    Serial.println("[PROCESS]: File handle invalid.");
     active = false;
     statusFlag = 0;
     return;
@@ -319,6 +319,7 @@ void AutoModeController::readFile(File &file, point &actualPoint,
   // Initialize at the beginning of a new file processing session
   if (!isInitialized)
   {
+    // Reset parsing indices and flags
     lineIndex = 0;
     lineIsComment = false;
     lineSemiColon = false;
@@ -326,23 +327,22 @@ void AutoModeController::readFile(File &file, point &actualPoint,
     lineVectorIndex = 0;
     charVectorIndex = 0;
 
-    FeedbackService::getInstance().calculateTotalLines(file);
+    // Recalc total lines and reset progress
     FeedbackService::getInstance().getCurrentLine() = 1;
     percentage = 0;
 
+    // Start timer
     isInitialized = true;
   }
 
-  statusFlag = 1;
-  isLineFull = false;
+  statusFlag = 1;     // Đặt cờ trạng thái đang đọc file
+  isLineFull = false; // Reset trạng thái dòng đầy
 
   while (!isLineFull)
   {
-    char c = IoHwAb_SD::getInstance().getCharFromVectorLine(lineVectorIndex, charVectorIndex);
-
-    // End of line
-    if ((c == '\n') || (c == '\r'))
+    if (!file.available())
     {
+      // Nếu còn dở một dòng chưa flush
       if (lineIndex > 0)
       {
         line[lineIndex] = '\0';
@@ -350,9 +350,9 @@ void AutoModeController::readFile(File &file, point &actualPoint,
         Serial.print("G-code: ");
         Serial.println(line);
 
-        // Execute G-code line
         GcodeParserService::getInstance().processIncomingLine(line, lineIndex, actualPoint);
 
+        // Cập nhật tiến độ
         percentage = FeedbackService::getInstance().calculatePercentage(
             FeedbackService::getInstance().getCurrentLine(),
             FeedbackService::getInstance().getTotalLines());
@@ -362,67 +362,109 @@ void AutoModeController::readFile(File &file, point &actualPoint,
                       FeedbackService::getInstance().getTotalLines(),
                       percentage);
 
-        // Reset buffer
+        FeedbackService::getInstance().getCurrentLine()++;
         lineIndex = 0;
       }
 
-      // ✅ ALWAYS advance to next vector-line on newline (even if empty/comment-only)
-      lineVectorIndex++;
-      charVectorIndex = 0;
-      isLineFull = true;
-
-      // ✅ ALWAYS reset comment flags at end-of-line (fix "sticky ; comment")
+      // ✅ FIX: reset comment flags khi kết thúc file (tránh state dính)
       lineIsComment = false;
       lineSemiColon = false;
 
-      FeedbackService::getInstance().getCurrentLine()++;
+      // Đã đọc hết file → dừng hẳn
+      active = false;
+      statusFlag = 0;
+      Serial.println("[PROCESS]: Reached end of G-code file.");
+      file.close();
+      return;
+    }
+
+    c = file.read();
+
+    // Kết thúc dòng
+    if ((c == '\n') || (c == '\r'))
+    {
+      if (lineIndex > 0)
+      {
+        line[lineIndex] = '\0'; // Kết thúc chuỗi
+
+        // In ra dòng lệnh đang xử lý (tuỳ chọn)
+        Serial.print("G-code: ");
+        Serial.println(line);
+
+        isLineFull = true; // Đánh dấu đã đầy dòng
+
+        // Xử lý dòng lệnh G-code thực tế
+        GcodeParserService::getInstance().processIncomingLine(line, lineIndex, actualPoint);
+        percentage = FeedbackService::getInstance().calculatePercentage(
+            FeedbackService::getInstance().getCurrentLine(),
+            FeedbackService::getInstance().getTotalLines());
+
+        // Debug percentage calculation
+        Serial.printf("[DEBUG]: Current line: %d, Total lines: %d, Percentage: %d%%\n",
+                      FeedbackService::getInstance().getCurrentLine(),
+                      FeedbackService::getInstance().getTotalLines(),
+                      percentage);
+
+        Serial.println("ok");
+
+        // Reset buffer
+        lineIndex = 0;
+      }
+      else
+      {
+        // Dòng trống hoặc chỉ comment → bỏ qua
+        lineIsComment = false;
+        lineSemiColon = false;
+      }
+
+      // ✅ FIX QUAN TRỌNG: luôn reset cờ comment sau khi kết thúc dòng
+      lineIsComment = false;
+      lineSemiColon = false;
+
+      FeedbackService::getInstance().getCurrentLine()++; // Increment FeedbackService's currentLine
     }
     else
     {
-      // If we're currently inside a comment, skip chars
+      // Xử lý các ký tự đang đọc
       if (lineIsComment || lineSemiColon)
       {
         if (c == ')')
           lineIsComment = false;
-
-        charVectorIndex++;
-        continue;
-      }
-
-      // Normal char handling
-      if (c <= ' ')
-      {
-        // Skip whitespace
-      }
-      else if (c == '/')
-      {
-        // Skip block delete
-      }
-      else if (c == '(')
-      {
-        lineIsComment = true;
-      }
-      else if (c == ';')
-      {
-        lineSemiColon = true;
-      }
-      else if (lineIndex >= LINE_BUFFER_LENGTH - 1)
-      {
-        Serial.println("ERROR - lineBuffer overflow");
-        lineIndex = 0;
-        lineIsComment = false;
-        lineSemiColon = false;
-      }
-      else if (c >= 'a' && c <= 'z')
-      {
-        line[lineIndex++] = c - 'a' + 'A';
       }
       else
       {
-        line[lineIndex++] = c;
+        if (c <= ' ')
+        {
+          // Bỏ qua whitespace
+        }
+        else if (c == '/')
+        {
+          // Bỏ qua block delete
+        }
+        else if (c == '(')
+        {
+          lineIsComment = true;
+        }
+        else if (c == ';')
+        {
+          lineSemiColon = true;
+        }
+        else if (lineIndex >= LINE_BUFFER_LENGTH - 1)
+        {
+          Serial.println("ERROR - lineBuffer overflow");
+          lineIndex = 0;
+          lineIsComment = false;
+          lineSemiColon = false;
+        }
+        else if (c >= 'a' && c <= 'z')
+        {
+          line[lineIndex++] = c - 'a' + 'A'; // Viết hoa
+        }
+        else
+        {
+          line[lineIndex++] = c;
+        }
       }
-
-      charVectorIndex++;
     }
   }
 }
