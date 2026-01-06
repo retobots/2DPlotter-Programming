@@ -27,40 +27,40 @@ void AutoModeController::setup()
 
 void AutoModeController::readSerial(point &actualPoint)
 {
-  static char c; // Biến lưu ký tự đọc từ Serial
+  static char c;
+
   while (Serial.available() > 0)
   {
     c = Serial.read();
 
-    // Xử lý ký tự thời gian thực của GRBL
+    // GRBL realtime commands
     if (c == '!')
-    { // Feed hold
+    {
       Serial.println("ok");
       continue;
     }
     if (c == '~')
-    { // Cycle resume
+    {
       Serial.println("ok");
       continue;
     }
     if (c == 0x18)
-    { // Soft reset
+    {
       Serial.println("ok");
-      // Có thể thêm logic reset trạng thái nếu cần
       lineIndex = 0;
       lineIsComment = false;
       lineSemiColon = false;
       continue;
     }
 
-    // Xử lý các ký tự thuộc dòng lệnh
+    // End of line
     if ((c == '\n') || (c == '\r'))
     {
       if (lineIndex > 0)
       {
-        line[lineIndex] = '\0'; // Kết thúc chuỗi
+        line[lineIndex] = '\0';
 
-        // Xử lý các lệnh GRBL
+        // Handle some GRBL queries
         if (strcmp(line, "?") == 0)
         {
           Serial.print("<Idle|MPos:");
@@ -68,9 +68,13 @@ void AutoModeController::readSerial(point &actualPoint)
           Serial.print(",");
           Serial.print(actualPoint.y, 3);
           Serial.print(",");
-          Serial.print(0.000, 3); // Z = 0 nếu không dùng
+          Serial.print(0.000, 3);
           Serial.println("|FS:0,0>");
           lineIndex = 0;
+
+          // ✅ reset comment flags
+          lineIsComment = false;
+          lineSemiColon = false;
           return;
         }
 
@@ -79,48 +83,53 @@ void AutoModeController::readSerial(point &actualPoint)
           Serial.println("[VER:1.1h.20210101:]");
           Serial.println("ok");
           lineIndex = 0;
+
+          lineIsComment = false;
+          lineSemiColon = false;
           return;
         }
 
         if (strcmp(line, "$$") == 0)
         {
-          // Trả về danh sách tham số GRBL
-          Serial.println("$0=10");      // Step pulse time
-          Serial.println("$1=25");      // Step idle delay
-          Serial.println("$2=0");       // Step pulse invert
-          Serial.println("$3=0");       // Direction invert
-          Serial.println("$4=0");       // Step enable invert
-          Serial.println("$5=0");       // Limit pins invert
-          Serial.println("$6=0");       // Probe pin invert
-          Serial.println("$10=1");      // Status report mask
-          Serial.println("$11=0.010");  // Junction deviation
-          Serial.println("$12=0.002");  // Arc tolerance
-          Serial.println("$13=0");      // Report inches
-          Serial.println("$20=0");      // Soft limits
-          Serial.println("$21=0");      // Hard limits
-          Serial.println("$22=0");      // Homing cycle
-          Serial.println("$23=0");      // Homing direction
-          Serial.println("$24=25.0");   // Homing feed
-          Serial.println("$25=500.0");  // Homing seek
-          Serial.println("$26=250");    // Homing debounce
-          Serial.println("$27=1.000");  // Homing pull-off
-          Serial.println("$30=1000");   // Max spindle speed
-          Serial.println("$31=0");      // Min spindle speed
-          Serial.println("$32=0");      // Laser mode
-          Serial.println("$100=250.0"); // X steps/mm
-          Serial.println("$101=250.0"); // Y steps/mm
-          Serial.println("$102=250.0"); // Z steps/mm
-          Serial.println("$110=500.0"); // X max rate
-          Serial.println("$111=500.0"); // Y max rate
-          Serial.println("$112=500.0"); // Z max rate
-          Serial.println("$120=10.0");  // X acceleration
-          Serial.println("$121=10.0");  // Y acceleration
-          Serial.println("$122=10.0");  // Z acceleration
-          Serial.println("$130=200.0"); // X max travel
-          Serial.println("$131=200.0"); // Y max travel
-          Serial.println("$132=200.0"); // Z max travel
+          Serial.println("$0=10");
+          Serial.println("$1=25");
+          Serial.println("$2=0");
+          Serial.println("$3=0");
+          Serial.println("$4=0");
+          Serial.println("$5=0");
+          Serial.println("$6=0");
+          Serial.println("$10=1");
+          Serial.println("$11=0.010");
+          Serial.println("$12=0.002");
+          Serial.println("$13=0");
+          Serial.println("$20=0");
+          Serial.println("$21=0");
+          Serial.println("$22=0");
+          Serial.println("$23=0");
+          Serial.println("$24=25.0");
+          Serial.println("$25=500.0");
+          Serial.println("$26=250");
+          Serial.println("$27=1.000");
+          Serial.println("$30=1000");
+          Serial.println("$31=0");
+          Serial.println("$32=0");
+          Serial.println("$100=250.0");
+          Serial.println("$101=250.0");
+          Serial.println("$102=250.0");
+          Serial.println("$110=500.0");
+          Serial.println("$111=500.0");
+          Serial.println("$112=500.0");
+          Serial.println("$120=10.0");
+          Serial.println("$121=10.0");
+          Serial.println("$122=10.0");
+          Serial.println("$130=200.0");
+          Serial.println("$131=200.0");
+          Serial.println("$132=200.0");
           Serial.println("ok");
           lineIndex = 0;
+
+          lineIsComment = false;
+          lineSemiColon = false;
           return;
         }
 
@@ -129,6 +138,9 @@ void AutoModeController::readSerial(point &actualPoint)
           Serial.println("[G90 G21 G17 G94 G54]");
           Serial.println("ok");
           lineIndex = 0;
+
+          lineIsComment = false;
+          lineSemiColon = false;
           return;
         }
 
@@ -138,6 +150,9 @@ void AutoModeController::readSerial(point &actualPoint)
           Serial.println("$N1=");
           Serial.println("ok");
           lineIndex = 0;
+
+          lineIsComment = false;
+          lineSemiColon = false;
           return;
         }
 
@@ -146,6 +161,9 @@ void AutoModeController::readSerial(point &actualPoint)
           Serial.println("[Unlocked]");
           Serial.println("ok");
           lineIndex = 0;
+
+          lineIsComment = false;
+          lineSemiColon = false;
           return;
         }
 
@@ -154,6 +172,9 @@ void AutoModeController::readSerial(point &actualPoint)
           Serial.println("[G54:-1.000,-1.000,0.000]");
           Serial.println("ok");
           lineIndex = 0;
+
+          lineIsComment = false;
+          lineSemiColon = false;
           return;
         }
 
@@ -161,75 +182,71 @@ void AutoModeController::readSerial(point &actualPoint)
         {
           Serial.println("ok");
           lineIndex = 0;
+
+          lineIsComment = false;
+          lineSemiColon = false;
           return;
         }
 
-        // Xử lý các lệnh G-code khác
+        // Normal G-code
         if (verbose)
         {
           Serial.print("Received: ");
           Serial.println(line);
         }
+
         GcodeParserService::getInstance().processIncomingLine(line, lineIndex, actualPoint);
         lineIndex = 0;
       }
       else
       {
-        // Bỏ qua dòng trống hoặc comment
-        lineIsComment = false;
-        lineSemiColon = false;
-        lineIndex = 0; // Reset lineIndex để tránh lỗi
+        lineIndex = 0;
       }
+
+      // ✅ ALWAYS reset comment flags at end-of-line
+      lineIsComment = false;
+      lineSemiColon = false;
     }
     else
     {
-      // Xử lý các ký tự trong dòng
+      // Skip comment content
       if (lineIsComment || lineSemiColon)
       {
         if (c == ')')
-        {
-          lineIsComment = false; // Kết thúc comment
-        }
+          lineIsComment = false;
+        continue;
+      }
+
+      if (c <= ' ')
+      {
+        // Skip whitespace
+      }
+      else if (c == '/')
+      {
+        // Skip block delete
+      }
+      else if (c == '(')
+      {
+        lineIsComment = true;
+      }
+      else if (c == ';')
+      {
+        lineSemiColon = true;
+      }
+      else if (lineIndex >= LINE_BUFFER_LENGTH - 1)
+      {
+        Serial.println("ERROR - lineBuffer overflow");
+        lineIsComment = false;
+        lineSemiColon = false;
+        lineIndex = 0;
+      }
+      else if (c >= 'a' && c <= 'z')
+      {
+        line[lineIndex++] = c - 'a' + 'A';
       }
       else
       {
-        if (c <= ' ')
-        {
-          // Bỏ qua khoảng trắng và ký tự điều khiển
-        }
-        else if (c == '/')
-        {
-          // Bỏ qua block delete
-        }
-        else if (c == '(')
-        {
-          lineIsComment = true; // Bắt đầu comment
-        }
-        else if (c == ';')
-        {
-          lineSemiColon = true; // Bắt đầu comment kiểu dấu chấm phẩy
-        }
-        else if (lineIndex >= LINE_BUFFER_LENGTH - 1)
-        {
-          Serial.println("ERROR - lineBuffer overflow");
-          lineIsComment = false;
-          lineSemiColon = false;
-          lineIndex = 0; // Reset buffer để tránh lỗi
-        }
-        else if (c >= 'a' && c <= 'z')
-        {
-          line[lineIndex++] = c - 'a' + 'A'; // Chuyển đổi thành chữ hoa
-        }
-        else
-        {
-          if (lineIndex < LINE_BUFFER_LENGTH - 1)
-            line[lineIndex++] = c;
-          else
-          {
-            Serial.println("ERROR - buffer overflow");
-            lineIndex = 0;
-          }
-        }
+        line[lineIndex++] = c;
       }
     }
   }
@@ -280,7 +297,9 @@ void AutoModeController::getGcodeFile(const String &filename)
   MotionControlService::getInstance().updateData(data);
 }
 
-void AutoModeController::readFile(File &file, point &actualPoint, int workingFlag, int &percentage, String &time, int &statusFlag)
+void AutoModeController::readFile(File &file, point &actualPoint,
+                                  int workingFlag, int &percentage,
+                                  String &time, int &statusFlag)
 {
   // Respect control flags: do nothing if paused, inactive, or cancelled
   if (paused || !active || cancelled)
@@ -289,9 +308,9 @@ void AutoModeController::readFile(File &file, point &actualPoint, int workingFla
   }
 
   // Only abort when SD buffered contents are empty
-  if (!file)
+  if (IoHwAb_SD::getInstance().isFileContentsEmpty())
   {
-    Serial.println("[PROCESS]: File handle invalid.");
+    Serial.println("[PROCESS]: File not available (empty contents).");
     active = false;
     statusFlag = 0;
     return;
@@ -300,7 +319,6 @@ void AutoModeController::readFile(File &file, point &actualPoint, int workingFla
   // Initialize at the beginning of a new file processing session
   if (!isInitialized)
   {
-    // Reset parsing indices and flags
     lineIndex = 0;
     lineIsComment = false;
     lineSemiColon = false;
@@ -308,22 +326,23 @@ void AutoModeController::readFile(File &file, point &actualPoint, int workingFla
     lineVectorIndex = 0;
     charVectorIndex = 0;
 
-    // Recalc total lines and reset progress
+    FeedbackService::getInstance().calculateTotalLines(file);
     FeedbackService::getInstance().getCurrentLine() = 1;
     percentage = 0;
 
-    // Start timer
     isInitialized = true;
   }
 
-  statusFlag = 1;     // Đặt cờ trạng thái đang đọc file
-  isLineFull = false; // Reset trạng thái dòng đầy
+  statusFlag = 1;
+  isLineFull = false;
 
   while (!isLineFull)
   {
-    if (!file.available())
+    char c = IoHwAb_SD::getInstance().getCharFromVectorLine(lineVectorIndex, charVectorIndex);
+
+    // End of line
+    if ((c == '\n') || (c == '\r'))
     {
-      // Nếu còn dở một dòng chưa flush
       if (lineIndex > 0)
       {
         line[lineIndex] = '\0';
@@ -331,9 +350,9 @@ void AutoModeController::readFile(File &file, point &actualPoint, int workingFla
         Serial.print("G-code: ");
         Serial.println(line);
 
+        // Execute G-code line
         GcodeParserService::getInstance().processIncomingLine(line, lineIndex, actualPoint);
 
-        // Cập nhật tiến độ
         percentage = FeedbackService::getInstance().calculatePercentage(
             FeedbackService::getInstance().getCurrentLine(),
             FeedbackService::getInstance().getTotalLines());
@@ -343,99 +362,67 @@ void AutoModeController::readFile(File &file, point &actualPoint, int workingFla
                       FeedbackService::getInstance().getTotalLines(),
                       percentage);
 
-        FeedbackService::getInstance().getCurrentLine()++;
-        lineIndex = 0;
-      }
-
-      // Đã đọc hết file → dừng hẳn
-      active = false;
-      statusFlag = 0;
-      Serial.println("[PROCESS]: Reached end of G-code file.");
-      file.close();
-      return;
-    }
-
-    c = file.read();
-
-    // Kết thúc dòng
-    if ((c == '\n') || (c == '\r'))
-    {
-      if (lineIndex > 0)
-      {
-        line[lineIndex] = '\0'; // Kết thúc chuỗi
-
-        // In ra dòng lệnh đang xử lý (tuỳ chọn)
-        Serial.print("G-code: ");
-        Serial.println(line);
-
-        isLineFull = true; // Đánh dấu đã đầy dòng
-
-        // Xử lý dòng lệnh G-code thực tế
-        GcodeParserService::getInstance().processIncomingLine(line, lineIndex, actualPoint);
-        percentage = FeedbackService::getInstance().calculatePercentage(FeedbackService::getInstance().getCurrentLine(), FeedbackService::getInstance().getTotalLines());
-
-        // Debug percentage calculation
-        Serial.printf("[DEBUG]: Current line: %d, Total lines: %d, Percentage: %d%%\n",
-                      FeedbackService::getInstance().getCurrentLine(),
-                      FeedbackService::getInstance().getTotalLines(),
-                      percentage);
-
-        Serial.println("ok");
-
         // Reset buffer
         lineIndex = 0;
       }
-      else
-      {
-        // Dòng trống hoặc chỉ comment → bỏ qua
-        lineIsComment = false;
-        lineSemiColon = false;
-      }
 
-      FeedbackService::getInstance().getCurrentLine()++; // Increment FeedbackService's currentLine
+      // ✅ ALWAYS advance to next vector-line on newline (even if empty/comment-only)
+      lineVectorIndex++;
+      charVectorIndex = 0;
+      isLineFull = true;
+
+      // ✅ ALWAYS reset comment flags at end-of-line (fix "sticky ; comment")
+      lineIsComment = false;
+      lineSemiColon = false;
+
+      FeedbackService::getInstance().getCurrentLine()++;
     }
     else
     {
-      // Xử lý các ký tự đang đọc
+      // If we're currently inside a comment, skip chars
       if (lineIsComment || lineSemiColon)
       {
         if (c == ')')
           lineIsComment = false;
+
+        charVectorIndex++;
+        continue;
+      }
+
+      // Normal char handling
+      if (c <= ' ')
+      {
+        // Skip whitespace
+      }
+      else if (c == '/')
+      {
+        // Skip block delete
+      }
+      else if (c == '(')
+      {
+        lineIsComment = true;
+      }
+      else if (c == ';')
+      {
+        lineSemiColon = true;
+      }
+      else if (lineIndex >= LINE_BUFFER_LENGTH - 1)
+      {
+        Serial.println("ERROR - lineBuffer overflow");
+        lineIndex = 0;
+        lineIsComment = false;
+        lineSemiColon = false;
+      }
+      else if (c >= 'a' && c <= 'z')
+      {
+        line[lineIndex++] = c - 'a' + 'A';
       }
       else
       {
-        if (c <= ' ')
-        {
-          // Bỏ qua whitespace
-        }
-        else if (c == '/')
-        {
-          // Bỏ qua block delete
-        }
-        else if (c == '(')
-        {
-          lineIsComment = true;
-        }
-        else if (c == ';')
-        {
-          lineSemiColon = true;
-        }
-        else if (lineIndex >= LINE_BUFFER_LENGTH - 1)
-        {
-          Serial.println("ERROR - lineBuffer overflow");
-          lineIndex = 0;
-          lineIsComment = false;
-          lineSemiColon = false;
-        }
-        else if (c >= 'a' && c <= 'z')
-        {
-          line[lineIndex++] = c - 'a' + 'A'; // Viết hoa
-        }
-        else
-        {
-          line[lineIndex++] = c;
-        }
+        line[lineIndex++] = c;
       }
+
+      charVectorIndex++;
     }
   }
 }
