@@ -51,6 +51,20 @@ int FeedbackService::calculateTotalLines(File &file)
   return totalLines;
 }
 
+int FeedbackService::calculateTotalLines(const String &filename)
+{
+  File file = SD.open(filename.c_str());
+  if (!file)
+  {
+    Serial.println("Cannot open file for counting lines!");
+    totalLines = 0;
+    return 0;
+  }
+
+  // Tái sử dụng hàm cũ – hàm này sẽ tự close(file)
+  return calculateTotalLines(file);
+}
+
 int FeedbackService::calculatePercentage(int currentLine, int totalLines)
 {
   if (totalLines == 0)

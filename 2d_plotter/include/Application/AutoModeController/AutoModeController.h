@@ -36,6 +36,8 @@ private:
 
   bool isInitialized = false;
 
+  String currentFilename;
+
   void readSerial(point &actualPoint);
 
   void readFile(File &file, point &actualPoint, int workingFlag, int &percentage, String &time, int &statusFlag);

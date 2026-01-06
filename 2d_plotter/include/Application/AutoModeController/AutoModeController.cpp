@@ -237,10 +237,26 @@ void AutoModeController::readSerial(point &actualPoint)
 
 void AutoModeController::getGcodeFile(const String &filename)
 {
-  Serial.println("[PROCESS]: Loading and parsing G-code file: " + filename);
+  currentFilename = filename;
+
   gcodeFile = IoHwAb_SD::getInstance().getFile(filename);
   Serial.print("Opened G-code file: ");
   Serial.println(filename);
+
+  if (!gcodeFile)
+  {
+    Serial.println("[ERROR]: Failed to open G-code file.");
+    active = false;
+    paused = false;
+    cancelled = true;
+    statusFlag = 0;
+    return;
+  }
+
+  // Tính totalLines bằng một file tạm riêng, không đụng đến gcodeFile
+  FeedbackService::getInstance().calculateTotalLines(currentFilename);
+  FeedbackService::getInstance().getCurrentLine() = 0;
+  percentage = 0;
 
   // Prepare internal state for a fresh run
   isInitialized = false;
@@ -248,12 +264,13 @@ void AutoModeController::getGcodeFile(const String &filename)
   paused = false;
   cancelled = false;
   statusFlag = 0;
-  percentage = 0;
 
   lineIndex = 0;
   lineIsComment = false;
   lineSemiColon = false;
   isLineFull = false;
+
+  // 2 biến này sẽ không dùng nữa trong chế độ SD
   lineVectorIndex = 0;
   charVectorIndex = 0;
 
@@ -261,9 +278,6 @@ void AutoModeController::getGcodeFile(const String &filename)
   data.x = X_MIN;
   data.y = Y_MIN;
   MotionControlService::getInstance().updateData(data);
-
-  // Reset feedback counters for a new file
-  FeedbackService::getInstance().getCurrentLine() = 0;
 }
 
 void AutoModeController::readFile(File &file, point &actualPoint, int workingFlag, int &percentage, String &time, int &statusFlag)
@@ -275,9 +289,9 @@ void AutoModeController::readFile(File &file, point &actualPoint, int workingFla
   }
 
   // Only abort when SD buffered contents are empty
-  if (IoHwAb_SD::getInstance().isFileContentsEmpty())
+  if (!file)
   {
-    Serial.println("[PROCESS]: File not available (empty contents).");
+    Serial.println("[PROCESS]: File handle invalid.");
     active = false;
     statusFlag = 0;
     return;
@@ -295,7 +309,6 @@ void AutoModeController::readFile(File &file, point &actualPoint, int workingFla
     charVectorIndex = 0;
 
     // Recalc total lines and reset progress
-    FeedbackService::getInstance().calculateTotalLines(file);
     FeedbackService::getInstance().getCurrentLine() = 1;
     percentage = 0;
 
@@ -308,7 +321,41 @@ void AutoModeController::readFile(File &file, point &actualPoint, int workingFla
 
   while (!isLineFull)
   {
-    char c = IoHwAb_SD::getInstance().getCharFromVectorLine(lineVectorIndex, charVectorIndex);
+    if (!file.available())
+    {
+      // Nếu còn dở một dòng chưa flush
+      if (lineIndex > 0)
+      {
+        line[lineIndex] = '\0';
+
+        Serial.print("G-code: ");
+        Serial.println(line);
+
+        GcodeParserService::getInstance().processIncomingLine(line, lineIndex, actualPoint);
+
+        // Cập nhật tiến độ
+        percentage = FeedbackService::getInstance().calculatePercentage(
+            FeedbackService::getInstance().getCurrentLine(),
+            FeedbackService::getInstance().getTotalLines());
+
+        Serial.printf("[DEBUG]: Current line: %d, Total lines: %d, Percentage: %d%%\n",
+                      FeedbackService::getInstance().getCurrentLine(),
+                      FeedbackService::getInstance().getTotalLines(),
+                      percentage);
+
+        FeedbackService::getInstance().getCurrentLine()++;
+        lineIndex = 0;
+      }
+
+      // Đã đọc hết file → dừng hẳn
+      active = false;
+      statusFlag = 0;
+      Serial.println("[PROCESS]: Reached end of G-code file.");
+      file.close();
+      return;
+    }
+
+    c = file.read();
 
     // Kết thúc dòng
     if ((c == '\n') || (c == '\r'))
@@ -321,8 +368,6 @@ void AutoModeController::readFile(File &file, point &actualPoint, int workingFla
         Serial.print("G-code: ");
         Serial.println(line);
 
-        lineVectorIndex++;
-        charVectorIndex = 0;
         isLineFull = true; // Đánh dấu đã đầy dòng
 
         // Xử lý dòng lệnh G-code thực tế
@@ -391,7 +436,6 @@ void AutoModeController::readFile(File &file, point &actualPoint, int workingFla
           line[lineIndex++] = c;
         }
       }
-      charVectorIndex++;
     }
   }
 }

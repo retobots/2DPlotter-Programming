@@ -39,6 +39,77 @@ void GcodeParserService::setup()
  ************************************************************************************************************************/
 void GcodeParserService::processIncomingLine(char *line, int charNB, point &actualPos)
 {
+  // =========================
+  // 1) Sanitize + strip comments
+  // =========================
+  auto stripCommentsAndNormalize = [](char *s)
+  {
+    // Remove \r \n early
+    for (int k = 0; s[k] != '\0'; k++)
+    {
+      if (s[k] == '\r' || s[k] == '\n')
+      {
+        s[k] = '\0';
+        break;
+      }
+    }
+
+    bool inParenComment = false;
+    int r = 0;
+    int w = 0;
+
+    while (s[r] != '\0')
+    {
+      char c = s[r++];
+
+      // ( ... ) comment style
+      if (inParenComment)
+      {
+        if (c == ')')
+          inParenComment = false;
+        continue;
+      }
+      if (c == '(')
+      {
+        inParenComment = true;
+        continue;
+      }
+
+      // ';' comment style (most common)
+      if (c == ';')
+        break;
+
+      // ',' comment style (only if it looks like " , comment" to avoid killing "X10,Y10")
+      if (c == ',')
+      {
+        char prev = (w > 0) ? s[w - 1] : '\0';
+        if (prev == ' ' || prev == '\t')
+          break;
+
+        // Otherwise treat comma as separator
+        c = ' ';
+      }
+
+      // Normalize tab to space
+      if (c == '\t')
+        c = ' ';
+
+      s[w++] = c;
+    }
+
+    s[w] = '\0';
+
+    // Trim trailing spaces
+    while (w > 0 && (s[w - 1] == ' '))
+    {
+      s[w - 1] = '\0';
+      w--;
+    }
+  };
+
+  stripCommentsAndNormalize(line);
+  charNB = (int)strlen(line);
+
   Serial.print("Input: ");
   Serial.println(line);
 
@@ -49,12 +120,17 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
   char buffer[32];
 
   // Parsed values
-  int gcode = -1;                     // G00, G01, G02, G03
-  point newPos = actualPos;           // New target position
-  float zValue = 5.0f;                // Current Z
-  float iValue = 0.0f, jValue = 0.0f; // Center offset relative to start (used for G02/G03)
+  int gcode = -1;
+  point newPos = actualPos;
+  float zValue = 5.0f;
+  float iValue = 0.0f, jValue = 0.0f;
   float feedrate = 0.0f;
+
   bool hasX = false, hasY = false, hasZ = false, hasI = false, hasJ = false;
+
+  // G4 dwell params
+  uint32_t dwellMs = 0;
+  bool hasP = false, hasS = false;
 
   // Pen state is kept across lines
   static bool penDown = false;
@@ -63,8 +139,8 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
   {
     char cmd = line[currentIndex++];
 
-    // Skip spaces and line endings
-    if (cmd == ' ' || cmd == '\n' || cmd == '\r')
+    // Skip spaces
+    if (cmd == ' ')
       continue;
 
     int i = 0;
@@ -117,10 +193,9 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
 
       case 2:
         Serial.println("M2 → Program End");
-        // Optional: reset state if needed
         break;
 
-      case 114: // M114 – report position
+      case 114:
         Serial.print("Position: X=");
         Serial.print(actualPos.x, 3);
         Serial.print(" Y=");
@@ -129,13 +204,12 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
         Serial.println(0.000, 3);
         break;
 
-      case 300: // M300 S30 / S50 – servo (Inkscape)
-        // Parse S parameter
+      case 300: // M300 S30 / S50
         while (currentIndex < charNB && line[currentIndex] != '\0')
         {
           if (line[currentIndex] == 'S')
           {
-            currentIndex++; // Skip 'S'
+            currentIndex++;
             int j = 0;
             char sBuffer[10];
             while (currentIndex < charNB &&
@@ -169,11 +243,11 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
                 Serial.println(sval);
               }
             }
-            break; // Done with S parameter
+            break;
           }
           else
           {
-            currentIndex++; // Skip non-'S' characters
+            currentIndex++;
           }
         }
         break;
@@ -183,7 +257,6 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
         Serial.println(mcode);
         break;
       }
-
       break;
     }
 
@@ -213,55 +286,34 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
       break;
 
     case 'F':
-      // Feedrate handling:
-      //  - We assume F is expressed in mm/min (common for G-code from Inkscape/UGS).
-      //  - Convert it to steps/s using X-axis steps/mm (or the dominant axis).
       feedrate = value;
       {
-        float feed_mm_per_min = feedrate;
-        float feed_mm_per_sec = feed_mm_per_min / 60.0f;
+        float feed_mm_per_sec = (feedrate / 60.0f);
         float steps_per_sec = feed_mm_per_sec * STEPS_PER_MM_X;
         IoHwAb_Stepper::getInstance().setSpeed(steps_per_sec);
       }
       break;
 
+    // ======= G4 dwell =======
+    // G4 P100  -> dwell 100 ms
+    // G4 S0.5  -> dwell 500 ms
+    case 'P':
+      dwellMs = (uint32_t)fabs(value);
+      hasP = true;
+      break;
+
+    case 'S':
+      dwellMs = (uint32_t)(fabs(value) * 1000.0f + 0.5f);
+      hasS = true;
+      break;
+
     default:
-      // Ignore unsupported/unknown letters
+      // ignore unknown
       break;
     }
   }
 
-  // ----------------- Debug output -----------------
-  if (gcode >= 0)
-  {
-    Serial.print("Parsed G-code: G");
-    Serial.println(gcode);
-  }
-
-  if (hasX || hasY)
-  {
-    Serial.print("Target: X=");
-    Serial.print(newPos.x, 3);
-    Serial.print(" Y=");
-    Serial.println(newPos.y, 3);
-  }
-
-  if (hasZ)
-  {
-    Serial.print("Z=");
-    Serial.println(zValue, 3);
-  }
-
-  if (hasI || hasJ)
-  {
-    Serial.print("Arc center offset: I=");
-    Serial.print(iValue, 6);
-    Serial.print(" J=");
-    Serial.println(jValue, 6);
-  }
-
   // ----------------- Pen control via Z -----------------
-  // Only for linear moves (or unspecified G, treated as G0/G1)
   if (hasZ && (gcode == 0 || gcode == 1 || gcode == -1))
   {
     if (zValue < 0 && !penDown)
@@ -281,16 +333,7 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
   // ----------------- Execute motion -----------------
   switch (gcode)
   {
-  case 0: // G00 - Rapid move (no drawing)
-    Serial.print("[DEBUG G0] actualPos.x=");
-    Serial.print(actualPos.x, 3);
-    Serial.print(" actualPos.y=");
-    Serial.print(actualPos.y, 3);
-    Serial.print(" targetX=");
-    Serial.print(newPos.x, 3);
-    Serial.print(" targetY=");
-    Serial.println(newPos.y, 3);
-
+  case 0:
     MotionControlService::getInstance().moveTo(newPos.x, newPos.y);
     Serial.print("[G0] Move to X=");
     Serial.print(newPos.x);
@@ -298,28 +341,21 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
     Serial.println(newPos.y);
     break;
 
-  case 1: // G01 - Draw line
+  case 1:
     MotionControlService::getInstance().drawLine(newPos.x, newPos.y);
-    Serial.print("Draw line to X=");
+    Serial.print("[G1] Draw line to X=");
     Serial.print(newPos.x);
     Serial.print(" Y=");
     Serial.println(newPos.y);
     break;
 
-  case 2: // G02 - CW arc
+  case 2:
     if (hasI && hasJ)
     {
       MotionControlService::getInstance().drawArc(actualPos.x, actualPos.y,
                                                   newPos.x, newPos.y,
                                                   iValue, jValue, true);
-      Serial.print("Draw arc CW to X=");
-      Serial.print(newPos.x);
-      Serial.print(" Y=");
-      Serial.print(newPos.y);
-      Serial.print(" I=");
-      Serial.print(iValue);
-      Serial.print(" J=");
-      Serial.println(jValue);
+      Serial.println("[G2] Draw arc CW");
     }
     else
     {
@@ -327,26 +363,35 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
     }
     break;
 
-  case 3: // G03 - CCW arc
+  case 3:
     if (hasI && hasJ)
     {
       MotionControlService::getInstance().drawArc(actualPos.x, actualPos.y,
                                                   newPos.x, newPos.y,
                                                   iValue, jValue, false);
-      Serial.print("Draw arc CCW to X=");
-      Serial.print(newPos.x);
-      Serial.print(" Y=");
-      Serial.print(newPos.y);
-      Serial.print(" I=");
-      Serial.print(iValue);
-      Serial.print(" J=");
-      Serial.println(jValue);
+      Serial.println("[G3] Draw arc CCW");
     }
     else
     {
       Serial.println("Warning: G03 missing I/J params");
     }
     break;
+
+  case 4: // ======= G4 dwell =======
+  {
+    // // Prefer S if both present (rare), else P
+    // uint32_t ms = dwellMs;
+    // if (!(hasP || hasS))
+    //   ms = 0;
+
+    // Serial.print("[G4] Dwell ");
+    // Serial.print(ms);
+    // Serial.println(" ms");
+
+    // if (ms > 0)
+    //   delay(ms); // dwell inherently pauses
+    break;
+  }
 
   case 21:
     Serial.println("Set units to mm");
@@ -361,8 +406,6 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
     break;
 
   default:
-    // gcode == -1 ⇒ line has no explicit G word (e.g. pure M-code or comments)
-    // In that case we skip the "unsupported G" message.
     if (gcode != -1)
     {
       Serial.print("Unsupported G-code: G");
@@ -381,5 +424,4 @@ void GcodeParserService::processIncomingLine(char *line, int charNB, point &actu
   Serial.println(ESP.getFreeHeap());
 
   Serial.println("ok");
-  // IMPORTANT: removed delay(500); to avoid artificial slowdown
 }

@@ -8,6 +8,7 @@ public:
 
   void setup();
   int calculateTotalLines(File &file);
+  int calculateTotalLines(const String &filename);
   int calculatePercentage(int currentLine, int totalLines);
   int getPercentage();
   int &getTotalLines();

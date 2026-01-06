@@ -267,7 +267,6 @@ void AppController::runSDMode()
 
   // 1. Clear màn hình, load file
   IoHwAb_LCD::getInstance().clear();
-  IoHwAb_SD::getInstance().readSelectedFile("/" + AppController::getInstance().selectedFile);
   AutoModeController::getInstance().getGcodeFile("/" + AppController::getInstance().selectedFile);
 
   Serial.println("[PROCESS]: File loaded and G-code parsed");
